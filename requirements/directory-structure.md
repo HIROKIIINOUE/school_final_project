@@ -1,0 +1,24 @@
+- frontend
+  - app (each function page)
+  - components (reusable common components)
+  - features (logic based on the features)
+  - constants (unify the design)
+  - services (API)
+  - hooks (custom hooks)
+  - lib (common function)
+  - types (type)
+  - store (global state as Zustand)
+  - providers (i18n)
+  - contents (for various languages, maybe later)
+  - i18n (for various languages, maybe later)
+- backend
+  - src
+    - middlewares
+    - services (logic)
+    - models (connect with DB)
+    - controllers (control responses)
+    - routes (route hub)
+    - schemas (zod schema)
+  - prisma (migration)
+- shared
+  - schemas (shared zod schemas for both frontend and backend)
