@@ -1,21 +1,40 @@
 import { View, Text, Pressable } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 
 import { mockTripRooms } from "@/features/trips/data/dummyRoomData";
 import MytripHeader from "@/components/trips/MytripHeader";
+import CreateTripModal from "@/features/trips/CreateTripModal";
 
 const index = () => {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
   return (
-    <View>
+    <View className="relative">
+      {isCreateModalOpen && (
+        <CreateTripModal
+          visible={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+        />
+      )}
       <MytripHeader />
-      <View className="gap-md">
+      <View className="flex flex-row items-center justify-center w-full">
+        <Pressable
+          className="btn-primary my-lg mx-md"
+          onPress={() => setIsCreateModalOpen(true)}
+        >
+          <Text>Create Trip</Text>
+        </Pressable>
+        <Pressable className="btn-secondary my-lg mx-md">
+          <Text>Create Trip</Text>
+        </Pressable>
+      </View>
+      <View className="gap-md px-sm">
         {mockTripRooms.map((room) => (
           <Pressable key={room.id} className="card">
             <View className="absolute top-0 left-0 w-1 h-full bg-primary" />
 
-            <View className="flex-row justify-between items-start pl-sm">
+            <View className="flex flex-row justify-between items-start pl-sm">
               <View>
-                <Text className="font-sans text-[18px] font-semibold leading-[24px] text-on-surface">
+                <Text className="font-sans text-[18px] font-semibold leading-[24px] text-on-surface truncate">
                   {room.title}
                 </Text>
               </View>
@@ -24,7 +43,7 @@ const index = () => {
                 {/* <MaterialIcons name="star" size={14} className="text-primary" /> */}
                 {/* TODO: insert ICON above */}
                 <Text
-                  className={`font-sans text-[12px] font-medium uppercase leading-[16px] ${room.isOwner ? "badge-primary" : "badge-secondary"}`}
+                  className={`font-sans font-medium uppercase leading-[16px] ${room.isOwner ? "badge-primary" : "badge-secondary"}`}
                 >
                   {room.isOwner ? "Owner" : "Member"}
                 </Text>
