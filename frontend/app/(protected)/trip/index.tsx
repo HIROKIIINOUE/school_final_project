@@ -18,13 +18,13 @@ const index = () => {
       <MytripHeader />
       <View className="flex flex-row items-center justify-center w-full">
         <Pressable
-          className="btn-primary my-lg mx-md"
+          className="btn-primary my-lg mx-md flex-1"
           onPress={() => setIsCreateModalOpen(true)}
         >
           <Text>Create Trip</Text>
         </Pressable>
-        <Pressable className="btn-secondary my-lg mx-md">
-          <Text>Create Trip</Text>
+        <Pressable className="btn-secondary my-lg mx-md flex-1">
+          <Text>Join Trip</Text>
         </Pressable>
       </View>
       <View className="gap-md px-sm">
