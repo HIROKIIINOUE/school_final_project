@@ -1,0 +1,743 @@
+@import "tailwindcss";
+
+/* 
+  Serene Navigator Design System
+  Use this file as the single global styling vocabulary for the trip app.
+
+  Main idea:
+  - @theme defines reusable design tokens.
+  - @layer components defines reusable app classes like card, btn-primary, badge, etc.
+*/
+
+@theme {
+  /* =========================
+     Colors
+  ========================= */
+
+  --color-surface: #f7f9ff;
+  --color-surface-dim: #d1dbe8;
+  --color-surface-bright: #f7f9ff;
+
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #edf4ff;
+  --color-surface-container: #e4effd;
+  --color-surface-container-high: #dfe9f7;
+  --color-surface-container-highest: #d9e3f1;
+
+  --color-on-surface: #121d26;
+  --color-on-surface-variant: #3d4949;
+
+  --color-inverse-surface: #27313c;
+  --color-inverse-on-surface: #e8f2ff;
+
+  --color-outline: #6d7979;
+  --color-outline-variant: #bdc9c8;
+
+  --color-surface-tint: #006a6a;
+
+  --color-primary: #006a6a;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #4db6b6;
+  --color-on-primary-container: #004444;
+  --color-inverse-primary: #70d6d6;
+
+  --color-secondary: #536161;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #d6e5e5;
+  --color-on-secondary-container: #596767;
+
+  --color-tertiary: #924b26;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #e99166;
+  --color-on-tertiary-container: #672a06;
+
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+
+  --color-primary-fixed: #8ef3f3;
+  --color-primary-fixed-dim: #70d6d6;
+  --color-on-primary-fixed: #002020;
+  --color-on-primary-fixed-variant: #004f50;
+
+  --color-secondary-fixed: #d6e5e5;
+  --color-secondary-fixed-dim: #bbc9c9;
+  --color-on-secondary-fixed: #111e1e;
+  --color-on-secondary-fixed-variant: #3c494a;
+
+  --color-tertiary-fixed: #ffdbcc;
+  --color-tertiary-fixed-dim: #ffb693;
+  --color-on-tertiary-fixed: #351000;
+  --color-on-tertiary-fixed-variant: #743411;
+
+  --color-background: #f7f9ff;
+  --color-on-background: #121d26;
+  --color-surface-variant: #d9e3f1;
+
+  /* App semantic aliases */
+  --color-card: #ffffff;
+  --color-muted: #3d4949;
+  --color-border: #bdc9c8;
+  --color-border-soft: #d9e3f1;
+  --color-warning: #924b26;
+  --color-warning-container: #ffdbcc;
+  --color-success: #006a6a;
+  --color-success-container: #d6e5e5;
+
+  /* =========================
+     Radius
+  ========================= */
+
+  --radius-app-sm: 0.25rem;
+  --radius-app: 0.5rem;
+  --radius-app-md: 0.75rem;
+  --radius-app-lg: 1rem;
+  --radius-app-xl: 1.5rem;
+  --radius-app-full: 9999px;
+
+  /* =========================
+     Spacing
+  ========================= */
+
+  --spacing-unit: 4px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-container: 20px;
+  --spacing-gutter: 16px;
+
+  /* =========================
+     Font
+  ========================= */
+  --font-sans: Inter, system-ui, sans-serif;
+
+  /* =========================
+     shadow
+  ========================= */
+
+  --shadow-sm:
+    inset 0 1px 2px #ffffff30, 0 1px 2px #00000030, 0 2px 4px #00000015;
+
+  --shadow-md:
+    inset 0 1px 2px #ffffff50, 0 2px 4px #00000030, 0 4px 8px #00000015;
+
+  --shadow-lg:
+    inset 0 1px 2px #ffffff70, 0 4px 6px #00000030, 0 6px 10px #00000015;
+}
+
+/* =========================
+   Reusable App Components
+========================= */
+
+@layer components {
+  /* =========================
+     Layout
+  ========================= */
+
+  .screen {
+    @apply flex-1 bg-background;
+  }
+
+  .screen-padding {
+    @apply px-container py-lg;
+  }
+
+  .screen-header {
+    @apply mb-lg;
+  }
+
+  .screen-header-row {
+    @apply mb-lg flex-row items-center justify-between gap-md;
+  }
+
+  .section {
+    @apply mb-lg;
+  }
+
+  .section-header {
+    @apply mb-md;
+  }
+
+  .stack-xs {
+    @apply gap-xs;
+  }
+
+  .stack-sm {
+    @apply gap-sm;
+  }
+
+  .stack-md {
+    @apply gap-md;
+  }
+
+  .stack-lg {
+    @apply gap-lg;
+  }
+
+  .row {
+    @apply flex-row items-center;
+  }
+
+  .row-between {
+    @apply flex-row items-center justify-between;
+  }
+
+  .row-start {
+    @apply flex-row items-center justify-start;
+  }
+
+  .row-center {
+    @apply flex-row items-center justify-center;
+  }
+
+  .separator {
+    @apply my-md h-px bg-border-soft;
+  }
+
+  .divider {
+    @apply h-px bg-border-soft;
+  }
+
+  /* =========================
+     Typography
+  ========================= */
+
+  .headline-xl {
+    @apply font-sans text-[32px] font-bold leading-[40px] tracking-[-0.02em] text-on-surface;
+  }
+
+  .headline-lg {
+    @apply font-sans text-[24px] font-semibold leading-[32px] tracking-[-0.01em] text-on-surface;
+  }
+
+  .headline-lg-mobile {
+    @apply font-sans text-[20px] font-semibold leading-[28px] text-on-surface;
+  }
+
+  .title-md {
+    @apply font-sans text-[18px] font-semibold leading-[24px] text-on-surface;
+  }
+
+  .body-lg {
+    @apply font-sans text-[16px] font-normal leading-[24px] text-on-surface;
+  }
+
+  .body-md {
+    @apply font-sans text-[14px] font-normal leading-[20px] text-on-surface;
+  }
+
+  .label-md {
+    @apply font-sans text-[12px] font-medium uppercase leading-[16px] tracking-[0.05em] text-on-surface-variant;
+  }
+
+  .screen-title {
+    @apply headline-xl;
+  }
+
+  .screen-subtitle {
+    @apply mt-xs body-md text-on-surface-variant;
+  }
+
+  .section-title {
+    @apply headline-lg-mobile;
+  }
+
+  .section-subtitle {
+    @apply mt-xs body-md text-on-surface-variant;
+  }
+
+  .text-title {
+    @apply title-md;
+  }
+
+  .text-body {
+    @apply body-md;
+  }
+
+  .text-body-lg {
+    @apply body-lg;
+  }
+
+  .text-muted {
+    @apply body-md text-on-surface-variant;
+  }
+
+  .text-caption {
+    @apply font-sans text-[12px] font-normal leading-[16px] text-on-surface-variant;
+  }
+
+  .text-primary {
+    @apply text-primary;
+  }
+
+  .text-secondary {
+    @apply text-secondary;
+  }
+
+  .text-warning {
+    @apply text-warning;
+  }
+
+  .text-error {
+    @apply text-error;
+  }
+
+  .text-success {
+    @apply text-success;
+  }
+
+  /* =========================
+     Cards
+  ========================= */
+
+  .card {
+    @apply rounded-app bg-card p-md border border-border-soft;
+  }
+
+  .card-compact {
+    @apply rounded-app bg-card p-sm border border-border-soft;
+  }
+
+  .card-muted {
+    @apply rounded-app bg-surface-container-low p-md border border-border-soft;
+  }
+
+  .card-pressable {
+    @apply rounded-app bg-card p-md border border-border-soft active:bg-surface-container-low;
+  }
+
+  .card-title {
+    @apply title-md;
+  }
+
+  .card-subtitle {
+    @apply mt-xs body-md text-on-surface-variant;
+  }
+
+  .card-meta {
+    @apply text-caption;
+  }
+
+  .card-row {
+    @apply flex-row items-center justify-between gap-md;
+  }
+
+  .floating-card {
+    @apply rounded-app-lg bg-card p-md border border-border-soft shadow-sm;
+  }
+
+  /* =========================
+     Buttons
+  ========================= */
+
+  .btn {
+    @apply min-h-[44px] flex-row items-center justify-center rounded-app-lg px-md py-sm;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary-container active:opacity-80;
+  }
+
+  .btn-primary-text {
+    @apply font-sans text-[14px] font-semibold leading-[20px] text-on-primary;
+  }
+
+  .btn-secondary {
+    @apply btn bg-secondary-container active:opacity-80;
+  }
+
+  .btn-secondary-text {
+    @apply font-sans text-[14px] font-semibold leading-[20px] text-on-secondary-container;
+  }
+
+  .btn-outline {
+    @apply btn border border-outline-variant bg-transparent active:bg-surface-container-low;
+  }
+
+  .btn-outline-text {
+    @apply font-sans text-[14px] font-semibold leading-[20px] text-on-surface;
+  }
+
+  .btn-ghost {
+    @apply min-h-[44px] flex-row items-center justify-center rounded-app-lg px-md py-sm bg-transparent active:bg-surface-container-low;
+  }
+
+  .btn-ghost-text {
+    @apply font-sans text-[14px] font-semibold leading-[20px] text-on-surface-variant;
+  }
+
+  .btn-danger {
+    @apply btn bg-error active:opacity-80;
+  }
+
+  .btn-danger-text {
+    @apply font-sans text-[14px] font-semibold leading-[20px] text-on-error;
+  }
+
+  .btn-small {
+    @apply min-h-[36px] rounded-app-md px-sm py-xs;
+  }
+
+  .btn-full {
+    @apply w-full;
+  }
+
+  /* =========================
+     Badges / Chips
+  ========================= */
+
+  .badge {
+    @apply self-start rounded-app-full px-sm py-xs;
+  }
+
+  .badge-text {
+    @apply font-sans text-[12px] font-medium leading-[16px];
+  }
+
+  .badge-primary {
+    @apply badge bg-primary-fixed;
+  }
+
+  .badge-primary-text {
+    @apply badge-text text-on-primary-fixed;
+  }
+
+  .badge-secondary {
+    @apply badge bg-secondary-container;
+  }
+
+  .badge-secondary-text {
+    @apply badge-text text-on-secondary-container;
+  }
+
+  .badge-neutral {
+    @apply badge bg-surface-container-high;
+  }
+
+  .badge-neutral-text {
+    @apply badge-text text-on-surface-variant;
+  }
+
+  .badge-warning {
+    @apply badge bg-warning-container;
+  }
+
+  .badge-warning-text {
+    @apply badge-text text-on-tertiary-fixed-variant;
+  }
+
+  .badge-error {
+    @apply badge bg-error-container;
+  }
+
+  .badge-error-text {
+    @apply badge-text text-on-error-container;
+  }
+
+  .badge-success {
+    @apply badge bg-success-container;
+  }
+
+  .badge-success-text {
+    @apply badge-text text-success;
+  }
+
+  /* =========================
+     Forms
+  ========================= */
+
+  .form {
+    @apply gap-md;
+  }
+
+  .form-group {
+    @apply gap-xs;
+  }
+
+  .label {
+    @apply label-md;
+  }
+
+  .input {
+    @apply min-h-[44px] rounded-app-lg border border-outline-variant bg-card px-md py-sm font-sans text-[14px] leading-[20px] text-on-surface;
+  }
+
+  .input-focused {
+    @apply border-primary bg-card;
+  }
+
+  .input-error {
+    @apply border-error;
+  }
+
+  .input-helper {
+    @apply text-caption;
+  }
+
+  .input-error-text {
+    @apply text-caption text-error;
+  }
+
+  .textarea {
+    @apply min-h-[100px] rounded-app-lg border border-outline-variant bg-card px-md py-sm font-sans text-[14px] leading-[20px] text-on-surface;
+  }
+
+  /* =========================
+     Empty / Loading / Error States
+  ========================= */
+
+  .empty-state {
+    @apply flex-1 items-center justify-center px-lg;
+  }
+
+  .empty-title {
+    @apply headline-lg-mobile text-center;
+  }
+
+  .empty-text {
+    @apply mt-sm body-md text-center text-on-surface-variant;
+  }
+
+  .state-box {
+    @apply rounded-app bg-surface-container-low p-md border border-border-soft;
+  }
+
+  .error-box {
+    @apply rounded-app bg-error-container p-md border border-error;
+  }
+
+  .error-title {
+    @apply title-md text-on-error-container;
+  }
+
+  .error-text {
+    @apply mt-xs body-md text-on-error-container;
+  }
+
+  .warning-box {
+    @apply rounded-app bg-warning-container p-md border border-tertiary;
+  }
+
+  .warning-title {
+    @apply title-md text-on-tertiary-fixed-variant;
+  }
+
+  .warning-text {
+    @apply mt-xs body-md text-on-tertiary-fixed-variant;
+  }
+
+  .success-box {
+    @apply rounded-app bg-success-container p-md border border-primary;
+  }
+
+  .success-title {
+    @apply title-md text-success;
+  }
+
+  .success-text {
+    @apply mt-xs body-md text-success;
+  }
+
+  /* =========================
+     Lists
+  ========================= */
+
+  .list {
+    @apply gap-md;
+  }
+
+  .list-section {
+    @apply gap-sm;
+  }
+
+  .list-item {
+    @apply min-h-[44px] flex-row items-center justify-between py-md;
+  }
+
+  .list-item-start {
+    @apply flex-row items-center gap-sm;
+  }
+
+  .list-item-title {
+    @apply body-md font-semibold text-on-surface;
+  }
+
+  .list-item-meta {
+    @apply text-caption;
+  }
+
+  /* =========================
+     Avatars / Members
+  ========================= */
+
+  .avatar {
+    @apply h-10 w-10 items-center justify-center rounded-app-full bg-primary-fixed;
+  }
+
+  .avatar-sm {
+    @apply h-8 w-8 items-center justify-center rounded-app-full bg-primary-fixed;
+  }
+
+  .avatar-lg {
+    @apply h-14 w-14 items-center justify-center rounded-app-full bg-primary-fixed;
+  }
+
+  .avatar-text {
+    @apply font-sans text-[14px] font-semibold text-on-primary-fixed;
+  }
+
+  .member-row {
+    @apply flex-row items-center gap-sm;
+  }
+
+  .member-name {
+    @apply body-md font-semibold text-on-surface;
+  }
+
+  .member-meta {
+    @apply text-caption;
+  }
+
+  /* =========================
+     Trip App Specific
+  ========================= */
+
+  .trip-card {
+    @apply card-pressable;
+  }
+
+  .trip-card-title {
+    @apply title-md;
+  }
+
+  .trip-card-destination {
+    @apply mt-xs body-md text-on-surface-variant;
+  }
+
+  .trip-card-meta {
+    @apply text-caption;
+  }
+
+  .trip-next-event {
+    @apply body-md font-semibold text-on-surface;
+  }
+
+  .trip-warning-text {
+    @apply body-md font-semibold text-warning;
+  }
+
+  /* =========================
+     Bookings / Uploads
+  ========================= */
+
+  .upload-box {
+    @apply rounded-app bg-surface-container-low p-md border border-outline-variant;
+  }
+
+  .upload-box-title {
+    @apply title-md;
+  }
+
+  .upload-box-text {
+    @apply mt-xs body-md text-on-surface-variant;
+  }
+
+  .confirmation-missing {
+    @apply font-semibold text-warning;
+  }
+
+  .confirmation-uploaded {
+    @apply font-semibold text-success;
+  }
+
+  /* =========================
+     Expenses / Settlements
+  ========================= */
+
+  .amount {
+    @apply font-sans text-[18px] font-bold leading-[24px] text-on-surface;
+  }
+
+  .amount-positive {
+    @apply text-success;
+  }
+
+  .amount-negative {
+    @apply text-error;
+  }
+
+  .amount-muted {
+    @apply text-on-surface-variant;
+  }
+
+  .settlement-card {
+    @apply card;
+  }
+
+  .settlement-summary {
+    @apply rounded-app bg-primary-fixed p-md;
+  }
+
+  /* =========================
+     Chat
+  ========================= */
+
+  .chat-list {
+    @apply flex-1 gap-sm;
+  }
+
+  .chat-bubble {
+    @apply max-w-[80%] rounded-app-lg px-md py-sm;
+  }
+
+  .chat-bubble-me {
+    @apply self-end bg-primary;
+  }
+
+  .chat-bubble-other {
+    @apply self-start bg-card border border-border-soft;
+  }
+
+  .chat-text-me {
+    @apply body-md text-on-primary;
+  }
+
+  .chat-text-other {
+    @apply body-md text-on-surface;
+  }
+
+  .chat-meta {
+    @apply mt-xs font-sans text-[11px] leading-[14px] text-on-surface-variant;
+  }
+
+  .chat-input-bar {
+    @apply flex-row items-center gap-sm border-t border-border-soft bg-card p-sm;
+  }
+
+  /* =========================
+     Activity / Trip Pulse
+  ========================= */
+
+  .activity-item {
+    @apply flex-row gap-sm py-sm;
+  }
+
+  .activity-dot {
+    @apply mt-[5px] h-[10px] w-[10px] rounded-app-full bg-primary;
+  }
+
+  .activity-title {
+    @apply body-md font-semibold text-on-surface;
+  }
+
+  .activity-meta {
+    @apply mt-xs text-caption;
+  }
+
+  .pulse-card {
+    @apply card;
+  }
+}
