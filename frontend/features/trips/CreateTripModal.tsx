@@ -76,7 +76,7 @@ const CreateTripModal = ({ visible, onClose }: Props) => {
                 Description
               </Text>
               <TextInput
-                className="input min-h-[110px] rounded-app-xl"
+                className="input min-h-27.5 rounded-app-xl"
                 placeholder="What's the vibe of this trip?"
                 placeholderTextColor="#6d7979"
                 multiline
