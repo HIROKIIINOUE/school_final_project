@@ -1,4 +1,8 @@
-@import "tailwindcss";
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+
+@import "nativewind/theme";
 
 /* 
   Serene Navigator Design System
@@ -234,35 +238,35 @@
   }
 
   .screen-title {
-    @apply headline-xl;
+    @apply font-sans text-[32px] font-bold leading-[40px] tracking-[-0.02em] text-on-surface;
   }
 
   .screen-subtitle {
-    @apply mt-xs body-md text-on-surface-variant;
+    @apply mt-xs font-sans text-[14px] font-normal leading-[20px] text-on-surface text-on-surface-variant;
   }
 
   .section-title {
-    @apply headline-lg-mobile;
+    @apply font-sans text-[20px] font-semibold leading-[28px] text-on-surface;
   }
 
   .section-subtitle {
-    @apply mt-xs body-md text-on-surface-variant;
+    @apply mt-xs font-sans text-[14px] font-normal leading-[20px] text-on-surface text-on-surface-variant;
   }
 
   .text-title {
-    @apply title-md;
+    @apply font-sans text-[18px] font-semibold leading-[24px] text-on-surface;
   }
 
   .text-body {
-    @apply body-md;
+    @apply font-sans text-[14px] font-normal leading-[20px] text-on-surface;
   }
 
   .text-body-lg {
-    @apply body-lg;
+    @apply font-sans text-[16px] font-normal leading-[24px] text-on-surface;
   }
 
   .text-muted {
-    @apply body-md text-on-surface-variant;
+    @apply font-sans text-[14px] font-normal leading-[20px] text-on-surface-variant;
   }
 
   .text-caption {
@@ -294,7 +298,7 @@
   ========================= */
 
   .card {
-    @apply rounded-app bg-card p-md border border-border-soft;
+    @apply bg-[white] rounded-app-lg border border-outline-variant p-md gap-md relative overflow-hidden active:shadow-md shadow-sm;
   }
 
   .card-compact {
@@ -310,15 +314,15 @@
   }
 
   .card-title {
-    @apply title-md;
+    @apply font-sans text-[18px] font-semibold leading-[24px] text-on-surface;
   }
 
   .card-subtitle {
-    @apply mt-xs body-md text-on-surface-variant;
+    @apply mt-xs font-sans text-[14px] font-normal leading-[20px] text-on-surface text-on-surface-variant;
   }
 
   .card-meta {
-    @apply text-caption;
+    @apply font-sans text-[12px] font-normal leading-[16px] text-on-surface-variant;
   }
 
   .card-row {
@@ -338,7 +342,7 @@
   }
 
   .btn-primary {
-    @apply btn bg-primary-container active:opacity-80;
+    @apply min-h-[44px] flex-row items-center justify-center rounded-app-lg px-md py-sm bg-primary-container active:opacity-80;
   }
 
   .btn-primary-text {
@@ -346,7 +350,7 @@
   }
 
   .btn-secondary {
-    @apply btn bg-secondary-container active:opacity-80;
+    @apply min-h-[44px] flex-row items-center justify-center rounded-app-lg px-md py-sm bg-secondary-container active:opacity-80;
   }
 
   .btn-secondary-text {
@@ -354,7 +358,7 @@
   }
 
   .btn-outline {
-    @apply btn border border-outline-variant bg-transparent active:bg-surface-container-low;
+    @apply min-h-[44px] flex-row items-center justify-center rounded-app-lg px-md py-sm border border-outline-variant bg-transparent active:bg-surface-container-low;
   }
 
   .btn-outline-text {
@@ -370,7 +374,7 @@
   }
 
   .btn-danger {
-    @apply btn bg-error active:opacity-80;
+    @apply min-h-[44px] flex-row items-center justify-center rounded-app-lg px-md py-sm bg-error active:opacity-80;
   }
 
   .btn-danger-text {
@@ -398,51 +402,51 @@
   }
 
   .badge-primary {
-    @apply badge bg-primary-fixed;
+    @apply self-start rounded-app-full px-sm py-xs bg-primary-fixed;
   }
 
   .badge-primary-text {
-    @apply badge-text text-on-primary-fixed;
+    @apply font-sans text-[12px] font-medium leading-[16px] text-on-primary-fixed;
   }
 
   .badge-secondary {
-    @apply badge bg-secondary-container;
+    @apply self-start rounded-app-full px-sm py-xs bg-secondary-container;
   }
 
   .badge-secondary-text {
-    @apply badge-text text-on-secondary-container;
+    @apply font-sans text-[12px] font-medium leading-[16px] text-on-secondary-container;
   }
 
   .badge-neutral {
-    @apply badge bg-surface-container-high;
+    @apply self-start rounded-app-full px-sm py-xs bg-surface-container-high;
   }
 
   .badge-neutral-text {
-    @apply badge-text text-on-surface-variant;
+    @apply font-sans text-[12px] font-medium leading-[16px] text-on-surface-variant;
   }
 
   .badge-warning {
-    @apply badge bg-warning-container;
+    @apply self-start rounded-app-full px-sm py-xs bg-warning-container;
   }
 
   .badge-warning-text {
-    @apply badge-text text-on-tertiary-fixed-variant;
+    @apply font-sans text-[12px] font-medium leading-[16px] text-on-tertiary-fixed-variant;
   }
 
   .badge-error {
-    @apply badge bg-error-container;
+    @apply self-start rounded-app-full px-sm py-xs bg-error-container;
   }
 
   .badge-error-text {
-    @apply badge-text text-on-error-container;
+    @apply font-sans text-[12px] font-medium leading-[16px] text-on-error-container;
   }
 
   .badge-success {
-    @apply badge bg-success-container;
+    @apply self-start rounded-app-full px-sm py-xs bg-success-container;
   }
 
   .badge-success-text {
-    @apply badge-text text-success;
+    @apply font-sans text-[12px] font-medium leading-[16px] text-success;
   }
 
   /* =========================
@@ -458,7 +462,7 @@
   }
 
   .label {
-    @apply label-md;
+    @apply font-sans text-[12px] font-medium uppercase leading-[16px] tracking-[0.05em] text-on-surface-variant;
   }
 
   .input {
@@ -474,11 +478,11 @@
   }
 
   .input-helper {
-    @apply text-caption;
+    @apply font-sans text-[12px] font-normal leading-[16px] text-on-surface-variant;
   }
 
   .input-error-text {
-    @apply text-caption text-error;
+    @apply font-sans text-[12px] font-normal leading-[16px] text-on-surface-variant text-error;
   }
 
   .textarea {
@@ -494,11 +498,11 @@
   }
 
   .empty-title {
-    @apply headline-lg-mobile text-center;
+    @apply font-sans text-[20px] font-semibold leading-[28px] text-on-surface text-center;
   }
 
   .empty-text {
-    @apply mt-sm body-md text-center text-on-surface-variant;
+    @apply mt-sm font-sans text-[14px] font-normal leading-[20px] text-on-surface text-center text-on-surface-variant;
   }
 
   .state-box {
@@ -510,11 +514,11 @@
   }
 
   .error-title {
-    @apply title-md text-on-error-container;
+    @apply font-sans text-[18px] font-semibold leading-[24px] text-on-surface text-on-error-container;
   }
 
   .error-text {
-    @apply mt-xs body-md text-on-error-container;
+    @apply mt-xs font-sans text-[14px] font-normal leading-[20px] text-on-surface text-on-error-container;
   }
 
   .warning-box {
@@ -522,11 +526,11 @@
   }
 
   .warning-title {
-    @apply title-md text-on-tertiary-fixed-variant;
+    @apply font-sans text-[18px] font-semibold leading-[24px] text-on-surface text-on-tertiary-fixed-variant;
   }
 
   .warning-text {
-    @apply mt-xs body-md text-on-tertiary-fixed-variant;
+    @apply mt-xs font-sans text-[14px] font-normal leading-[20px] text-on-surface text-on-tertiary-fixed-variant;
   }
 
   .success-box {
@@ -534,11 +538,11 @@
   }
 
   .success-title {
-    @apply title-md text-success;
+    @apply font-sans text-[18px] font-semibold leading-[24px] text-on-surface text-success;
   }
 
   .success-text {
-    @apply mt-xs body-md text-success;
+    @apply mt-xs font-sans text-[14px] font-normal leading-[20px] text-on-surface text-success;
   }
 
   /* =========================
@@ -562,11 +566,11 @@
   }
 
   .list-item-title {
-    @apply body-md font-semibold text-on-surface;
+    @apply font-sans text-[14px] font-normal leading-[20px] text-on-surface font-semibold text-on-surface;
   }
 
   .list-item-meta {
-    @apply text-caption;
+    @apply font-sans text-[12px] font-normal leading-[16px] text-on-surface-variant;
   }
 
   /* =========================
@@ -594,11 +598,11 @@
   }
 
   .member-name {
-    @apply body-md font-semibold text-on-surface;
+    @apply font-sans text-[14px] font-normal leading-[20px] text-on-surface font-semibold text-on-surface;
   }
 
   .member-meta {
-    @apply text-caption;
+    @apply font-sans text-[12px] font-normal leading-[16px] text-on-surface-variant;
   }
 
   /* =========================
@@ -606,27 +610,27 @@
   ========================= */
 
   .trip-card {
-    @apply card-pressable;
+    @apply rounded-app bg-card p-md border border-border-soft active:bg-surface-container-low;
   }
 
   .trip-card-title {
-    @apply title-md;
+    @apply font-sans text-[18px] font-semibold leading-[24px] text-on-surface;
   }
 
   .trip-card-destination {
-    @apply mt-xs body-md text-on-surface-variant;
+    @apply mt-xs font-sans text-[14px] font-normal leading-[20px] text-on-surface text-on-surface-variant;
   }
 
   .trip-card-meta {
-    @apply text-caption;
+    @apply font-sans text-[12px] font-normal leading-[16px] text-on-surface-variant;
   }
 
   .trip-next-event {
-    @apply body-md font-semibold text-on-surface;
+    @apply font-sans text-[14px] font-normal leading-[20px] text-on-surface font-semibold text-on-surface;
   }
 
   .trip-warning-text {
-    @apply body-md font-semibold text-warning;
+    @apply font-sans text-[14px] font-normal leading-[20px] text-on-surface font-semibold text-warning;
   }
 
   /* =========================
@@ -638,11 +642,11 @@
   }
 
   .upload-box-title {
-    @apply title-md;
+    @apply font-sans text-[18px] font-semibold leading-[24px] text-on-surface;
   }
 
   .upload-box-text {
-    @apply mt-xs body-md text-on-surface-variant;
+    @apply mt-xs font-sans text-[14px] font-normal leading-[20px] text-on-surface text-on-surface-variant;
   }
 
   .confirmation-missing {
@@ -674,7 +678,7 @@
   }
 
   .settlement-card {
-    @apply card;
+    @apply rounded-app bg-card p-md border border-border-soft;
   }
 
   .settlement-summary {
@@ -702,11 +706,11 @@
   }
 
   .chat-text-me {
-    @apply body-md text-on-primary;
+    @apply font-sans text-[14px] font-normal leading-[20px] text-on-surface text-on-primary;
   }
 
   .chat-text-other {
-    @apply body-md text-on-surface;
+    @apply font-sans text-[14px] font-normal leading-[20px] text-on-surface text-on-surface;
   }
 
   .chat-meta {
@@ -730,14 +734,14 @@
   }
 
   .activity-title {
-    @apply body-md font-semibold text-on-surface;
+    @apply font-sans text-[14px] font-normal leading-[20px] text-on-surface font-semibold text-on-surface;
   }
 
   .activity-meta {
-    @apply mt-xs text-caption;
+    @apply mt-xs font-sans text-[12px] font-normal leading-[16px] text-on-surface-variant;
   }
 
   .pulse-card {
-    @apply card;
+    @apply rounded-app bg-card p-md border border-border-soft;
   }
 }

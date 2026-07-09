@@ -1,12 +1,3 @@
-import { View, Text } from "react-native";
-import React from "react";
+import MyTripScreen from "@/features/trips/screens/MyTripScreen";
 
-const index = () => {
-  return (
-    <View>
-      <Text>index</Text>
-    </View>
-  );
-};
-
-export default index;
+export default MyTripScreen;
