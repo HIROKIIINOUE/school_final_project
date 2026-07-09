@@ -9,7 +9,7 @@ const MytripHeader = () => {
           <Image
             alt="User profile avatar"
             className="w-full h-full object-cover"
-            source={require("../../assets/images/example-avatar.jpg")}
+            source={require("../../../assets/images/example-avatar.jpg")}
           />
         </View>
         <Text className="headline-lg font-headline-lg font-bold text-primary dark:text-primary-fixed-dim">
