@@ -4,7 +4,8 @@
   "description": "- Each group can have **up to 2 members**, depending on project size, to ensure effective workload distribution. - Discuss and assign roles and responsibilities within the team.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"npx tsc -w\" \"nodemon dist/server.js\""
   },
   "repository": {
     "type": "git",
@@ -24,13 +25,19 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "pg": "^8.22.0"
+    "pg": "^8.22.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",
     "@types/pg": "^8.20.0",
     "prisma": "^7.8.0",
     "tsx": "^4.23.0",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.5.0",
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.14"
   }
 }
