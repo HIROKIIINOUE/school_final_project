@@ -12,8 +12,37 @@ datasource db {
   provider = "postgresql"
 }
 
+// table for trip
+model Trip {
+  id          String   @id @default(uuid()) @db.Uuid
+  ownerId     String   @db.Uuid // supabase user id
+  title       String
+  description String?
+  destination String?
+  startDate   DateTime?
+  endDate     DateTime?
+  inviteCode  String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-model Test {
-  id Int @id
-  title String
+  members TripMember[]
+}
+
+// who is joing what room table
+model TripMember {
+  id        String   @id @default(uuid()) @db.Uuid
+  tripId    String   @db.Uuid
+  userId    String   @db.Uuid
+  role      TripRole @default(MEMBER)
+  joinedAt  DateTime @default(now())
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  @@unique([tripId, userId])
+  @@index([userId])
+  @@index([tripId])
+}
+
+enum TripRole {
+  OWNER
+  MEMBER
 }
