@@ -1,8 +1,11 @@
+import { generateInviteCode } from "../lib/generateInviteCode";
+import { isInviteCodeCollision } from "../lib/isInviteCodeCollision";
 import { prisma } from "../lib/prisma";
 
 async function getMyRooms(userId: string) {
   // get all user's joined rooms
-  prisma.tripMember.findMany({
+
+  const memberships = await prisma.tripMember.findMany({
     where: { userId },
     select: {
       role: true,
@@ -14,11 +17,52 @@ async function getMyRooms(userId: string) {
         },
       },
     },
+    orderBy: { joinedAt: "desc" },
   });
+
+  const myTrips = memberships.map((mem) => ({
+    title: mem.trip.title,
+    id: mem.trip.id,
+    memberCount: mem.trip._count.members,
+    isOwner: mem.role === "OWNER",
+  }));
+
+  return myTrips;
 }
 
-async function createRoom() {
-  // create room
+async function createRoom(
+  data: { userId: string; title: string; description: string | null },
+  attemptCount = 1,
+) {
+  const { userId, title, description = null } = data;
+
+  const maximumRetryCount = 3;
+
+  const inviteCode = generateInviteCode();
+
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const trip = await tx.trip.create({
+        data: { title, ownerId: userId, inviteCode, description },
+      });
+      await tx.tripMember.create({
+        data: { tripId: trip.id, userId, role: "OWNER" },
+      });
+
+      return { id: trip.id, title: trip.title };
+    });
+
+    return result;
+  } catch (e) {
+    // if unique constraint error
+    // else throw error
+
+    if (isInviteCodeCollision(e) && attemptCount < maximumRetryCount) {
+      return createRoom(data, attemptCount + 1);
+    }
+
+    throw e;
+  }
 }
 
-export { getMyRooms };
+export { getMyRooms, createRoom };
