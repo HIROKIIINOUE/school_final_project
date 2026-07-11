@@ -1,4 +1,4 @@
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { createRoom, getMyRooms } from "../../services/tripRoom.service";
 import { AuthedRequest } from "../../types/types";
 import { createTripBodySchema } from "../../schemas/trips.schema";
@@ -6,17 +6,43 @@ import { AppError } from "../../utils/appError";
 
 type CreateRoomBody = { title: string; description?: string };
 
-async function getMyRoomsController(req: AuthedRequest, res: Response) {
+async function getMyRoomsController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  if (!req.userId) {
+    next(
+      new AppError(
+        401,
+        "AUTHENTICATION_REQUIRED",
+        "Authentication is required.",
+      ),
+    );
+    return;
+  }
   const trips = await getMyRooms(req.userId);
 
   return res.status(200).json({ data: { trips } });
 }
 
 async function createMyTripsController(
-  req: AuthedRequest,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) {
+  if (!req.userId) {
+    if (!req.userId) {
+      next(
+        new AppError(
+          401,
+          "AUTHENTICATION_REQUIRED",
+          "Authentication is required.",
+        ),
+      );
+      return;
+    }
+  }
   // validation
   const validationResult = createTripBodySchema.safeParse(req.body);
 
