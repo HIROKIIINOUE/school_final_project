@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import { errorHandler } from "./middleware/errorHandler";
 dotenv.config();
 
 const app = express();
@@ -9,6 +10,8 @@ app.use(express.json());
 app.use((req, res) => {
   res.status(404).send("Invalid Page");
 });
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`server is running on port http://localhost:${PORT}`);

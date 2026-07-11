@@ -1,6 +1,7 @@
 import { generateInviteCode } from "../lib/generateInviteCode";
 import { isInviteCodeCollision } from "../lib/isInviteCodeCollision";
 import { prisma } from "../lib/prisma";
+import { AppError } from "../utils/appError";
 
 async function getMyRooms(userId: string) {
   // get all user's joined rooms
@@ -19,6 +20,14 @@ async function getMyRooms(userId: string) {
     },
     orderBy: { joinedAt: "desc" },
   });
+
+  if (!memberships) {
+    throw new AppError(
+      404,
+      "TRIP_ACCESS_DENIED",
+      "You do not have access to this trip.",
+    );
+  }
 
   const myTrips = memberships.map((mem) => ({
     title: mem.trip.title,
