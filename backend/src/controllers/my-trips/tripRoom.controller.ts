@@ -1,10 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { createRoom, getMyRooms } from "../../services/tripRoom.service";
-import { AuthedRequest } from "../../types/types";
 import { createTripBodySchema } from "../../schemas/trips.schema";
 import { AppError } from "../../utils/appError";
-
-type CreateRoomBody = { title: string; description?: string };
 
 async function getMyRoomsController(
   req: Request,
