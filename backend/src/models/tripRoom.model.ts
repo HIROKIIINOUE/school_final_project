@@ -17,4 +17,8 @@ async function getMyRooms(userId: string) {
   });
 }
 
+async function createRoom() {
+  // create room
+}
+
 export { getMyRooms };
