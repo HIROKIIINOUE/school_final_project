@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import { errorHandler } from "./middleware/errorHandler";
 import router from "./routes/tripRoom.route";
@@ -9,6 +9,10 @@ const PORT = Number(process.env.BACKEND_PORT ?? 4000);
 app.use(express.json());
 
 app.use("/api/trips", router);
+
+app.get("/api/health", (req: Request, res: Response) => {
+  res.status(200).json({ message: "API is working" });
+});
 
 app.use((req, res) => {
   res.status(404).send("Invalid Page");

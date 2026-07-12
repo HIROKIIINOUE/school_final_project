@@ -1,13 +1,42 @@
 import { View, Text, Pressable, FlatList } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-import { mockTripRooms } from "@/features/trips/data/dummyRoomData";
 import MytripHeader from "@/features/trips/components/MytripHeader";
-import CreateTripModal from "@/features/trips/CreateTripModal";
+import CreateTripModal from "@/features/trips/components/CreateTripModal";
 import TripRoomCard from "@/features/trips/components/TripRoomCard";
+import { MyRoomType } from "../types/types";
+import { fetchMyRooms } from "../api/myRoom.api";
+import Spinner from "@/components/Spinner";
 
 const MyTripScreen = () => {
+  const [tripRooms, setTripRooms] = useState<MyRoomType[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    async function fetchAndSetTrips() {
+      try {
+        setIsLoading(true);
+        const trips = await fetchMyRooms();
+        setTripRooms(trips);
+      } catch (e) {
+        // toast message
+        console.error(
+          "Error occured: ",
+          e instanceof Error ? e.message : "Failed to fetch trips",
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchAndSetTrips();
+  }, []);
+
+  if (isLoading) {
+    return <Spinner />;
+  }
+
   return (
     <View className="flex-1">
       {isCreateModalOpen && (
@@ -29,14 +58,21 @@ const MyTripScreen = () => {
         </Pressable>
       </View>
 
-      <FlatList
-        data={mockTripRooms}
-        keyExtractor={(room) => room.id}
-        className="flex-1"
-        contentContainerClassName="gap-md px-sm pb-xl"
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item: room }) => <TripRoomCard room={room} />}
-      />
+      {tripRooms.length === 0 ? (
+        // TODO: add styling
+        <View>
+          <Text>No room yet</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={tripRooms}
+          keyExtractor={(room) => room.id}
+          className="flex-1"
+          contentContainerClassName="gap-md px-sm pb-xl"
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item: room }) => <TripRoomCard room={room} />}
+        />
+      )}
     </View>
   );
 };
