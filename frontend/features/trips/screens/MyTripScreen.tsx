@@ -17,6 +17,7 @@ const MyTripScreen = () => {
     async function fetchAndSetTrips() {
       try {
         setIsLoading(true);
+        console.log("Fetching trips");
         const trips = await fetchMyRooms();
         setTripRooms(trips);
       } catch (e) {

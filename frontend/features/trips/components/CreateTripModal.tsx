@@ -1,9 +1,43 @@
 import { View, Text, TextInput, Modal, Pressable } from "react-native";
-import React from "react";
+import React, { useState } from "react";
+import { createMyTrips } from "../api/myRoom.api";
+import { useRouter } from "expo-router";
 
 type Props = { visible: boolean; onClose: () => void };
 
 const CreateTripModal = ({ visible, onClose }: Props) => {
+  const [title, setTitle] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [isCreating, setIsCreating] = useState<boolean>(false);
+
+  const router = useRouter();
+
+  async function handleSubmit() {
+    const normalizedTitle = title.trim();
+    if (!normalizedTitle) {
+      // toast error
+      console.log("Title is required");
+      return;
+    }
+    const normalizedDes = description.trim() === "" ? null : description.trim();
+    try {
+      setIsCreating(true);
+      const data = await createMyTrips({
+        title: normalizedTitle,
+        description: normalizedDes,
+      });
+
+      // toast successful message
+      // redirect to trip room
+      router.replace(`/trips/${data.id}`);
+    } catch (e) {
+      // toast error
+      console.error("Failed to create trip", e);
+    } finally {
+      setIsCreating(false);
+    }
+  }
+
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View
@@ -28,51 +62,10 @@ const CreateTripModal = ({ visible, onClose }: Props) => {
                 className="input"
                 placeholder="e.g., Summer in Kyoto"
                 placeholderTextColor="#6d7979"
+                value={title}
+                onChangeText={setTitle}
               />
             </View>
-
-            {/* <View className="gap-sm">
-              <Text className="text-[13px] font-medium text-on-surface-variant">
-                Destination
-              </Text>
-              <TextInput
-                className="input"
-                placeholder="e.g., Kyoto, Japan"
-                placeholderTextColor="#6d7979"
-              />
-            </View>
-
-            <View className="gap-sm">
-              <Text className="text-[13px] font-medium text-on-surface-variant">
-                Start Date
-              </Text>
-              <TextInput
-                className="input"
-                placeholder="Select"
-                placeholderTextColor="#6d7979"
-              />
-            </View>
-
-            <View className="gap-sm">
-              <Text className="text-[13px] font-medium text-on-surface-variant">
-                End Date
-              </Text>
-              <TextInput
-                className="input"
-                placeholder="Select"
-                placeholderTextColor="#6d7979"
-              />
-            </View>
-
-            <View className="gap-sm">
-              <Text className="text-[13px] font-medium text-on-surface-variant">
-                Cover Image
-              </Text>
-
-              <View className="h-40 items-center justify-center rounded-app-xl border-2 border-dashed border-outline-variant bg-surface-container-low">
-                <Text className="text-muted">Add a cover photo</Text>
-              </View>
-            </View> */}
 
             <View className="gap-sm">
               <Text className="text-[13px] font-medium text-on-surface-variant">
@@ -84,10 +77,16 @@ const CreateTripModal = ({ visible, onClose }: Props) => {
                 placeholderTextColor="#6d7979"
                 multiline
                 textAlignVertical="top"
+                value={description}
+                onChangeText={setDescription}
               />
             </View>
 
-            <Pressable className="btn-primary mt-md">
+            <Pressable
+              className="btn-primary mt-md"
+              onPress={handleSubmit}
+              disabled={isCreating}
+            >
               <Text className="btn-primary-text">Create Trip</Text>
             </Pressable>
           </View>

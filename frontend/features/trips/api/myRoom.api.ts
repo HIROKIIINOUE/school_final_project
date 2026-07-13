@@ -15,14 +15,14 @@ export async function fetchMyRooms() {
     throw new Error(data.error?.message ?? "Failed to fetch trips");
   }
 
-  return data.data;
+  return data.data.trips;
 }
 
 export async function createMyTrips({
   title,
   description,
 }: createMyRoomsInput) {
-  const res = await fetch(`${backendUrl}/api/tirps/create-trip`, {
+  const res = await fetch(`${backendUrl}/api/trips/create-trip`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -35,5 +35,5 @@ export async function createMyTrips({
     throw new Error(data.error?.message ?? "Failed to create a trip");
   }
 
-  return data.data;
+  return data.data.createdTrip;
 }

@@ -5,4 +5,4 @@ export type MyRoomType = {
   isOwner: boolean;
 };
 
-export type createMyRoomsInput = { title: string; description?: string };
+export type createMyRoomsInput = { title: string; description?: string | null };

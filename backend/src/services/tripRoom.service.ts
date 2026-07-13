@@ -22,6 +22,7 @@ async function getMyRooms(userId: string) {
   });
 
   if (!memberships) {
+    console.log("Can't find memberships");
     throw new AppError(
       404,
       "TRIP_ACCESS_DENIED",
@@ -65,6 +66,7 @@ async function createRoom(
   } catch (e) {
     // if unique constraint error
     // else throw error
+    console.error("Failed to create room: ", e);
 
     if (isInviteCodeCollision(e) && attemptCount < maximumRetryCount) {
       return createRoom(data, attemptCount + 1);
