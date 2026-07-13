@@ -66,7 +66,7 @@ async function getItineraries({ tripId }: { tripId: string }) {
   return itineraries;
 }
 
-export async function getOverviewDate(input: {
+export async function getOverviewData(input: {
   userId: string;
   tripId: string;
 }) {
