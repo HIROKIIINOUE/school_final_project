@@ -27,6 +27,13 @@ async function getTripDetails({
   if (!trip) {
     throw new AppError(404, "TRIP_NOT_FOUND", "Trip was not found");
   }
+
+  const membership = trip.members[0];
+
+  if (!membership) {
+    throw new AppError(404, "TRIP_NOT_FOUND", "Trip was not found.");
+  }
+
   const planningStatus = getPlanningStatus({
     start: trip.startDate,
     end: trip.endDate,
@@ -43,7 +50,7 @@ async function getTripDetails({
   };
 }
 
-async function getItineraries({ tripId }: { tripId: string; userId: string }) {
+async function getItineraries({ tripId }: { tripId: string }) {
   const itineraries = await prisma.itineraryItem.findMany({
     where: { tripId: tripId },
     select: {
@@ -53,6 +60,19 @@ async function getItineraries({ tripId }: { tripId: string; userId: string }) {
       detail: true,
       startTime: true,
     },
-    orderBy: { startTime: "desc" },
+    orderBy: { startTime: "asc" },
   });
+
+  return itineraries;
+}
+
+export async function getOverviewDate(input: {
+  userId: string;
+  tripId: string;
+}) {
+  const tripDetails = await getTripDetails(input);
+
+  const itineraries = await getItineraries({ tripId: input.tripId });
+
+  return { tripDetails, itineraries };
 }

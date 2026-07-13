@@ -1,31 +1,42 @@
+type TripPlanningStatus = {
+  status:
+    | "DATES_NOT_SET"
+    | "UPCOMING"
+    | "STARTING_SOON"
+    | "IN_PROGRESS"
+    | "COMPLETED";
+  daysUntilStart: number | null;
+};
+
 function getPlanningStatus({
   start,
   end,
 }: {
   start: Date | null;
   end: Date | null;
-}) {
-  if (!start) return;
-  if (!end) return;
+}): TripPlanningStatus {
+  if (!start || !end) {
+    return { status: "DATES_NOT_SET", daysUntilStart: null };
+  }
   const now = new Date();
-  const startDate = new Date(start).getDate();
 
-  const startMs = new Date(start).getMilliseconds();
-  const endMs = new Date(end).getMilliseconds();
-
-  const timeDiff = now.getDate() - startDate;
-
-  if (startMs < endMs && timeDiff <= 7 && timeDiff > 0) {
-    return `In ${timeDiff} Days`;
+  if (now > end) {
+    return { status: "COMPLETED", daysUntilStart: null };
   }
 
-  if (timeDiff > 7) {
-    return "Upcoming";
+  if (now >= start && now <= end) {
+    return { status: "IN_PROGRESS", daysUntilStart: 0 };
   }
 
-  if (now.getMilliseconds() > startMs && now.getMilliseconds() < endMs) {
-    return "In progress";
+  const millisecondsPerDay = 1000 * 60 * 60 * 24;
+
+  const daysUntilStart = Math.ceil(
+    (start.getTime() - now.getTime()) / millisecondsPerDay,
+  );
+
+  if (daysUntilStart <= 7) {
+    return { status: "STARTING_SOON", daysUntilStart };
   }
 
-  return "Completed";
+  return { status: "UPCOMING", daysUntilStart };
 }
