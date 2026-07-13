@@ -10,4 +10,6 @@
  */
 export type * from './models/Trip'
 export type * from './models/TripMember'
+export type * from './models/ItineraryItem'
+export type * from './models/Message'
 export type * from './commonInputTypes'

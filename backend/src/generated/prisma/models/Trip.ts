@@ -223,6 +223,8 @@ export type TripWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Trip"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Trip"> | Date | string
   members?: Prisma.TripMemberListRelationFilter
+  itineraryItems?: Prisma.ItineraryItemListRelationFilter
+  messages?: Prisma.MessageListRelationFilter
 }
 
 export type TripOrderByWithRelationInput = {
@@ -237,6 +239,8 @@ export type TripOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   members?: Prisma.TripMemberOrderByRelationAggregateInput
+  itineraryItems?: Prisma.ItineraryItemOrderByRelationAggregateInput
+  messages?: Prisma.MessageOrderByRelationAggregateInput
 }
 
 export type TripWhereUniqueInput = Prisma.AtLeast<{
@@ -254,6 +258,8 @@ export type TripWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Trip"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Trip"> | Date | string
   members?: Prisma.TripMemberListRelationFilter
+  itineraryItems?: Prisma.ItineraryItemListRelationFilter
+  messages?: Prisma.MessageListRelationFilter
 }, "id" | "inviteCode">
 
 export type TripOrderByWithAggregationInput = {
@@ -300,6 +306,8 @@ export type TripCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.TripMemberCreateNestedManyWithoutTripInput
+  itineraryItems?: Prisma.ItineraryItemCreateNestedManyWithoutTripInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTripInput
 }
 
 export type TripUncheckedCreateInput = {
@@ -314,6 +322,8 @@ export type TripUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.TripMemberUncheckedCreateNestedManyWithoutTripInput
+  itineraryItems?: Prisma.ItineraryItemUncheckedCreateNestedManyWithoutTripInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTripInput
 }
 
 export type TripUpdateInput = {
@@ -328,6 +338,8 @@ export type TripUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.TripMemberUpdateManyWithoutTripNestedInput
+  itineraryItems?: Prisma.ItineraryItemUpdateManyWithoutTripNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTripNestedInput
 }
 
 export type TripUncheckedUpdateInput = {
@@ -342,6 +354,8 @@ export type TripUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.TripMemberUncheckedUpdateManyWithoutTripNestedInput
+  itineraryItems?: Prisma.ItineraryItemUncheckedUpdateManyWithoutTripNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTripNestedInput
 }
 
 export type TripCreateManyInput = {
@@ -457,6 +471,34 @@ export type TripUpdateOneRequiredWithoutMembersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TripUpdateToOneWithWhereWithoutMembersInput, Prisma.TripUpdateWithoutMembersInput>, Prisma.TripUncheckedUpdateWithoutMembersInput>
 }
 
+export type TripCreateNestedOneWithoutItineraryItemsInput = {
+  create?: Prisma.XOR<Prisma.TripCreateWithoutItineraryItemsInput, Prisma.TripUncheckedCreateWithoutItineraryItemsInput>
+  connectOrCreate?: Prisma.TripCreateOrConnectWithoutItineraryItemsInput
+  connect?: Prisma.TripWhereUniqueInput
+}
+
+export type TripUpdateOneRequiredWithoutItineraryItemsNestedInput = {
+  create?: Prisma.XOR<Prisma.TripCreateWithoutItineraryItemsInput, Prisma.TripUncheckedCreateWithoutItineraryItemsInput>
+  connectOrCreate?: Prisma.TripCreateOrConnectWithoutItineraryItemsInput
+  upsert?: Prisma.TripUpsertWithoutItineraryItemsInput
+  connect?: Prisma.TripWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TripUpdateToOneWithWhereWithoutItineraryItemsInput, Prisma.TripUpdateWithoutItineraryItemsInput>, Prisma.TripUncheckedUpdateWithoutItineraryItemsInput>
+}
+
+export type TripCreateNestedOneWithoutMessagesInput = {
+  create?: Prisma.XOR<Prisma.TripCreateWithoutMessagesInput, Prisma.TripUncheckedCreateWithoutMessagesInput>
+  connectOrCreate?: Prisma.TripCreateOrConnectWithoutMessagesInput
+  connect?: Prisma.TripWhereUniqueInput
+}
+
+export type TripUpdateOneRequiredWithoutMessagesNestedInput = {
+  create?: Prisma.XOR<Prisma.TripCreateWithoutMessagesInput, Prisma.TripUncheckedCreateWithoutMessagesInput>
+  connectOrCreate?: Prisma.TripCreateOrConnectWithoutMessagesInput
+  upsert?: Prisma.TripUpsertWithoutMessagesInput
+  connect?: Prisma.TripWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TripUpdateToOneWithWhereWithoutMessagesInput, Prisma.TripUpdateWithoutMessagesInput>, Prisma.TripUncheckedUpdateWithoutMessagesInput>
+}
+
 export type TripCreateWithoutMembersInput = {
   id?: string
   ownerId: string
@@ -468,6 +510,8 @@ export type TripCreateWithoutMembersInput = {
   inviteCode: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  itineraryItems?: Prisma.ItineraryItemCreateNestedManyWithoutTripInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTripInput
 }
 
 export type TripUncheckedCreateWithoutMembersInput = {
@@ -481,6 +525,8 @@ export type TripUncheckedCreateWithoutMembersInput = {
   inviteCode: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  itineraryItems?: Prisma.ItineraryItemUncheckedCreateNestedManyWithoutTripInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTripInput
 }
 
 export type TripCreateOrConnectWithoutMembersInput = {
@@ -510,6 +556,8 @@ export type TripUpdateWithoutMembersInput = {
   inviteCode?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  itineraryItems?: Prisma.ItineraryItemUpdateManyWithoutTripNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTripNestedInput
 }
 
 export type TripUncheckedUpdateWithoutMembersInput = {
@@ -523,6 +571,160 @@ export type TripUncheckedUpdateWithoutMembersInput = {
   inviteCode?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  itineraryItems?: Prisma.ItineraryItemUncheckedUpdateManyWithoutTripNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTripNestedInput
+}
+
+export type TripCreateWithoutItineraryItemsInput = {
+  id?: string
+  ownerId: string
+  title: string
+  description?: string | null
+  destination?: string | null
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  inviteCode: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  members?: Prisma.TripMemberCreateNestedManyWithoutTripInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTripInput
+}
+
+export type TripUncheckedCreateWithoutItineraryItemsInput = {
+  id?: string
+  ownerId: string
+  title: string
+  description?: string | null
+  destination?: string | null
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  inviteCode: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  members?: Prisma.TripMemberUncheckedCreateNestedManyWithoutTripInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTripInput
+}
+
+export type TripCreateOrConnectWithoutItineraryItemsInput = {
+  where: Prisma.TripWhereUniqueInput
+  create: Prisma.XOR<Prisma.TripCreateWithoutItineraryItemsInput, Prisma.TripUncheckedCreateWithoutItineraryItemsInput>
+}
+
+export type TripUpsertWithoutItineraryItemsInput = {
+  update: Prisma.XOR<Prisma.TripUpdateWithoutItineraryItemsInput, Prisma.TripUncheckedUpdateWithoutItineraryItemsInput>
+  create: Prisma.XOR<Prisma.TripCreateWithoutItineraryItemsInput, Prisma.TripUncheckedCreateWithoutItineraryItemsInput>
+  where?: Prisma.TripWhereInput
+}
+
+export type TripUpdateToOneWithWhereWithoutItineraryItemsInput = {
+  where?: Prisma.TripWhereInput
+  data: Prisma.XOR<Prisma.TripUpdateWithoutItineraryItemsInput, Prisma.TripUncheckedUpdateWithoutItineraryItemsInput>
+}
+
+export type TripUpdateWithoutItineraryItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destination?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteCode?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.TripMemberUpdateManyWithoutTripNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTripNestedInput
+}
+
+export type TripUncheckedUpdateWithoutItineraryItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destination?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteCode?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.TripMemberUncheckedUpdateManyWithoutTripNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTripNestedInput
+}
+
+export type TripCreateWithoutMessagesInput = {
+  id?: string
+  ownerId: string
+  title: string
+  description?: string | null
+  destination?: string | null
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  inviteCode: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  members?: Prisma.TripMemberCreateNestedManyWithoutTripInput
+  itineraryItems?: Prisma.ItineraryItemCreateNestedManyWithoutTripInput
+}
+
+export type TripUncheckedCreateWithoutMessagesInput = {
+  id?: string
+  ownerId: string
+  title: string
+  description?: string | null
+  destination?: string | null
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  inviteCode: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  members?: Prisma.TripMemberUncheckedCreateNestedManyWithoutTripInput
+  itineraryItems?: Prisma.ItineraryItemUncheckedCreateNestedManyWithoutTripInput
+}
+
+export type TripCreateOrConnectWithoutMessagesInput = {
+  where: Prisma.TripWhereUniqueInput
+  create: Prisma.XOR<Prisma.TripCreateWithoutMessagesInput, Prisma.TripUncheckedCreateWithoutMessagesInput>
+}
+
+export type TripUpsertWithoutMessagesInput = {
+  update: Prisma.XOR<Prisma.TripUpdateWithoutMessagesInput, Prisma.TripUncheckedUpdateWithoutMessagesInput>
+  create: Prisma.XOR<Prisma.TripCreateWithoutMessagesInput, Prisma.TripUncheckedCreateWithoutMessagesInput>
+  where?: Prisma.TripWhereInput
+}
+
+export type TripUpdateToOneWithWhereWithoutMessagesInput = {
+  where?: Prisma.TripWhereInput
+  data: Prisma.XOR<Prisma.TripUpdateWithoutMessagesInput, Prisma.TripUncheckedUpdateWithoutMessagesInput>
+}
+
+export type TripUpdateWithoutMessagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destination?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteCode?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.TripMemberUpdateManyWithoutTripNestedInput
+  itineraryItems?: Prisma.ItineraryItemUpdateManyWithoutTripNestedInput
+}
+
+export type TripUncheckedUpdateWithoutMessagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destination?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteCode?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.TripMemberUncheckedUpdateManyWithoutTripNestedInput
+  itineraryItems?: Prisma.ItineraryItemUncheckedUpdateManyWithoutTripNestedInput
 }
 
 
@@ -532,10 +734,14 @@ export type TripUncheckedUpdateWithoutMembersInput = {
 
 export type TripCountOutputType = {
   members: number
+  itineraryItems: number
+  messages: number
 }
 
 export type TripCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   members?: boolean | TripCountOutputTypeCountMembersArgs
+  itineraryItems?: boolean | TripCountOutputTypeCountItineraryItemsArgs
+  messages?: boolean | TripCountOutputTypeCountMessagesArgs
 }
 
 /**
@@ -555,6 +761,20 @@ export type TripCountOutputTypeCountMembersArgs<ExtArgs extends runtime.Types.Ex
   where?: Prisma.TripMemberWhereInput
 }
 
+/**
+ * TripCountOutputType without action
+ */
+export type TripCountOutputTypeCountItineraryItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ItineraryItemWhereInput
+}
+
+/**
+ * TripCountOutputType without action
+ */
+export type TripCountOutputTypeCountMessagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MessageWhereInput
+}
+
 
 export type TripSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -568,6 +788,8 @@ export type TripSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   members?: boolean | Prisma.Trip$membersArgs<ExtArgs>
+  itineraryItems?: boolean | Prisma.Trip$itineraryItemsArgs<ExtArgs>
+  messages?: boolean | Prisma.Trip$messagesArgs<ExtArgs>
   _count?: boolean | Prisma.TripCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["trip"]>
 
@@ -613,6 +835,8 @@ export type TripSelectScalar = {
 export type TripOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ownerId" | "title" | "description" | "destination" | "startDate" | "endDate" | "inviteCode" | "createdAt" | "updatedAt", ExtArgs["result"]["trip"]>
 export type TripInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   members?: boolean | Prisma.Trip$membersArgs<ExtArgs>
+  itineraryItems?: boolean | Prisma.Trip$itineraryItemsArgs<ExtArgs>
+  messages?: boolean | Prisma.Trip$messagesArgs<ExtArgs>
   _count?: boolean | Prisma.TripCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TripIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -622,6 +846,8 @@ export type $TripPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "Trip"
   objects: {
     members: Prisma.$TripMemberPayload<ExtArgs>[]
+    itineraryItems: Prisma.$ItineraryItemPayload<ExtArgs>[]
+    messages: Prisma.$MessagePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1029,6 +1255,8 @@ readonly fields: TripFieldRefs;
 export interface Prisma__TripClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   members<T extends Prisma.Trip$membersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Trip$membersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TripMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  itineraryItems<T extends Prisma.Trip$itineraryItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Trip$itineraryItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ItineraryItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  messages<T extends Prisma.Trip$messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Trip$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1482,6 +1710,54 @@ export type Trip$membersArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
   take?: number
   skip?: number
   distinct?: Prisma.TripMemberScalarFieldEnum | Prisma.TripMemberScalarFieldEnum[]
+}
+
+/**
+ * Trip.itineraryItems
+ */
+export type Trip$itineraryItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ItineraryItem
+   */
+  select?: Prisma.ItineraryItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ItineraryItem
+   */
+  omit?: Prisma.ItineraryItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItineraryItemInclude<ExtArgs> | null
+  where?: Prisma.ItineraryItemWhereInput
+  orderBy?: Prisma.ItineraryItemOrderByWithRelationInput | Prisma.ItineraryItemOrderByWithRelationInput[]
+  cursor?: Prisma.ItineraryItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ItineraryItemScalarFieldEnum | Prisma.ItineraryItemScalarFieldEnum[]
+}
+
+/**
+ * Trip.messages
+ */
+export type Trip$messagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Message
+   */
+  select?: Prisma.MessageSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Message
+   */
+  omit?: Prisma.MessageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MessageInclude<ExtArgs> | null
+  where?: Prisma.MessageWhereInput
+  orderBy?: Prisma.MessageOrderByWithRelationInput | Prisma.MessageOrderByWithRelationInput[]
+  cursor?: Prisma.MessageWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MessageScalarFieldEnum | Prisma.MessageScalarFieldEnum[]
 }
 
 /**

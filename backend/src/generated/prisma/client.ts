@@ -49,3 +49,13 @@ export type Trip = Prisma.TripModel
  * 
  */
 export type TripMember = Prisma.TripMemberModel
+/**
+ * Model ItineraryItem
+ * 
+ */
+export type ItineraryItem = Prisma.ItineraryItemModel
+/**
+ * Model Message
+ * 
+ */
+export type Message = Prisma.MessageModel
