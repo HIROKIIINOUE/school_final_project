@@ -1,14 +1,6 @@
-type TripPlanningStatus = {
-  status:
-    | "DATES_NOT_SET"
-    | "UPCOMING"
-    | "STARTING_SOON"
-    | "IN_PROGRESS"
-    | "COMPLETED";
-  daysUntilStart: number | null;
-};
+import { TripPlanningStatus } from "../types/overview.types";
 
-function getPlanningStatus({
+export function getPlanningStatus({
   start,
   end,
 }: {

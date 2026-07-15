@@ -1,5 +1,13 @@
+import { getPlanningStatus } from "../lib/getPlanningStatus";
 import { prisma } from "../lib/prisma";
+import {
+  ItineraryType,
+  OverviewDataType,
+  TripDetailsType,
+} from "../types/overview.types";
 import { AppError } from "../utils/appError";
+
+// TODO: Add more informatin later on such as expenses, chats etc
 
 async function getTripDetails({
   userId,
@@ -7,7 +15,7 @@ async function getTripDetails({
 }: {
   userId: string;
   tripId: string;
-}) {
+}): Promise<TripDetailsType> {
   // find one trip which mathces with tripId
   // also check if userId is the member of the trip
   const trip = await prisma.trip.findFirst({
@@ -50,7 +58,11 @@ async function getTripDetails({
   };
 }
 
-async function getItineraries({ tripId }: { tripId: string }) {
+async function getItineraries({
+  tripId,
+}: {
+  tripId: string;
+}): Promise<ItineraryType[]> {
   const itineraries = await prisma.itineraryItem.findMany({
     where: { tripId: tripId },
     select: {
@@ -69,7 +81,7 @@ async function getItineraries({ tripId }: { tripId: string }) {
 export async function getOverviewData(input: {
   userId: string;
   tripId: string;
-}) {
+}): Promise<OverviewDataType> {
   const tripDetails = await getTripDetails(input);
 
   const itineraries = await getItineraries({ tripId: input.tripId });
