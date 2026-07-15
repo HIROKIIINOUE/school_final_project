@@ -12,6 +12,7 @@ datasource db {
   provider = "postgresql"
 }
 
+
 // table for trip
 model Trip {
   id          String    @id @default(uuid()) @db.Uuid

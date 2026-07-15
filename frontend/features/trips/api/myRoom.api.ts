@@ -1,6 +1,10 @@
 import { createMyRoomsInput } from "../types/types";
 
-const backendUrl = process.env.BACKEND_URL;
+const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
+
+if (!backendUrl) {
+  throw new Error("EXPO_PUBLIC_BACKEND_URL is not configured");
+}
 
 export async function fetchMyRooms() {
   const res = await fetch(`${backendUrl}/api/trips/my-trips`, {
@@ -12,8 +16,11 @@ export async function fetchMyRooms() {
   const data = await res.json();
 
   if (!res.ok) {
+    console.error("Request failed");
     throw new Error(data.error?.message ?? "Failed to fetch trips");
   }
+
+  console.log(data);
 
   return data.data.trips;
 }

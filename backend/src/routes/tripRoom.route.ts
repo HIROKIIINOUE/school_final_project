@@ -7,6 +7,6 @@ import {
 const router = Router();
 
 router.get("/my-trips", getMyRoomsController);
-router.post("/create-room", createMyTripsController);
+router.post("/create-trip", createMyTripsController);
 
 export default router;
