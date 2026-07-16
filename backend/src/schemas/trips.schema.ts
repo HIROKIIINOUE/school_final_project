@@ -12,6 +12,7 @@ export const createTripBodySchema = z.strictObject({
     .string({ error: "Description must be a string." })
     .trim()
     .max(500, { error: "Description must be 500 characters or fewer." })
+    .nullable()
     .optional(),
 });
 

@@ -4,6 +4,6 @@ import { GetOverviewController } from "../controllers/my-trips/overview.controll
 const router = Router();
 
 // todo: requireAuth
-router.get("/overview/:id", GetOverviewController);
+router.get("/overview/:tripId", GetOverviewController);
 
 export default router;

@@ -20,7 +20,7 @@ const OverView = ({ id }: Props) => {
       } catch (e) {
         console.error("Failed to fetch overview data", e);
       } finally {
-        setIsLoading(true);
+        setIsLoading(false);
       }
     }
 
@@ -30,6 +30,8 @@ const OverView = ({ id }: Props) => {
   if (isLoading) {
     return <Spinner />;
   }
+
+  console.log(overviewData);
 
   if (!overviewData?.tripDetails) {
     return (

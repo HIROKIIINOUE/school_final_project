@@ -10,7 +10,7 @@ const PORT = Number(process.env.BACKEND_PORT ?? 4000);
 app.use(express.json());
 
 app.use("/api/trips", router);
-app.use("api/trip", overviewRouter);
+app.use("/api/trip", overviewRouter);
 
 app.get("/api/health", (req: Request, res: Response) => {
   res.status(200).json({ message: "API is working" });
