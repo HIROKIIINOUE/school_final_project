@@ -38,6 +38,7 @@ export async function createMyTrips({
   const data = await res.json();
 
   if (!res.ok) {
+    console.error("Failed to create trip");
     throw new Error(data.error?.message ?? "Failed to create a trip");
   }
 

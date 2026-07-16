@@ -13,7 +13,7 @@ const monthMaping: Record<number, string> = {
   12: "December",
 };
 
-export function calculatePeriod(start: Date, end?: Date) {
+export function calculatePeriod(start: Date, end: Date | null) {
   const startDate = new Date(start);
 
   if (!end) {
@@ -32,4 +32,11 @@ export function calculatePeriod(start: Date, end?: Date) {
   const endMonth = monthMaping[endDate.getMonth() + 1];
 
   return `${startMonth} ${startDate.getDate()} - ${endMonth} ${endDate.getDate()}`;
+}
+export function calculateDuration(start: Date, end: Date | null) {
+  if (!end) {
+    return "-";
+  }
+
+  return `${new Date(end).getDate() - new Date(start).getDate()} days`;
 }

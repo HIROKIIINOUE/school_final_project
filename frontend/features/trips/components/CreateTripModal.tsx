@@ -2,6 +2,7 @@ import { View, Text, TextInput, Modal, Pressable } from "react-native";
 import React, { useState } from "react";
 import { createMyTrips } from "../api/myRoom.api";
 import { useRouter } from "expo-router";
+import KeyboardDissmissBtn from "@/components/KeyboardDissmissBtn";
 
 type Props = { visible: boolean; onClose: () => void };
 
@@ -22,6 +23,7 @@ const CreateTripModal = ({ visible, onClose }: Props) => {
     const normalizedDes = description.trim() === "" ? null : description.trim();
     try {
       setIsCreating(true);
+      console.log(normalizedTitle, normalizedDes);
       const data = await createMyTrips({
         title: normalizedTitle,
         description: normalizedDes,
@@ -47,6 +49,7 @@ const CreateTripModal = ({ visible, onClose }: Props) => {
         <View className="rounded-app-xl border border-outline-variant bg-surface-container-lowest p-lg">
           <View className="mb-lg flex-row items-center justify-between">
             <Text className="headline-lg text-primary">Create Trip</Text>
+            <KeyboardDissmissBtn />
 
             <Pressable onPress={onClose}>
               <Text className="text-body text-primary">Close</Text>
