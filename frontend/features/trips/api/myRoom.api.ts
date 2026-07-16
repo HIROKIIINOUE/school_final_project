@@ -16,7 +16,6 @@ export async function fetchMyRooms() {
   const data = await res.json();
 
   if (!res.ok) {
-    console.error("Request failed");
     throw new Error(data.error?.message ?? "Failed to fetch trips");
   }
 
