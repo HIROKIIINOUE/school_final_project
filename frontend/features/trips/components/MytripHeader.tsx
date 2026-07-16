@@ -1,4 +1,5 @@
 import { View, Text, Image, Pressable } from "react-native";
+import { Settings } from "lucide-react-native";
 import React from "react";
 
 const MytripHeader = () => {
@@ -17,7 +18,7 @@ const MytripHeader = () => {
         </Text>
       </View>
       <Pressable className="btn-primary">
-        <Text className="material-symbols-outlined">settings</Text>
+        <Settings />
       </Pressable>
     </View>
   );
