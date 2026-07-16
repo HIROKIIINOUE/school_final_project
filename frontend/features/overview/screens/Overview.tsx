@@ -1,9 +1,10 @@
-import { View, Text } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
 import { getOverviewData } from "../api/overview.api";
 import { OverviewDataType } from "../types/types";
 import Spinner from "@/components/Spinner";
 import TripDetail from "../components/TripDetail";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type Props = { id: string };
 
@@ -42,9 +43,11 @@ const OverView = ({ id }: Props) => {
   }
 
   return (
-    <View>
-      <TripDetail tripDetails={overviewData?.tripDetails} />
-    </View>
+    <SafeAreaView edges={["top", "left", "right"]} style={{ flex: 1 }}>
+      <ScrollView>
+        <TripDetail tripDetails={overviewData?.tripDetails} />
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

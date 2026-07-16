@@ -26,10 +26,12 @@ const TripDetail = ({ tripDetails }: Props) => {
     <View className="relative z-20 -mt-10 mx-container-margin bg-white rounded-[24px] p-lg shadow-sm border border-outline-variant/30 flex flex-col gap-sm">
       <View className="flex items-center gap-sm flex-wrap">
         <View className="px-sm py-xs bg-primary-container text-on-primary-container rounded-md text-label-md font-label-md font-bold">
-          {status}
+          <Text>{status}</Text>
         </View>
         <View className="px-sm py-xs bg-surface-variant text-on-surface-variant rounded-md text-label-md font-label-md">
-          {tripDetails.currentUserRole === "OWNER" ? "Owner" : "Member"}
+          <Text>
+            {tripDetails.currentUserRole === "OWNER" ? "Owner" : "Member"}
+          </Text>
         </View>
       </View>
       <Text className="text-headline-lg-mobile md:text-headline-lg font-headline-lg-mobile md:font-headline-lg text-on-surface font-bold tracking-tight">
@@ -40,17 +42,17 @@ const TripDetail = ({ tripDetails }: Props) => {
           <View className="material-symbols-outlined text-[18px]">
             <MapPin />
           </View>
-          <View>{tripDetails.destination ?? "Unprovided"}</View>
+          <Text>{tripDetails.destination ?? "Unprovided"}</Text>
         </View>
         <View className="flex items-center gap-sm">
           <View className="material-symbols-outlined text-[18px]">
             <CalendarDays />
           </View>
-          <View>
+          <Text>
             {tripDetails.startDate
               ? `${calculatePeriod(tripDetails.startDate, tripDetails.endDate)}, ${new Date(tripDetails.startDate).getFullYear()} • ${duration}`
               : "Unprovided"}
-          </View>
+          </Text>
         </View>
       </View>
       <View className="mt-sm p-sm bg-surface-container rounded-lg border border-primary/20">
