@@ -16,9 +16,9 @@ model Profile {
   id Int @id @default(autoincrement())
   userId String @unique @map("user_id")
   displayName String @map("display_name")
-  image String 
-  createdAt DateTime @default(now())
-  updateAt DateTime @map("updated_at")
+  image String? 
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 }
 
 // table for trip
