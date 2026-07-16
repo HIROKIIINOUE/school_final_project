@@ -1,8 +1,7 @@
 import React from 'react'
-import { OAuthProviderId } from '../screen/LoginScreen'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import AntDesign from '@expo/vector-icons/AntDesign';
-
+import { OAuthProviderId } from '../types/provider.type';
 
 type Props = {
   providers: OAuthProviderId[]

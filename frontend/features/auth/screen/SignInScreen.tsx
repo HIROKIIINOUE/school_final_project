@@ -3,8 +3,7 @@ import React, { useMemo } from 'react'
 import { Image, Platform, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import OAuthContinueButtons from '../components/OAuthContinueButtons';
-
-export type OAuthProviderId = "apple" | "google";
+import { OAuthProviderId } from '../types/provider.type';
 
 const LoginScreen = () => {
   const oAuthProviders = useMemo<OAuthProviderId[]>(() => (Platform.OS === "ios" ? ["apple", "google"] : ["google"]), [])
