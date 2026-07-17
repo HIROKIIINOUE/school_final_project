@@ -31,8 +31,5 @@ export const useAuth = () => {
     }
   };
 
-  return {
-    isSubmitting,
-    handleOAuthContinue,
-  };
+  return { isSubmitting, handleOAuthContinue };
 };

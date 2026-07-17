@@ -8,19 +8,19 @@ async function getMyRoomsController(
   res: Response,
   next: NextFunction,
 ) {
-  // if (!req.userId) {
-  //   next(
-  //     new AppError(
-  //       401,
-  //       "AUTHENTICATION_REQUIRED",
-  //       "Authentication is required.",
-  //     ),
-  //   );
-  //   return;
-  // }
+  if (!req.userId) {
+    next(
+      new AppError(
+        401,
+        "AUTHENTICATION_REQUIRED",
+        "Authentication is required.",
+      ),
+    );
+    return;
+  }
 
   // todo: pass req.userId
-  const trips = await getMyRooms("550e8400-e29b-41d4-a716-446655440000");
+  const trips = await getMyRooms(req.userId);
 
   return res.status(200).json({ data: { trips } });
 }
@@ -30,7 +30,6 @@ async function createMyTripsController(
   res: Response,
   next: NextFunction,
 ) {
-  // todo: after establishing auth middleware, turn this back on
   if (!req.userId) {
     if (!req.userId) {
       next(
@@ -43,6 +42,7 @@ async function createMyTripsController(
       return;
     }
   }
+
   // validation
   const validationResult = createTripBodySchema.safeParse(req.body);
 
@@ -65,8 +65,8 @@ async function createMyTripsController(
 
   const createdTrip = await createRoom({
     userId: req.userId,
-    title: req.body.title,
-    description: req.body.description ?? null,
+    title: title,
+    description: description ?? null,
   });
 
   console.log("successfully created", createdTrip.id);
