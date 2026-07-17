@@ -5,6 +5,8 @@ import { OverviewDataType } from "../types/types";
 import Spinner from "@/components/Spinner";
 import TripDetail from "../components/TripDetail";
 import { SafeAreaView } from "react-native-safe-area-context";
+import OverviewThumbnail from "../components/OverviewThumbnail";
+import ItineraryCard from "../components/ItineraryCard";
 
 type Props = { id: string };
 
@@ -43,9 +45,11 @@ const OverView = ({ id }: Props) => {
   }
 
   return (
-    <SafeAreaView edges={["top", "left", "right"]} style={{ flex: 1 }}>
+    <SafeAreaView edges={["left", "right"]} style={{ flex: 1 }}>
+      <OverviewThumbnail />
       <ScrollView>
         <TripDetail tripDetails={overviewData?.tripDetails} />
+        <ItineraryCard itineraries={overviewData.itineraries} tripId={id} />
       </ScrollView>
     </SafeAreaView>
   );
