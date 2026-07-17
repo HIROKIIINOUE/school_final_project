@@ -1,7 +1,7 @@
 import { generateInviteCode } from "../lib/generateInviteCode";
 import { isInviteCodeCollision } from "../lib/isInviteCodeCollision";
 import { prisma } from "../lib/prisma";
-import { AppError } from "../utils/appError";
+import { AppError } from "../lib/appError";
 
 async function getMyRooms(userId: string) {
   // get all user's joined rooms

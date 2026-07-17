@@ -57,7 +57,4 @@ const createProfile = async (req: Request, res: Response) => {
   }
 };
 
-export default {
-  checkProfileExist,
-  createProfile,
-};
+export default { checkProfileExist, createProfile };

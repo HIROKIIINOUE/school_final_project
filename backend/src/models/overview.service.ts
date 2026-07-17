@@ -5,7 +5,7 @@ import {
   OverviewDataType,
   TripDetailsType,
 } from "../types/overview.types";
-import { AppError } from "../utils/appError";
+import { AppError } from "../lib/appError";
 
 // TODO: Add more informatin later on such as expenses, chats etc
 
