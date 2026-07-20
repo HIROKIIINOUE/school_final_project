@@ -3,6 +3,7 @@ import { OAuthProviderId } from "../types/provider.type";
 import { handleSignInWithOAuth } from "../api/signInWithOAuth";
 import { buildRedirect } from "@/lib/appConfig";
 import { toast } from "sonner";
+import checkProfile from "../api/checkProfile";
 
 export const useAuth = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -21,8 +22,18 @@ export const useAuth = () => {
         toast.error("You failed to sign in. Please try again.");
         return;
       }
-      // 認証済み user/session を Zustand に反映し、必要に応じて profile の初期化を行う
+      const profileResult = await checkProfile(result.session.access_token);
+
+      if (profileResult.hasProfile) {
+        // TODO: overview route is not created yet.
+        // router.replace("/(protected)/overview");
+      } else {
+        // TODO: profile setup route is not created yet.
+        // router.replace("/profile");
+      }
+
       toast.success("You signed in successfully");
+      return { user: result.user, profileResult };
     } catch (error) {
       console.error(error);
       toast.error("Something wrong, please try again.");

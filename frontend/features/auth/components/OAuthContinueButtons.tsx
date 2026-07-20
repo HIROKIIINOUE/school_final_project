@@ -4,11 +4,13 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { OAuthProviderId } from '../types/provider.type';
 
 type Props = {
-  providers: OAuthProviderId[]
+  providers: OAuthProviderId[];
+  isSubmitting: boolean;
+  onContinue: (provider: OAuthProviderId) => void;
 }
 
 const OAuthContinueButtons = (props: Props) => {
-  const { providers } = props;
+  const { providers, isSubmitting, onContinue } = props;
   const labelByProvider: Record<OAuthProviderId, string> = {
     apple: "Continue with Apple",
     google: "Continue with Google"
@@ -22,6 +24,8 @@ const OAuthContinueButtons = (props: Props) => {
           <Pressable
             key={provider}
             accessibilityRole='button'
+            disabled={isSubmitting}
+            onPress={() => onContinue(provider)}
             style={({ pressed }) => [
               styles.button,
               !isLast && styles.buttonSpacing,
