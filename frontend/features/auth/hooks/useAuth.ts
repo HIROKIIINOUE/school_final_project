@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from "expo-router";
 import { OAuthProviderId } from "../types/provider.type";
 import { handleSignInWithOAuth } from "../api/signInWithOAuth";
 import { buildRedirect } from "@/lib/appConfig";
@@ -7,6 +8,7 @@ import checkProfile from "../api/checkProfile";
 
 export const useAuth = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const router = useRouter();
 
   const handleOAuthContinue = async (provider: OAuthProviderId) => {
     setIsSubmitting(true);
@@ -28,8 +30,7 @@ export const useAuth = () => {
         // TODO: overview route is not created yet.
         // router.replace("/(protected)/overview");
       } else {
-        // TODO: profile setup route is not created yet.
-        // router.replace("/profile");
+        router.replace("/profile");
       }
 
       toast.success("You signed in successfully");

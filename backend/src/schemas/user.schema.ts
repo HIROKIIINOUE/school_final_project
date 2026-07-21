@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const profileInputSchema = z.object({
-  displayName: z.string().min(1),
+  displayName: z.string().trim().min(1).max(10),
   image: z.string().optional(),
 });
 

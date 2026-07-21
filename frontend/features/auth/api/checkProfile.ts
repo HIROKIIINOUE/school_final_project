@@ -1,11 +1,6 @@
-export type Profile = {
-  id: number;
-  userId: string;
-  displayName: string;
-  image: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
+import { Profile } from "@/features/profile/types/profile.type";
+
+export type { Profile };
 
 export type CheckProfileResult =
   | { hasProfile: true; profile: Profile }
