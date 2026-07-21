@@ -20,7 +20,7 @@ app.get("/api/health", (req: Request, res: Response) => {
 });
 
 app.use((req, res) => {
-  res.status(404).send("Invalid Page");
+  res.status(404).json({ message: "Invalid Page" });
 });
 
 app.use(errorHandler);
