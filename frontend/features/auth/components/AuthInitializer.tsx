@@ -14,6 +14,10 @@ export function AuthInitializer() {
   useEffect(() => {
     let isActive = true;
     async function synchronizeSession(accessToken: string, user: User) {
+      console.log("[AuthInitializer] synchronizing session", {
+        userId: user.id,
+        hasAccessToken: Boolean(accessToken),
+      });
       setUser(user);
       setProfile(null);
       setProfileStatus("loading");
@@ -24,16 +28,29 @@ export function AuthInitializer() {
           return;
         }
         if (result.hasProfile) {
+          console.log("[AuthInitializer] profile found", {
+            userId: user.id,
+          });
           setProfile(result.profile);
           setProfileStatus("exists");
         } else {
+          console.log("[AuthInitializer] profile missing", {
+            userId: user.id,
+          });
           setProfile(null);
           setProfileStatus("missing");
         }
 
         setAuthStatus("authenticated");
+        console.log("[AuthInitializer] authentication synchronized", {
+          userId: user.id,
+          profileStatus: result.hasProfile ? "exists" : "missing",
+        });
       } catch (e) {
-        console.error("Failed to check profile");
+        console.error("[AuthInitializer] failed to check profile", {
+          userId: user.id,
+          message: e instanceof Error ? e.message : "Unknown error",
+        });
         if (!isActive) {
           return;
         }
@@ -44,6 +61,7 @@ export function AuthInitializer() {
     }
 
     async function initializeAuth() {
+      console.log("[AuthInitializer] initial session check started");
       setAuthStatus("initializing");
       setProfileStatus("unchecked");
 
@@ -70,6 +88,7 @@ export function AuthInitializer() {
       }
 
       if (!session) {
+        console.log("[AuthInitializer] no initial session; clearing auth");
         clearAuth();
         return;
       }
@@ -81,15 +100,32 @@ export function AuthInitializer() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("[AuthInitializer] auth event", {
+        event,
+        hasSession: Boolean(session),
+        hasAccessToken: Boolean(session?.access_token),
+        userId: session?.user.id ?? null,
+      });
+
       if (!isActive) {
+        console.log("[AuthInitializer] ignored auth event after cleanup", {
+          event,
+        });
         return;
       }
       if (!session) {
+        console.log("[AuthInitializer] auth event has no session; clearing auth", {
+          event,
+        });
         clearAuth();
         return;
       }
 
       if (event === "SIGNED_IN" || event === "USER_UPDATED") {
+        console.log("[AuthInitializer] auth event will synchronize profile", {
+          event,
+          userId: session.user.id,
+        });
         void synchronizeSession(session.access_token, session.user);
       }
     });

@@ -12,15 +12,28 @@ export const useAuth = () => {
 
   const handleOAuthContinue = async (provider: OAuthProviderId) => {
     if (isSubmitting) {
+      console.log("[OAuth] ignored duplicate submission", { provider });
       return;
     }
 
     setIsSubmitting(true);
+    console.log("[OAuth] starting", { provider });
 
     try {
       const redirectTo = buildRedirect("/auth/callback");
+      console.log("[OAuth] redirect prepared", { redirectTo });
 
       const result = await handleSignInWithOAuth(provider, redirectTo);
+      console.log("[OAuth] completion result", {
+        ok: result.ok,
+        reason: result.ok ? null : result.reason,
+        message: result.ok ? null : result.message,
+        hasSession: result.ok ? Boolean(result.session) : false,
+        hasAccessToken: result.ok
+          ? Boolean(result.session.access_token)
+          : false,
+        userId: result.ok ? result.user.id : null,
+      });
 
       if (!result.ok) {
         if (result.reason === "cancelled") {
@@ -46,6 +59,7 @@ export const useAuth = () => {
       toast.error("Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
+      console.log("[OAuth] submission finished", { provider });
     }
   };
 

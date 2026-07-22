@@ -13,6 +13,11 @@ export const handleSignInWithOAuth = async (
   redirectTo: string,
 ): Promise<OAuthContinueResult> => {
   try {
+    console.log("[OAuth API] requesting authorization URL", {
+      provider,
+      redirectTo,
+    });
+
     // data stores url which is needed to open Google/Apple browser
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
@@ -20,6 +25,12 @@ export const handleSignInWithOAuth = async (
         redirectTo,
         skipBrowserRedirect: true, // bring users directly Google or Apple Auth page
       },
+    });
+
+    console.log("[OAuth API] authorization URL response", {
+      provider,
+      hasAuthorizationUrl: Boolean(data.url),
+      errorMessage: error?.message ?? null,
     });
 
     if (error) {
@@ -38,6 +49,12 @@ export const handleSignInWithOAuth = async (
       preferEphemeralSession: true, // not use existed login status or cookie from user's devise
     });
 
+    console.log("[OAuth API] browser session completed", {
+      provider,
+      resultType: result.type,
+      hasCallbackUrl: result.type === "success" && Boolean(result.url),
+    });
+
     if (result.type !== "success") {
       return {
         ok: false,
@@ -47,9 +64,20 @@ export const handleSignInWithOAuth = async (
     }
 
     // create and store session data (access token and refresh token)
-    return await createSessionFromOAuthCallbackUrl(result.url);
+    const callbackResult = await createSessionFromOAuthCallbackUrl(result.url);
+    console.log("[OAuth API] callback processing completed", {
+      provider,
+      ok: callbackResult.ok,
+      reason: callbackResult.ok ? null : callbackResult.reason,
+      message: callbackResult.ok ? null : callbackResult.message,
+      hasSession: callbackResult.ok ? Boolean(callbackResult.session) : false,
+      userId: callbackResult.ok ? callbackResult.user.id : null,
+    });
+
+    return callbackResult;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unexpected error";
+    console.error("[OAuth API] unexpected failure", { provider, message });
     return { ok: false, reason: "unknown", message };
   }
 };

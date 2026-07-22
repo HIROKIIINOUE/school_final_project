@@ -20,14 +20,24 @@ const MyTripScreen = () => {
   const isReady = authStatus === "authenticated" && profileStatus === "exists";
 
   useEffect(() => {
+    console.log("[MyTripScreen] readiness changed", {
+      authStatus,
+      profileStatus,
+      isReady,
+    });
+
     if (!isReady) {
+      console.log("[MyTripScreen] trip fetch skipped; auth is not ready");
       return;
     }
     async function fetchAndSetTrips() {
       try {
+        console.log("[MyTripScreen] trip fetch started");
         setIsLoading(true);
         const trips = await fetchMyRooms();
-        console.log(trips);
+        console.log("[MyTripScreen] trip fetch succeeded", {
+          tripCount: trips.length,
+        });
         setTripRooms(trips);
       } catch (e) {
         // toast message
@@ -37,6 +47,7 @@ const MyTripScreen = () => {
         );
       } finally {
         setIsLoading(false);
+        console.log("[MyTripScreen] trip fetch finished");
       }
     }
 

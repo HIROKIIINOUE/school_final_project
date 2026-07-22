@@ -3,10 +3,18 @@ import "../globals.css";
 import Spinner from "@/components/Spinner";
 import { AuthInitializer } from "@/features/auth/components/AuthInitializer";
 import { useAuthStore } from "@/store/auth.store";
+import { useEffect } from "react";
 
 function RootNavigator() {
   const authStatus = useAuthStore((state) => state.authStatus);
   const profileStatus = useAuthStore((state) => state.profileStatus);
+
+  useEffect(() => {
+    console.log("[RootNavigator] guard state changed", {
+      authStatus,
+      profileStatus,
+    });
+  }, [authStatus, profileStatus]);
 
   if (authStatus === "initializing" || profileStatus === "loading") {
     return <Spinner message="Loading user..." />;
