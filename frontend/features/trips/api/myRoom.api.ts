@@ -1,3 +1,4 @@
+import { supabase } from "@/lib/supabaseClient";
 import { createMyRoomsInput } from "../types/types";
 
 const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -7,9 +8,22 @@ if (!backendUrl) {
 }
 
 export async function fetchMyRooms() {
+  const { data: sessionData, error } = await supabase.auth.getSession();
+
+  if (error) {
+    throw new Error("Failed to gain session");
+  }
+
+  if (!sessionData.session?.access_token) {
+    throw new Error("Access token not found");
+  }
+
   const res = await fetch(`${backendUrl}/api/trips/my-trips`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionData.session.access_token}`,
+    },
     credentials: "include",
   });
 
