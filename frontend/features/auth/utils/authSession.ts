@@ -1,10 +1,10 @@
 // create and store session data
 
 import { supabase } from "@/lib/supabaseClient";
-import { User } from "@supabase/supabase-js";
+import { Session, User } from "@supabase/supabase-js";
 
-type OAuthContinueResult =
-  | { ok: true; user: User }
+export type OAuthContinueResult =
+  | { ok: true; session: Session; user: User }
   | {
       ok: false;
       reason: "cancelled" | "missing_session" | "unknown";
@@ -56,7 +56,7 @@ export const createSessionFromOAuthCallbackUrl = async (
         message: "OAuth session was not created",
       };
     }
-    return { ok: true, user: data.session.user };
+    return { ok: true, session: data.session, user: data.session.user };
   }
 
   // fallback, try to create session with supabase.auth.exchangeCodeForSession()
@@ -73,7 +73,7 @@ export const createSessionFromOAuthCallbackUrl = async (
         message: "OAuth session was not created",
       };
     }
-    return { ok: true, user: data.session.user };
+    return { ok: true, session: data.session, user: data.session.user };
   }
 
   return {

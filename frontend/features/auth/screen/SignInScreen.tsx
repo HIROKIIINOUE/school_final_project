@@ -2,14 +2,17 @@ import { Stack } from "expo-router";
 import React, { useMemo } from "react";
 import { Image, Platform, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 import OAuthContinueButtons from "../components/OAuthContinueButtons";
 import { OAuthProviderId } from "../types/provider.type";
+import { useAuth } from "../hooks/useAuth";
 
 const LoginScreen = () => {
   const oAuthProviders = useMemo<OAuthProviderId[]>(
     () => (Platform.OS === "ios" ? ["apple", "google"] : ["google"]),
     [],
   );
+  const { isSubmitting, handleOAuthContinue } = useAuth();
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -37,7 +40,11 @@ const LoginScreen = () => {
               <Text style={styles.eyebrow}>Sign in</Text>
             </View>
             <View style={styles.buttonGroup}>
-              <OAuthContinueButtons providers={oAuthProviders} />
+              <OAuthContinueButtons
+                providers={oAuthProviders}
+                isSubmitting={isSubmitting}
+                onContinue={handleOAuthContinue}
+              />
             </View>
             <Text style={styles.footnote}>
               We only use your account to sign you in securely.
