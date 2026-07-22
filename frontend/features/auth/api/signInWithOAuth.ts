@@ -2,13 +2,16 @@
 
 import * as WebBrowser from "expo-web-browser";
 import { supabase } from "@/lib/supabaseClient";
-import { createSessionFromOAuthCallbackUrl } from "../utils/authSession";
+import {
+  createSessionFromOAuthCallbackUrl,
+  OAuthContinueResult,
+} from "../utils/authSession";
 import { OAuthProviderId } from "../types/provider.type";
 
 export const handleSignInWithOAuth = async (
   provider: OAuthProviderId,
   redirectTo: string,
-) => {
+): Promise<OAuthContinueResult> => {
   try {
     // data stores url which is needed to open Google/Apple browser
     const { data, error } = await supabase.auth.signInWithOAuth({
