@@ -4,6 +4,7 @@ import { errorHandler } from "./middleware/errorHandler";
 import router from "./routes/tripRoom.route";
 import overviewRouter from "./routes/overview.route";
 import userRouter from "./routes/user.route";
+import itineraryrouter from "./routes/itinerary.service";
 dotenv.config();
 
 const app = express();
@@ -12,6 +13,7 @@ app.use(express.json());
 
 app.use("/api/trips", router);
 app.use("/api/trip", overviewRouter);
+app.use("/api/itineray", itineraryrouter);
 
 app.use("/api/user", userRouter);
 

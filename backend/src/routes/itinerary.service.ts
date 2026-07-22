@@ -7,7 +7,7 @@ import {
 
 const itineraryrouter = Router();
 
-itineraryrouter.get("itineraries/:tripId", authCheck, getItinerariesController);
-itineraryrouter.post("itinerary/:tripId", authCheck, createItineraryController);
+itineraryrouter.get("/:tripId", authCheck, getItinerariesController);
+itineraryrouter.post("/:tripId", authCheck, createItineraryController);
 
 export default itineraryrouter;
