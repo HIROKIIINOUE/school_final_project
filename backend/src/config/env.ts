@@ -1,7 +1,7 @@
 // validate env
 const PORT = process.env.PORT ?? 4000;
 const DATABASE_URL = process.env.DATABASE_URL;
-const SUPABASE_URL = process.env.DIRECT_URL;
+const SUPABASE_URL = process.env.SUPABASE_URL;
 
 if (!DATABASE_URL) {
   throw new Error("Missing credentials");

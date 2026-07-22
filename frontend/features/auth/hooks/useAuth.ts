@@ -8,53 +8,42 @@ import { useAuthStore } from "@/store/auth.store";
 import checkProfile from "../api/checkProfile";
 
 export const useAuth = () => {
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const router = useRouter();
-  const setUser = useAuthStore((state) => state.setUser);
-  const setProfile = useAuthStore((state) => state.setProfile);
-  const setLoadingStatus = useAuthStore((state) => state.setLoadingStatus);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleOAuthContinue = async (provider: OAuthProviderId) => {
-    setLoadingStatus(true);
+    if (isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
-      console.log("Logging in the user...");
-      const path = "/auth/callback";
-      const redirectTo = buildRedirect(path);
+      const redirectTo = buildRedirect("/auth/callback");
+
       const result = await handleSignInWithOAuth(provider, redirectTo);
+
       if (!result.ok) {
-        if (result.reason !== "cancelled") {
+        if (result.reason === "cancelled") {
           return;
         }
 
-        console.log("Login failed. You are unauthorized");
-        setLoadingStatus(false);
         toast.error("You failed to sign in. Please try again.");
         return;
       }
 
-      console.log("User: ", result.user);
-      setUser(result.user);
-      const profileResult = await checkProfile(result.session.access_token);
-      setLoadingStatus(false);
-
-      if (profileResult.hasProfile) {
-        setProfile(profileResult.profile);
-        // TODO: overview route is not created yet.
-        // router.replace("/(protected)/overview");
-      } else {
-        console.log("You don't have profile");
-        setProfile(null);
-        router.replace("/profile");
-      }
+      /*
+       * Do not set Zustand user/profile here.
+       *
+       * Supabase now owns the session.
+       * AuthInitializer observes the auth change,
+       * loads the profile, and updates route guards.
+       */
 
       toast.success("You signed in successfully");
-      setLoadingStatus(false);
-      return { user: result.user, profileResult };
     } catch (error) {
-      console.error(error);
-      toast.error("Something wrong, please try again.");
-      setLoadingStatus(false);
+      console.error("OAuth sign-in failed:", error);
+
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

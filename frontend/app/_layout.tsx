@@ -1,30 +1,51 @@
-import { Redirect, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import "../globals.css";
-import { useAuthStore } from "@/store/auth.store";
 import Spinner from "@/components/Spinner";
-import { useEffect } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { AuthInitializer } from "@/features/auth/components/AuthInitializer";
+import { useAuthStore } from "@/store/auth.store";
 
-export default function RootLayout() {
-  // is not logged in => redirect to login
-  const isLoading = useAuthStore((state) => state.isLoading);
-  const user = useAuthStore((state) => state.user);
+function RootNavigator() {
+  const authStatus = useAuthStore((state) => state.authStatus);
+  const profileStatus = useAuthStore((state) => state.profileStatus);
 
-  if (isLoading) {
-    return null;
+  if (authStatus === "initializing" || profileStatus === "loading") {
+    return <Spinner message="Loading user..." />;
   }
 
-  const isAuthenticated = user !== null;
+  const isAuthenticated = authStatus === "authenticated";
+
+  const needsProfile = isAuthenticated && profileStatus === "missing";
+
+  const hasProfile = isAuthenticated && profileStatus === "exists";
+
+  const profileLoadFailed = isAuthenticated && profileStatus === "error";
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Protected guard={!isAuthenticated}>
+      <Stack.Protected guard={authStatus === "unauthenticated"}>
         <Stack.Screen name="auth" />
       </Stack.Protected>
 
-      <Stack.Protected guard={isAuthenticated}>
+      <Stack.Protected guard={needsProfile}>
+        <Stack.Screen name="(onboarding)" />
+      </Stack.Protected>
+
+      <Stack.Protected guard={hasProfile}>
         <Stack.Screen name="(protected)" />
       </Stack.Protected>
+
+      <Stack.Protected guard={profileLoadFailed}>
+        <Stack.Screen name="profile-error" />
+      </Stack.Protected>
     </Stack>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <>
+      <AuthInitializer />
+      <RootNavigator />
+    </>
   );
 }

@@ -7,13 +7,22 @@ import TripRoomCard from "@/features/trips/components/TripRoomCard";
 import { MyRoomType } from "../types/types";
 import { fetchMyRooms } from "../api/myRoom.api";
 import Spinner from "@/components/Spinner";
+import { useAuthStore } from "@/store/auth.store";
 
 const MyTripScreen = () => {
   const [tripRooms, setTripRooms] = useState<MyRoomType[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const authStatus = useAuthStore((state) => state.authStatus);
+  const profileStatus = useAuthStore((state) => state.profileStatus);
+
+  const isReady = authStatus === "authenticated" && profileStatus === "exists";
+
   useEffect(() => {
+    if (!isReady) {
+      return;
+    }
     async function fetchAndSetTrips() {
       try {
         setIsLoading(true);
@@ -32,7 +41,7 @@ const MyTripScreen = () => {
     }
 
     fetchAndSetTrips();
-  }, []);
+  }, [isReady]);
 
   if (isLoading) {
     return <Spinner />;

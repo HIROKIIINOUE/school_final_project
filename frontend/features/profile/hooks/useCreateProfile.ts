@@ -8,6 +8,7 @@ export const useCreateProfile = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdProfile, setCreatedProfile] = useState<Profile | null>(null);
   const setProfile = useAuthStore((state) => state.setProfile);
+  const setProfileStatus = useAuthStore((state) => state.setProfileStatus);
 
   const submitProfile = async (displayName: string): Promise<Profile> => {
     const {
@@ -23,6 +24,7 @@ export const useCreateProfile = () => {
       const profile = await createProfile(session.access_token, displayName);
       setCreatedProfile(profile);
       setProfile(profile);
+      setProfileStatus("exists");
       return profile;
     } finally {
       setIsSubmitting(false);

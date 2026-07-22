@@ -18,16 +18,18 @@ const checkProfile = async (
 
   const res = await fetch(`${backendUrl}/api/user/profile`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
 
-  if (!res.ok) {
-    throw new Error("Failed to authenticate with the backend");
-  }
+  const data = await res.json().catch(() => null);
 
-  const data: CheckProfileResult = await res.json();
+  if (!res.ok) {
+    const message =
+      data?.error?.message ??
+      data?.message ??
+      `Profile request failed with status ${res.status}`;
+    throw new Error(message);
+  }
 
   return data;
 };
