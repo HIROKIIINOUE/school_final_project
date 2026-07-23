@@ -1,9 +1,12 @@
-import { View, Text } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
 import { getOverviewData } from "../api/overview.api";
 import { OverviewDataType } from "../types/types";
 import Spinner from "@/components/Spinner";
 import TripDetail from "../components/TripDetail";
+import { SafeAreaView } from "react-native-safe-area-context";
+import OverviewThumbnail from "../components/OverviewThumbnail";
+import ItineraryCard from "../components/ItineraryCard";
 
 type Props = { id: string };
 
@@ -20,7 +23,7 @@ const OverView = ({ id }: Props) => {
       } catch (e) {
         console.error("Failed to fetch overview data", e);
       } finally {
-        setIsLoading(true);
+        setIsLoading(false);
       }
     }
 
@@ -31,6 +34,8 @@ const OverView = ({ id }: Props) => {
     return <Spinner />;
   }
 
+  console.log(overviewData);
+
   if (!overviewData?.tripDetails) {
     return (
       <View>
@@ -40,9 +45,13 @@ const OverView = ({ id }: Props) => {
   }
 
   return (
-    <View>
-      <TripDetail tripDetails={overviewData?.tripDetails} />
-    </View>
+    <SafeAreaView edges={["left", "right"]} style={{ flex: 1 }}>
+      <OverviewThumbnail />
+      <ScrollView>
+        <TripDetail tripDetails={overviewData?.tripDetails} />
+        <ItineraryCard itineraries={overviewData.itineraries} tripId={id} />
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

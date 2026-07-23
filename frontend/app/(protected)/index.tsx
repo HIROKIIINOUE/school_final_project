@@ -1,6 +1,3 @@
-import { Redirect } from "expo-router";
+import MyTripScreen from "../../features/trips/screens/MyTripScreen";
 
-// Temporary entry point for testing the OAuth and profile creation flow.
-export default function Index() {
-  return <Redirect href="/auth/signIn" />;
-}
+export default MyTripScreen;

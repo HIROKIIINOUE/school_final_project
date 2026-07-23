@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { AppError } from "../../utils/appError";
-import { getOverviewData } from "../../services/overview.service";
+import { AppError } from "../../lib/appError";
+import { getOverviewData } from "../../models/overview.service";
 
 export async function GetOverviewController(
   req: Request,
@@ -22,6 +22,6 @@ export async function GetOverviewController(
   const { tripId } = req.params;
   const id = Array.isArray(tripId) ? tripId[0] : tripId;
 
-  const data = await getOverviewData({ tripId: id, userId });
-  return data;
+  const data = await getOverviewData({ tripId: id, userId: userId });
+  return res.status(200).json({ data });
 }

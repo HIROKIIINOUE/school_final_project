@@ -1,12 +1,18 @@
 import { View, Text, Pressable } from "react-native";
 import React from "react";
 import { TripRoom } from "@/features/trips/data/dummyRoomData";
+import { useRouter } from "expo-router";
 
 type Props = { room: TripRoom };
 
 const TripRoomCard = ({ room }: Props) => {
+  const router = useRouter();
+
+  function handleOnpress() {
+    router.replace(`/(protected)/trips/${room.id}`);
+  }
   return (
-    <Pressable className="card">
+    <Pressable className="card" onPress={handleOnpress}>
       <View className="absolute top-0 left-0 w-1 h-full bg-primary" />
 
       <View className="flex flex-row justify-between items-start pl-sm ">

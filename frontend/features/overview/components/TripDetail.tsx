@@ -23,41 +23,50 @@ const TripDetail = ({ tripDetails }: Props) => {
     : "-";
 
   return (
-    <View className="relative z-20 -mt-10 mx-container-margin bg-white rounded-[24px] p-lg shadow-sm border border-outline-variant/30 flex flex-col gap-sm">
-      <View className="flex items-center gap-sm flex-wrap">
-        <View className="px-sm py-xs bg-primary-container text-on-primary-container rounded-md text-label-md font-label-md font-bold">
-          {status}
+    <View className="relative card mx-sm">
+      <View className="flex items-center gap-sm flex-wrap flex-row">
+        <View className="px-sm py-xs bg-primary-container text-on-primary-container rounded-md label-md font-bold badge badge-text">
+          <Text>{status}</Text>
         </View>
-        <View className="px-sm py-xs bg-surface-variant text-on-surface-variant rounded-md text-label-md font-label-md">
-          {tripDetails.currentUserRole === "OWNER" ? "Owner" : "Member"}
+        <View
+          className={`${tripDetails.currentUserRole === "OWNER" ? "badge-primary badge-primary-text" : "badge-secondary"} px-sm py-xs bg-surface-variant text-on-surface-variant rounded-md label-md`}
+        >
+          <Text>
+            {tripDetails.currentUserRole === "OWNER" ? "Owner" : "Member"}
+          </Text>
         </View>
       </View>
-      <Text className="text-headline-lg-mobile md:text-headline-lg font-headline-lg-mobile md:font-headline-lg text-on-surface font-bold tracking-tight">
+      <Text className="headline-lg-mobile md:headline-lg text-on-surface font-bold tracking-tight headline-lg py-md">
         {tripDetails.title}
       </Text>
-      <View className="flex flex-col gap-xs mt-xs text-body-md font-body-md text-on-surface-variant">
-        <View className="flex items-center gap-sm">
-          <View className="material-symbols-outlined text-[18px]">
+      <View className="flex flex-col gap-sm mt-xs body-md text-on-surface-variant">
+        <View className="flex items-center gap-sm flex-row">
+          <View className="text-[18px]">
             <MapPin />
           </View>
-          <View>{tripDetails.destination ?? "Unprovided"}</View>
+          <Text className="text-muted">
+            {tripDetails.destination ?? "Unprovided"}
+          </Text>
         </View>
-        <View className="flex items-center gap-sm">
-          <View className="material-symbols-outlined text-[18px]">
+        <View className="flex items-center gap-sm flex-row">
+          <View className="text-[18px]">
             <CalendarDays />
           </View>
-          <View>
+          <Text className="text-muted">
             {tripDetails.startDate
               ? `${calculatePeriod(tripDetails.startDate, tripDetails.endDate)}, ${new Date(tripDetails.startDate).getFullYear()} • ${duration}`
               : "Unprovided"}
-          </View>
+          </Text>
         </View>
       </View>
-      <View className="mt-sm p-sm bg-surface-container rounded-lg border border-primary/20">
-        <Text className="text-title-md font-title-md text-primary text-center">
-          {tripDetails.planningStatus.daysUntilStart}
-        </Text>
-      </View>
+      {true && (
+        <View className="mt-sm p-sm bg-surface-container rounded-lg border border-primary/20">
+          <Text className="title-md text-primary text-center">
+            {/* {tripDetails.planningStatus.daysUntilStart} */}
+            10 days until departure!
+          </Text>
+        </View>
+      )}
     </View>
   );
 };

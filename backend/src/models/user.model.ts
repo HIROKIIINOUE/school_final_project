@@ -3,9 +3,7 @@ import { prisma } from "../lib/prisma";
 import { ProfileInputType } from "../schemas/user.schema";
 
 const findProfile = async (userId: string) => {
-  const profile = await prisma.profile.findUnique({
-    where: { userId },
-  });
+  const profile = await prisma.profile.findUnique({ where: { userId } });
   if (!profile) {
     return null;
   }
@@ -16,15 +14,7 @@ const createProfile = async (
   userId: string,
   inputData: ProfileInputType,
 ): Promise<Profile> => {
-  return await prisma.profile.create({
-    data: {
-      ...inputData,
-      userId,
-    },
-  });
+  return await prisma.profile.create({ data: { ...inputData, userId } });
 };
 
-export default {
-  findProfile,
-  createProfile,
-};
+export default { findProfile, createProfile };

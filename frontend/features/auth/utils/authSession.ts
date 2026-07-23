@@ -40,11 +40,30 @@ export const createSessionFromOAuthCallbackUrl = async (
 
   const accessToken = params.get("access_token");
   const refreshToken = params.get("refresh_token");
+  const code = params.get("code");
+  const oauthError = params.get("error");
+  const oauthErrorCode = params.get("error_code");
+
+  console.log("[OAuth Session] callback parameters parsed", {
+    hasAccessToken: Boolean(accessToken),
+    hasRefreshToken: Boolean(refreshToken),
+    hasCode: Boolean(code),
+    hasOAuthError: Boolean(oauthError || oauthErrorCode),
+    oauthError: oauthError ?? null,
+    oauthErrorCode: oauthErrorCode ?? null,
+  });
+
   if (accessToken && refreshToken) {
     // save session data both in supabase and in AsyncStorage
     const { data, error } = await supabase.auth.setSession({
       access_token: accessToken,
       refresh_token: refreshToken,
+    });
+    console.log("[OAuth Session] setSession completed", {
+      hasSession: Boolean(data.session),
+      hasUser: Boolean(data.session?.user),
+      userId: data.session?.user.id ?? null,
+      errorMessage: error?.message ?? null,
     });
     if (error) {
       return { ok: false, reason: "unknown", message: error.message };
@@ -60,9 +79,14 @@ export const createSessionFromOAuthCallbackUrl = async (
   }
 
   // fallback, try to create session with supabase.auth.exchangeCodeForSession()
-  const code = params.get("code");
   if (code) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    console.log("[OAuth Session] code exchange completed", {
+      hasSession: Boolean(data.session),
+      hasUser: Boolean(data.session?.user),
+      userId: data.session?.user.id ?? null,
+      errorMessage: error?.message ?? null,
+    });
     if (error) {
       return { ok: false, reason: "unknown", message: error.message };
     }
