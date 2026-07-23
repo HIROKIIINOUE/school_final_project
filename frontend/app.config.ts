@@ -18,10 +18,7 @@ export default (): ExpoConfig => ({
   scheme,
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
-  ios: {
-    supportsTablet: true,
-    bundleIdentifier: "com.gowbie.app",
-  },
+  ios: { supportsTablet: true, bundleIdentifier: "com.gowbie.app" },
   android: {
     adaptiveIcon: {
       backgroundColor: "#E6F4FE",
@@ -32,12 +29,11 @@ export default (): ExpoConfig => ({
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
   },
-  web: {
-    output: "static",
-    favicon: "./assets/images/favicon.png",
-  },
+  web: { output: "static", favicon: "./assets/images/favicon.png" },
   plugins: [
     "expo-router",
+    "@react-native-community/datetimepicker",
+
     [
       "expo-splash-screen",
       {
@@ -45,17 +41,10 @@ export default (): ExpoConfig => ({
         imageWidth: 200,
         resizeMode: "contain",
         backgroundColor: "#ffffff",
-        dark: {
-          backgroundColor: "#000000",
-        },
+        dark: { backgroundColor: "#000000" },
       },
     ],
   ],
-  experiments: {
-    typedRoutes: true,
-    reactCompiler: true,
-  },
-  extra: {
-    appEnv: APP_ENV,
-  },
+  experiments: { typedRoutes: true, reactCompiler: true },
+  extra: { appEnv: APP_ENV },
 });
