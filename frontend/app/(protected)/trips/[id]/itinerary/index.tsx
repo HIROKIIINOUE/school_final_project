@@ -1,12 +1,12 @@
-import { View, Text } from "react-native";
 import React from "react";
+import { useLocalSearchParams } from "expo-router";
+import ItineraryClient from "@/features/itinerary/screens/ItineraryClient";
 
 const index = () => {
-  return (
-    <View>
-      <Text>index</Text>
-    </View>
-  );
+  const { id } = useLocalSearchParams();
+
+  const tripId = Array.isArray(id) ? id[0] : id;
+  return <ItineraryClient tripId={tripId} />;
 };
 
 export default index;
