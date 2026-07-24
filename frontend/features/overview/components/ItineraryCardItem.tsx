@@ -2,7 +2,7 @@ import { View, Text, Pressable } from "react-native";
 import React from "react";
 import { PlaneTakeoff, Timer } from "lucide-react-native";
 import { ItineraryType } from "../types/types";
-import { formateDate } from "@/lib/formatDate";
+import { formatDayLabel, formatTime } from "@/lib/formatDate";
 
 type Props = { itinerary: ItineraryType };
 
@@ -19,10 +19,14 @@ const ItineraryCardItem = ({ itinerary }: Props) => {
             <Text className="text-title-md font-title-md text-on-surface">
               {itinerary.title}
             </Text>
-            <Text className="text-body-md font-body-md text-muted mt-xs">
-              {formateDate(itinerary.startTime)}
-            </Text>
-            <Text className="text-body-md font-body-md text-muted">{}</Text>
+            <View className="flex flex-row gap-2 items-center my-sm">
+              <Text className="text-body-md font-body-md text-muted">
+                {formatDayLabel(itinerary.startTime)}
+              </Text>
+              <Text className="text-body-md font-body-md text-muted">
+                {formatTime(itinerary.startTime)}
+              </Text>
+            </View>
           </View>
         </View>
       </View>

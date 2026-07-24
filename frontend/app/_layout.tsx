@@ -4,6 +4,8 @@ import Spinner from "@/components/Spinner";
 import { AuthInitializer } from "@/features/auth/components/AuthInitializer";
 import { useAuthStore } from "@/store/auth.store";
 import { useEffect } from "react";
+import Toast from "react-native-toast-message";
+import { toastConfig } from "@/config/toastConfig";
 
 function RootNavigator() {
   const authStatus = useAuthStore((state) => state.authStatus);
@@ -54,6 +56,7 @@ export default function RootLayout() {
     <>
       <AuthInitializer />
       <RootNavigator />
+      <Toast config={toastConfig} />
     </>
   );
 }

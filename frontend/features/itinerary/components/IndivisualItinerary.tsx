@@ -2,24 +2,30 @@ import { View, Text } from "react-native";
 import React from "react";
 import { ItineraryInput } from "../types/types";
 import ItineraryCardItem from "./ItineraryCardItem";
-import { formateDate } from "@/lib/formatDate";
+import { formatDayLabel, formatDayNumber } from "@/lib/formatDate";
 
 type Props = { date: string; itineraries: ItineraryInput[] };
 
 const IndivisualItinerary = ({ date, itineraries }: Props) => {
-  const dateNum = formateDate(new Date(date)).split(",")[0];
+  console.log(date);
+  const firstDate = new Date(itineraries[0].startTime);
+
+  const dayNumber = formatDayNumber(firstDate);
+  const dayLabel = formatDayLabel(firstDate);
 
   return (
-    <View className="mb-xl relative">
-      <View className="sticky top-20 bg-background/90 backdrop-blur-sm py-2 z-10 flex items-center gap-3">
-        <Text className="h-8 w-8 rounded-full bg-secondary-container text-primary flex items-center justify-center text-label-md font-label-md font-bold"></Text>
-        <Text className="text-title-md font-title-md text-on-background">
-          {dateNum} - {itineraries[0].title}
+    <View className="relative mb-xl bg-background px-container">
+      <View className="absolute bottom-0 left-9.5 top-12 w-px bg-outline-variant" />
+      <View className="mb-md flex-row items-center pl-11">
+        <Text className="list-item-title flex-1">
+          {dayNumber} - {dayLabel}
         </Text>
       </View>
-      {itineraries.map((item) => (
-        <ItineraryCardItem itineraryItem={item} />
-      ))}
+      <View className="gap-md pl-11">
+        {itineraries.map((item) => (
+          <ItineraryCardItem key={item.title} itineraryItem={item} />
+        ))}
+      </View>
     </View>
   );
 };

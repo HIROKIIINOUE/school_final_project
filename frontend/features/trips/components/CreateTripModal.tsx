@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { createMyTrips } from "../api/myRoom.api";
 import { useRouter } from "expo-router";
 import KeyboardDissmissBtn from "@/components/KeyboardDissmissBtn";
+import Toast from "react-native-toast-message";
 
 type Props = { visible: boolean; onClose: () => void };
 
@@ -30,8 +31,9 @@ const CreateTripModal = ({ visible, onClose }: Props) => {
       });
 
       // toast successful message
+      Toast.show({ type: "success", text1: "Successfully created new trip" });
       // redirect to trip room
-      router.replace(`/trips/${data.id}`);
+      router.push(`/trips/${data.id}`);
     } catch (e) {
       // toast error
       console.error("Failed to create trip", e);

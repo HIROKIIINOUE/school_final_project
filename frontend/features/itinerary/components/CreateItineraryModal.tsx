@@ -1,16 +1,21 @@
 import {
-  ImageBackground,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
   Text,
   TextInput,
   View,
+  StyleSheet,
+  Keyboard,
 } from "react-native";
-import { MapPin, X } from "lucide-react-native";
+import { BlurView } from "expo-blur";
+import { CalendarDays, Clock, MapPin, X } from "lucide-react-native";
 import { useState } from "react";
 import { ItineraryInput } from "../types/types";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import Toast from "react-native-toast-message";
+import { toastConfig } from "@/config/toastConfig";
 
 type Props = {
   addItems: (item: ItineraryInput) => void;
@@ -54,10 +59,15 @@ export default function CreateItineraryModal({ addItems, closeModal }: Props) {
   }
 
   function onPress() {
+    if (itineraryInputs.title.trim() === "" || !itineraryInputs.startTime) {
+      Toast.show({ type: "error", text1: "Title or start time is required" });
+      return;
+    }
     const startTime = combineDateAndTime(date, time);
     addItems({ ...itineraryInputs, startTime: startTime });
     resetInputs();
-    closeModal();
+
+    Toast.show({ type: "success", text1: "Successfully added item" });
   }
 
   function resetInputs() {
@@ -74,164 +84,204 @@ export default function CreateItineraryModal({ addItems, closeModal }: Props) {
   }
 
   return (
-    <View className="max-h-[90%] w-full overflow-hidden rounded-t-3xl bg-surface">
-      {/* Header */}
-      <View className="flex-row items-center justify-between border-b border-outline-variant bg-surface px-container-margin py-md">
-        <Pressable className="h-11 w-11 items-start justify-center">
-          <X size={28} className="text-on-surface-variant" />
-        </Pressable>
-
-        <Text className="text-headline-lg-mobile font-headline-lg-mobile text-on-surface">
-          Add Activity
-        </Text>
-
+    <Modal
+      visible
+      transparent
+      animationType="slide"
+      statusBarTranslucent
+      onRequestClose={closeModal}
+    >
+      <View className="flex-1 justify-end">
+        <BlurView intensity={35} tint="dark" style={StyleSheet.absoluteFill} />
         <Pressable
-          className="rounded-full bg-secondary-container px-md py-sm"
-          onPress={onPress}
-        >
-          <Text className="text-label-md font-label-md text-primary">Save</Text>
-        </Pressable>
-      </View>
+          style={StyleSheet.absoluteFill}
+          className="bg-black/40"
+          onPress={closeModal}
+        />
+        <View className="h-[90%] w-full overflow-hidden rounded-t-3xl bg-surface">
+          <View className="max-h-[90%] w-full overflow-hidden rounded-t-3xl bg-surface">
+            {/* Header */}
+            <View className="flex-row items-center justify-between border-b border-outline-variant bg-surface px-container-margin py-md px-sm">
+              <Pressable
+                className="h-11 w-11 items-start justify-center"
+                onPress={closeModal}
+              >
+                <X size={28} className="text-on-surface-variant" />
+              </Pressable>
 
-      <ScrollView
-        className="px-container-margin"
-        contentContainerClassName="pb-12 pt-md"
-        showsVerticalScrollIndicator={false}
-      >
-        <View className="mb-lg items-center">
-          <Text className="text-center font-body-md italic text-on-surface-variant">
-            Planning your next adventure in Kyoto
-            {/* Change this title dynamically */}
-          </Text>
-        </View>
+              <Text className="text-headline-lg-mobile font-headline-lg-mobile text-on-surface">
+                Add Activity
+              </Text>
 
-        <View className="gap-lg rounded-3xl border border-outline-variant bg-surface-container-lowest p-lg">
-          {/* Activity title */}
-          <View className="gap-xs">
-            <Text className="px-1 text-label-md font-label-md text-on-surface-variant">
-              Activity Title
-            </Text>
-
-            <TextInput
-              placeholder="e.g., Team Dinner at Gonpachi"
-              className="h-12 rounded-xl border border-outline-variant bg-surface-container px-md text-body-lg
-               text-on-surface"
-              onChangeText={(title) => {
-                setItineraryInputs((prev) => ({ ...prev, title: title }));
-              }}
-              value={itineraryInputs.title}
-            />
-          </View>
-
-          {/* Location */}
-          <View className="gap-xs">
-            <Text className="px-1 text-label-md font-label-md text-on-surface-variant">
-              Location
-            </Text>
-
-            <View className="relative justify-center">
-              <MapPin
-                size={21}
-                className="absolute left-md z-10 text-on-surface-variant"
-              />
-
-              <TextInput
-                placeholder="Nishi-Azabu, Tokyo"
-                className="h-12 rounded-xl border border-outline-variant bg-surface-container pl-12 pr-md text-body-lg text-on-surface"
-                onChangeText={(location) =>
-                  setItineraryInputs((prev) => ({ ...prev, location }))
-                }
-                value={itineraryInputs.location}
-              />
+              <Pressable
+                className="rounded-full bg-secondary-container px-md py-sm"
+                onPress={onPress}
+              >
+                <Text className="text-label-md font-label-md text-primary">
+                  Save
+                </Text>
+              </Pressable>
             </View>
-          </View>
 
-          {/* Date */}
-          <View className="gap-xs">
-            <Text className="px-1 text-label-md font-label-md text-on-surface-variant">
-              Date
-            </Text>
-
-            <Pressable onPress={() => setShowPicker(true)}>
-              <TextInput
-                value={formattedDate}
-                editable={false}
-                pointerEvents="none"
-                placeholder="Select date"
-                className="h-12 rounded-xl border px-4"
-              />
-            </Pressable>
-            {showPicker && (
-              <DateTimePicker
-                value={new Date(itineraryInputs.startTime)}
-                mode="date"
-                onChange={(_, selectedDate) => {
-                  if (Platform.OS === "android") {
-                    setShowPicker(false);
-                  }
-
-                  if (selectedDate) {
-                    setDate(selectedDate);
-                  }
-                }}
-              />
-            )}
-          </View>
-
-          {/* Times */}
-          <View className="gap-xs">
-            <Text className="px-1 text-label-md font-label-md text-on-surface-variant">
-              Start Time
-            </Text>
-
-            <Pressable onPress={() => setShowTimePicker(true)}>
-              <TextInput
-                value={formattedTime}
-                editable={false}
-                pointerEvents="none"
-                placeholder="Select date"
-                className="h-12 rounded-xl border px-4"
-              />
-            </Pressable>
-            {showTimePicker && (
-              <DateTimePicker
-                value={new Date(itineraryInputs.startTime)}
-                mode="time"
-                onChange={(event, selectedTime) => {
-                  if (Platform.OS === "android") {
-                    setShowPicker(false);
-                  }
-
-                  if (event.type === "dismissed" || !selectedTime) {
-                    return;
-                  }
-
-                  setTime(selectedTime);
-                }}
-              />
-            )}
-          </View>
-
-          {/* Notes */}
-          <View className="gap-xs">
-            <Text className="px-1 text-label-md font-label-md text-on-surface-variant">
-              Details / Notes
-            </Text>
-
-            <TextInput
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-              placeholder="What are the plans? e.g., Dress code is smart casual."
-              className="min-h-28 rounded-xl border border-outline-variant bg-surface-container p-md text-body-lg text-on-surface"
-              onChangeText={(details) =>
-                setItineraryInputs((prev) => ({ ...prev, detail: details }))
+            <ScrollView
+              className="px-container-margin"
+              contentContainerClassName="pb-12 pt-md"
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode={
+                Platform.OS === "ios" ? "interactive" : "on-drag"
               }
-            />
-          </View>
+            >
+              <View className="mb-lg items-center">
+                <Text className="text-center font-body-md italic text-on-surface-variant">
+                  Planning your next adventure in Kyoto
+                  {/* Change this title dynamically */}
+                </Text>
+              </View>
 
-          {/* Photo */}
-          {/* <View className="pt-md">
+              <View className="gap-lg rounded-3xl border border-outline-variant bg-surface-container-lowest p-lg">
+                {/* Activity title */}
+                <View className="gap-xs">
+                  <Text className="px-1 text-label-md font-label-md text-on-surface-variant">
+                    Activity Title
+                  </Text>
+
+                  <TextInput
+                    placeholder="e.g., Team Dinner at Gonpachi"
+                    className="h-12 rounded-xl border border-outline-variant bg-surface-container px-md text-body-lg
+               text-on-surface"
+                    onChangeText={(title) => {
+                      setItineraryInputs((prev) => ({ ...prev, title: title }));
+                    }}
+                    value={itineraryInputs.title}
+                  />
+                </View>
+
+                {/* Location */}
+                <View className="gap-xs">
+                  <View className="flex flex-row items-center">
+                    <MapPin
+                      size={21}
+                      className="absolute left-md z-10 text-on-surface-variant"
+                    />
+                    <Text className="px-1 text-label-md font-label-md text-on-surface-variant">
+                      Location
+                    </Text>
+                  </View>
+
+                  <View className="relative  items-center">
+                    <TextInput
+                      placeholder="Nishi-Azabu, Tokyo"
+                      className="h-12 rounded-xl border border-outline-variant bg-surface-container pl-12 pr-md text-body-lg text-on-surface w-full"
+                      onChangeText={(location) =>
+                        setItineraryInputs((prev) => ({ ...prev, location }))
+                      }
+                      value={itineraryInputs.location}
+                    />
+                  </View>
+                </View>
+
+                {/* Date */}
+                <View className="gap-xs">
+                  <View className="flex flex-row items-center">
+                    <CalendarDays
+                      size={21}
+                      className="absolute left-md z-10 text-on-surface-variant"
+                    />
+                    <Text className="px-1 text-label-md font-label-md text-on-surface-variant">
+                      Date
+                    </Text>
+                  </View>
+
+                  <Pressable onPress={() => setShowPicker(true)}>
+                    <TextInput
+                      value={formattedDate}
+                      editable={false}
+                      pointerEvents="none"
+                      placeholder="Select date"
+                      className="h-12 rounded-xl border px-4"
+                    />
+                  </Pressable>
+                  {showPicker && (
+                    <DateTimePicker
+                      value={date}
+                      mode="date"
+                      onChange={(_, selectedDate) => {
+                        if (Platform.OS === "android") {
+                          setShowPicker(false);
+                        }
+
+                        if (selectedDate) {
+                          setDate(selectedDate);
+                        }
+                      }}
+                    />
+                  )}
+                </View>
+
+                {/* Times */}
+                <View className="gap-xs">
+                  <View className="flex flex-row items-center">
+                    <Clock
+                      size={21}
+                      className="absolute left-md z-10 text-on-surface-variant"
+                    />
+                    <Text className="px-1 text-label-md font-label-md text-on-surface-variant">
+                      Start Time
+                    </Text>
+                  </View>
+
+                  <Pressable onPress={() => setShowTimePicker(true)}>
+                    <TextInput
+                      value={formattedTime}
+                      editable={false}
+                      pointerEvents="none"
+                      placeholder="Select date"
+                      className="h-12 rounded-xl border px-4"
+                    />
+                  </Pressable>
+                  {showTimePicker && (
+                    <DateTimePicker
+                      value={time}
+                      mode="time"
+                      onChange={(event, selectedTime) => {
+                        if (Platform.OS === "android") {
+                          setShowTimePicker(false);
+                        }
+
+                        if (event.type === "dismissed" || !selectedTime) {
+                          return;
+                        }
+
+                        setTime(selectedTime);
+                      }}
+                    />
+                  )}
+                </View>
+
+                {/* Notes */}
+                <View className="gap-xs">
+                  <Text className="px-1 text-label-md font-label-md text-on-surface-variant">
+                    Details / Notes
+                  </Text>
+
+                  <TextInput
+                    multiline
+                    numberOfLines={4}
+                    textAlignVertical="top"
+                    placeholder="What are the plans? e.g., Dress code is smart casual."
+                    className="min-h-28 rounded-xl border border-outline-variant bg-surface-container p-md text-body-lg text-on-surface"
+                    onChangeText={(details) =>
+                      setItineraryInputs((prev) => ({
+                        ...prev,
+                        detail: details,
+                      }))
+                    }
+                  />
+                </View>
+
+                {/* Photo */}
+                {/* <View className="pt-md">
             <ImageBackground
               source={{
                 uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuCGjSQs0xpcTu4tCsAnN_hh7sgeHVTt3Bn7rbYEq8vJ4gklMzV_GlSVaeW5xQ5wA-ZgSAHSdpUzi5zqovBts-_1bALhboYzO8Z78Dmlb4mWAdxB01H_T8GK_1N7qJMSZbn85tDXdoQVPhZ6RUgzQyHQFUWtoUkM_Mc7ciC2UmzrsY6TaCnxKLw8lIM3impRcWrkRgslqISTwn7lodcEjkQYlSlLNaEsDTFqpUrZOot7UyCUWazpm_UZ",
@@ -252,10 +302,10 @@ export default function CreateItineraryModal({ addItems, closeModal }: Props) {
               </View>
             </ImageBackground>
           </View> */}
-        </View>
+              </View>
 
-        {/* Bottom actions */}
-        {/* <View className="mt-lg gap-md">
+              {/* Bottom actions */}
+              {/* <View className="mt-lg gap-md">
           <Pressable className="w-full flex-row items-center justify-center gap-sm rounded-2xl py-md">
             <Share2 size={21} className="text-primary" />
 
@@ -272,7 +322,11 @@ export default function CreateItineraryModal({ addItems, closeModal }: Props) {
             </Text>
           </Pressable>
         </View> */}
-      </ScrollView>
-    </View>
+            </ScrollView>
+          </View>
+        </View>
+      </View>
+      <Toast config={toastConfig} />
+    </Modal>
   );
 }

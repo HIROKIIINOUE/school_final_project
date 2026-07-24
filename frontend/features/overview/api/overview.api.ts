@@ -1,3 +1,5 @@
+import { grabAccessToken } from "@/lib/getAccessToken";
+
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 if (!BACKEND_URL) {
@@ -7,9 +9,14 @@ if (!BACKEND_URL) {
 const API_ROUTE = `${BACKEND_URL}/api/trip/overview`;
 
 export async function getOverviewData({ id }: { id: string }) {
+  const accessToken = await grabAccessToken();
+
   const res = await fetch(`${API_ROUTE}/${id}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
     credentials: "include",
   });
 

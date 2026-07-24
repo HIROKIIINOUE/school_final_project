@@ -13,7 +13,7 @@ app.use(express.json());
 
 app.use("/api/trips", router);
 app.use("/api/trip", overviewRouter);
-app.use("/api/itineray", itineraryrouter);
+app.use("/api/itinerary", itineraryrouter);
 
 app.use("/api/user", userRouter);
 
