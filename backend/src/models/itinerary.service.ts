@@ -18,7 +18,7 @@ async function getItinerary({
       location: true,
       startTime: true,
     },
-    orderBy: { startTime: "desc" },
+    orderBy: { startTime: "asc" },
   });
 
   return itineraryItems.map((itinerary) => {

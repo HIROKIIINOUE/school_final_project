@@ -62,7 +62,17 @@ const ItineraryClient = ({ tripId }: Props) => {
         <IndivisualItinerary date={key} itineraries={value} key={key} />
       ))}
 
-      <Plus className="material-symbols-outlined" />
+      <Link
+        href={{
+          pathname: "/trips/[id]/itinerary/create-itinerary",
+          params: { id: tripId },
+        }}
+        asChild
+      >
+        <Pressable className="bg-primary-container h-15 w-15 rounded-full flex items-center justify-center mt-md mx-md">
+          <Plus className="material-symbols-outlined" />
+        </Pressable>
+      </Link>
     </ScrollView>
   );
 };

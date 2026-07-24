@@ -17,7 +17,7 @@ const IndivisualItinerary = ({ date, itineraries }: Props) => {
     <View className="relative mb-xl bg-background px-container">
       <View className="absolute bottom-0 left-9.5 top-12 w-px bg-outline-variant" />
       <View className="mb-md flex-row items-center pl-11">
-        <Text className="list-item-title flex-1">
+        <Text className="list-item-title flex-1 mt-md">
           {dayNumber} - {dayLabel}
         </Text>
       </View>
