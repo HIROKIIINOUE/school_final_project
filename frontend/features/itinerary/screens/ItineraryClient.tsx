@@ -43,7 +43,7 @@ const ItineraryClient = ({ tripId }: Props) => {
         </Text>
         <Link
           href={{
-            pathname: "/trips/[id]/itinerary/create-itinerary",
+            pathname: "/trips/[id]/create-itinerary",
             params: { id: tripId },
           }}
           asChild
@@ -59,22 +59,22 @@ const ItineraryClient = ({ tripId }: Props) => {
   // display itineararies
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      <Link
+        href={{
+          pathname: "/trips/[id]/create-itinerary",
+          params: { id: tripId },
+        }}
+        asChild
+      >
+        <Pressable className="bg-primary-container h-15 w-15 rounded-full flex items-center justify-center mt-md mx-md">
+          <Plus className="material-symbols-outlined" />
+        </Pressable>
+      </Link>
+
       <ScrollView className="screen">
         {Array.from(dateMap.entries()).map(([key, value]) => (
           <IndivisualItinerary date={key} itineraries={value} key={key} />
         ))}
-
-        <Link
-          href={{
-            pathname: "/trips/[id]/itinerary/create-itinerary",
-            params: { id: tripId },
-          }}
-          asChild
-        >
-          <Pressable className="bg-primary-container h-15 w-15 rounded-full flex items-center justify-center mt-md mx-md">
-            <Plus className="material-symbols-outlined" />
-          </Pressable>
-        </Link>
       </ScrollView>
     </SafeAreaView>
   );

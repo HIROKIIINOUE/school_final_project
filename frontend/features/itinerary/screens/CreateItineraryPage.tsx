@@ -4,9 +4,10 @@ import { ItineraryInput } from "../types/types";
 import ItineraryCardItem from "../components/ItineraryCardItem";
 import CreateItineraryModal from "../components/CreateItineraryModal";
 import { createItineraries } from "../api/itinerary.api";
-import { Plus } from "lucide-react-native";
-import { useRouter } from "expo-router";
+import { ArrowLeft, Plus } from "lucide-react-native";
+import { Link, useRouter } from "expo-router";
 import Toast from "react-native-toast-message";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type Props = { tripId: string };
 
@@ -31,7 +32,7 @@ const CreateItineraryPage = ({ tripId }: Props) => {
 
       console.log(res);
       Toast.show({ type: "success", text1: "Successfully created itinerary" });
-      router.navigate(`/(protected)/trips/${tripId}/itinerary`);
+      router.navigate(`/(protected)/trips/${tripId}/(tabs)/itinerary`);
     } catch (e) {
       Toast.show({ type: "error", text1: "Failed to add itinerary" });
     } finally {
@@ -41,12 +42,21 @@ const CreateItineraryPage = ({ tripId }: Props) => {
 
   if (createdItems.length === 0) {
     return (
-      <View className="m-md">
+      <SafeAreaView style={{ flex: 1 }} className="m-md">
+        <Link
+          href={`/(protected)/trips/${tripId}/(tabs)/itinerary`}
+          className=" ml-7"
+        >
+          <View className="flex flex-row items-center text-primary">
+            <ArrowLeft className="" />
+            <Text className="text-primary">Go back</Text>
+          </View>
+        </Link>
         <Text className="text-muted text-center mb-md">
           You haven't created items yet
         </Text>
         <Pressable
-          className="btn-primary"
+          className="btn-primary mx-md"
           onPress={() => setIsModalOpen(true)}
           disabled={isModalOpen}
         >
@@ -58,11 +68,11 @@ const CreateItineraryPage = ({ tripId }: Props) => {
             closeModal={() => setIsModalOpen(false)}
           />
         )}
-      </View>
+      </SafeAreaView>
     );
   }
   return (
-    <View className="mx-sm mt-md">
+    <SafeAreaView style={{ flex: 1 }} className="mx-sm mt-md">
       <Pressable
         className="bg-primary-container rounded-full w-15 h-15 flex items-center justify-center mb-md"
         onPress={() => setIsModalOpen(true)}
@@ -87,7 +97,7 @@ const CreateItineraryPage = ({ tripId }: Props) => {
           closeModal={() => setIsModalOpen(false)}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
