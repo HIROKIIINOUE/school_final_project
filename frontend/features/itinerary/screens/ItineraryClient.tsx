@@ -6,6 +6,7 @@ import { getDateKey } from "@/lib/formatDate";
 import IndivisualItinerary from "../components/IndivisualItinerary";
 import { Plus } from "lucide-react-native";
 import { Link } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type Props = { tripId: string };
 
@@ -36,7 +37,7 @@ const ItineraryClient = ({ tripId }: Props) => {
 
   if (itineraryItems.length === 0) {
     return (
-      <View className="m-sm">
+      <SafeAreaView className="m-sm" style={{ flex: 1 }}>
         <Text className="text-center text-xl text-muted">
           No Itineraries created yet
         </Text>
@@ -51,29 +52,31 @@ const ItineraryClient = ({ tripId }: Props) => {
             <Text className="text-on-primary">Create Itinerary here</Text>
           </Pressable>
         </Link>
-      </View>
+      </SafeAreaView>
     );
   }
 
   // display itineararies
   return (
-    <ScrollView className="screen">
-      {Array.from(dateMap.entries()).map(([key, value]) => (
-        <IndivisualItinerary date={key} itineraries={value} key={key} />
-      ))}
+    <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView className="screen">
+        {Array.from(dateMap.entries()).map(([key, value]) => (
+          <IndivisualItinerary date={key} itineraries={value} key={key} />
+        ))}
 
-      <Link
-        href={{
-          pathname: "/trips/[id]/itinerary/create-itinerary",
-          params: { id: tripId },
-        }}
-        asChild
-      >
-        <Pressable className="bg-primary-container h-15 w-15 rounded-full flex items-center justify-center mt-md mx-md">
-          <Plus className="material-symbols-outlined" />
-        </Pressable>
-      </Link>
-    </ScrollView>
+        <Link
+          href={{
+            pathname: "/trips/[id]/itinerary/create-itinerary",
+            params: { id: tripId },
+          }}
+          asChild
+        >
+          <Pressable className="bg-primary-container h-15 w-15 rounded-full flex items-center justify-center mt-md mx-md">
+            <Plus className="material-symbols-outlined" />
+          </Pressable>
+        </Link>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

@@ -45,7 +45,7 @@ const OverView = ({ id }: Props) => {
   }
 
   return (
-    <SafeAreaView edges={["left", "right"]} style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }}>
       <OverviewThumbnail />
       <ScrollView>
         <TripDetail tripDetails={overviewData?.tripDetails} />

@@ -1,6 +1,6 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text } from "react-native";
 import React from "react";
-import { PlaneTakeoff, Timer } from "lucide-react-native";
+import { PlaneTakeoff } from "lucide-react-native";
 import { ItineraryType } from "../types/types";
 import { formatDayLabel, formatTime } from "@/lib/formatDate";
 
@@ -21,10 +21,10 @@ const ItineraryCardItem = ({ itinerary }: Props) => {
             </Text>
             <View className="flex flex-row gap-2 items-center my-sm">
               <Text className="text-body-md font-body-md text-muted">
-                {formatDayLabel(itinerary.startTime)}
+                {formatDayLabel(new Date(itinerary.startTime))}
               </Text>
               <Text className="text-body-md font-body-md text-muted">
-                {formatTime(itinerary.startTime)}
+                {formatTime(new Date(itinerary.startTime))}
               </Text>
             </View>
           </View>

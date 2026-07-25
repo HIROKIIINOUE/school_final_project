@@ -78,7 +78,7 @@ const CreateItineraryPage = ({ tripId }: Props) => {
         onPress={onSubmit}
         disabled={isSubmitting}
       >
-        <Text>Submit itineraries</Text>
+        <Text>{isSubmitting ? "Submitting your data..." : "Submit"}</Text>
       </Pressable>
 
       {isModalOpen && (

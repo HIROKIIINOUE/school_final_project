@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { useEffect } from "react";
 import Toast from "react-native-toast-message";
 import { toastConfig } from "@/config/toastConfig";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 function RootNavigator() {
   const authStatus = useAuthStore((state) => state.authStatus);
@@ -19,7 +20,13 @@ function RootNavigator() {
   }, [authStatus, profileStatus]);
 
   if (authStatus === "initializing" || profileStatus === "loading") {
-    return <Spinner message="Loading user..." />;
+    return (
+      <SafeAreaView
+        style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+      >
+        <Spinner message="Loading user..." />
+      </SafeAreaView>
+    );
   }
 
   const isAuthenticated = authStatus === "authenticated";

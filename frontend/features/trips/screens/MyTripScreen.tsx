@@ -8,6 +8,7 @@ import { MyRoomType } from "../types/types";
 import { fetchMyRooms } from "../api/myRoom.api";
 import Spinner from "@/components/Spinner";
 import { useAuthStore } from "@/store/auth.store";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const MyTripScreen = () => {
   const [tripRooms, setTripRooms] = useState<MyRoomType[]>([]);
@@ -59,7 +60,7 @@ const MyTripScreen = () => {
   }
 
   return (
-    <View className="flex-1">
+    <SafeAreaView style={{ flex: 1 }} className="flex-1">
       {isCreateModalOpen && (
         <CreateTripModal
           visible={isCreateModalOpen}
@@ -94,7 +95,7 @@ const MyTripScreen = () => {
           renderItem={({ item: room }) => <TripRoomCard room={room} />}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
