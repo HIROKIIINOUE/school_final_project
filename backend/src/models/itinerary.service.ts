@@ -40,7 +40,14 @@ async function getItinerary({
   });
 
   return itineraryItems.map((itinerary) => {
-    return { ...itinerary, isOwner: itinerary.createdById === userId };
+    return {
+      id: itinerary.id,
+      title: itinerary.title,
+      detail: itinerary.detail ?? null,
+      location: itinerary.location ?? null,
+      startTime: new Date(itinerary.startTime),
+      isCreatedByCurrentser: itinerary.createdById === userId,
+    };
   });
 }
 
