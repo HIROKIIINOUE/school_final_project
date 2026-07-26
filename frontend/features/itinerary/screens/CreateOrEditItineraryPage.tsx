@@ -1,6 +1,10 @@
 import { View, Text, Pressable, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
-import { ItineraryInput } from "../types/types";
+import {
+  SaveItineraryItemInput,
+  SavedItineraryItem,
+  ItineraryDraftItem,
+} from "../types/types";
 import ItineraryCardItem from "../components/ItineraryCardItem";
 import CreateItineraryModal from "../components/CreateOrEditItineraryModal";
 import {
@@ -13,37 +17,58 @@ import { Link, useRouter } from "expo-router";
 import Toast from "react-native-toast-message";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Spinner from "@/components/Spinner";
+import {
+  draftToSaveInput,
+  savedItemToDraft,
+} from "@/features/itinerary/lib/conversion";
+import ItineraryDraftCardItem from "../components/ItineraryDraftItem";
 
 type Props = { tripId: string; mode: "edit" | "create" };
 
 const CreateItineraryPage = ({ tripId, mode }: Props) => {
-  const [createdItems, setCreatedItems] = useState<ItineraryInput[]>([]);
+  const [createdItems, setCreatedItems] = useState<ItineraryDraftItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [selectedItem, setSelectedItem] = useState<ItineraryInput | null>(null);
+  const [selectedItem, setSelectedItem] = useState<ItineraryDraftItem | null>(
+    null,
+  );
 
   const router = useRouter();
 
-  function addToItems(item: ItineraryInput) {
+  function addToItems(input: ItineraryDraftItem) {
     // if already exists, update, else, push
-    if (item.id) {
-      const foundIndex = createdItems.findIndex((item) => item.id === item.id);
-      createdItems[foundIndex] = item;
-      setCreatedItems((prev) => [...prev]);
-      return;
-    }
+    setCreatedItems((prev) => {
+      const alreadyExists = prev.some(
+        (item) => (item.id ?? item.clientId) === (input.id ?? input.clientId),
+      );
+      if (!alreadyExists) {
+        return [...prev, input];
+      }
 
-    setCreatedItems((prev) => [...prev, item]);
+      return prev.map((item) => {
+        const currentId = item.id ?? item.clientId;
+
+        // if current mapping item id is equal to newly input id, return newly input
+        if (currentId === (input.id ?? input.clientId)) {
+          return input;
+        }
+        return item;
+      });
+    });
+
+    setSelectedItem(null);
+    setIsModalOpen(false);
   }
 
   async function onSubmit() {
+    const sendData = createdItems.map(draftToSaveInput);
     try {
       setIsSubmitting(true);
       const res =
         mode === "edit"
-          ? await updateItineraries({ tripId, itineraries: createdItems })
-          : await createItineraries({ tripId, itineraryInputs: createdItems });
+          ? await updateItineraries({ tripId, itineraries: sendData })
+          : await createItineraries({ tripId, itineraryInputs: sendData });
 
       console.log(res);
       Toast.show({ type: "success", text1: "Successfully created itinerary" });
@@ -61,7 +86,8 @@ const CreateItineraryPage = ({ tripId, mode }: Props) => {
       try {
         setIsLoading(true);
         const data = await fetchItineraries(tripId);
-        setCreatedItems(data);
+        const drafts = data.map(savedItemToDraft);
+        setCreatedItems(drafts);
       } catch (e) {
         Toast.show({ type: "error", text1: "Failed to fetch your data" });
       } finally {
@@ -73,7 +99,9 @@ const CreateItineraryPage = ({ tripId, mode }: Props) => {
   }, []);
 
   function onEditPress(id: string) {
-    const targetItem = createdItems.find((item) => item.id === id);
+    const targetItem = createdItems.find(
+      (item) => (item.id ?? item.clientId) === id,
+    );
     if (!targetItem) return;
     setSelectedItem(targetItem);
     setIsModalOpen(true);
@@ -139,7 +167,7 @@ const CreateItineraryPage = ({ tripId, mode }: Props) => {
       </View>
       <ScrollView className="mx-sm">
         {createdItems.map((item) => (
-          <ItineraryCardItem
+          <ItineraryDraftCardItem
             key={item.id}
             itineraryItem={item}
             isEditMode={mode === "edit"}

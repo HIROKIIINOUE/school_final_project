@@ -25,12 +25,13 @@ export const itineraryItemSchema = z.object({
     .min(1, { error: "Title is required." })
     .max(100, { error: "Title must be 100 characters or fewer." }),
 
-  detail: z.string().trim().max(200).optional(),
+  detail: z.string().trim().max(200).optional().nullable(),
   location: z
     .string({ error: "Location must be a string" })
     .trim()
     .max(300)
-    .optional(),
+    .optional()
+    .nullable(),
   startTime: z.iso.datetime(),
 });
 
@@ -54,12 +55,13 @@ export const updateItineraryItemSchema = z.object({
     .min(1, { error: "Title is required." })
     .max(100, { error: "Title must be 100 characters or fewer." }),
 
-  detail: z.string().trim().max(200).optional(),
+  detail: z.string().trim().max(200).optional().nullable(),
   location: z
     .string({ error: "Location must be a string" })
     .trim()
     .max(300)
-    .optional(),
+    .optional()
+    .nullable(),
   startTime: z.iso.datetime(),
 });
 
@@ -72,3 +74,5 @@ export const updatItinerariesBodySchema = z.object({
 
 export type UpdateItineraryInput = z.infer<typeof updateItineraryItemSchema>;
 export type UpdateItinerariesBody = z.infer<typeof updatItinerariesBodySchema>;
+
+export const tripIdParamsSchema = z.object({ tripId: z.string().uuid() });

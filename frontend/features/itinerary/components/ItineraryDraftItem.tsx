@@ -1,16 +1,20 @@
 import { View, Text, Pressable } from "react-native";
 import React from "react";
-import { SavedItineraryItem } from "../types/types";
+import { ItineraryDraftItem } from "../types/types";
 import { formatTime } from "@/lib/formatDate";
-import { MapPin } from "lucide-react-native";
+import { MapPin, SquarePen, Trash2 } from "lucide-react-native";
 
 type Props = {
-  itineraryItem: SavedItineraryItem;
+  itineraryItem: ItineraryDraftItem;
   isEditMode: boolean;
   onEditPress?: (id: string) => void;
 };
 
-const ItineraryCardItem = ({ itineraryItem }: Props) => {
+const ItineraryDraftCardItem = ({
+  itineraryItem,
+  isEditMode,
+  onEditPress,
+}: Props) => {
   const time = formatTime(new Date(itineraryItem.startTime));
   return (
     <View className="relative mb-md flex flex-row">
@@ -38,8 +42,23 @@ const ItineraryCardItem = ({ itineraryItem }: Props) => {
           </Text>
         </View>
       </View>
+      {isEditMode && (
+        <View className="flex gap-2 items-center justify-center ml-sm">
+          <Pressable
+            onPress={() => {
+              if (!itineraryItem.id) return;
+              onEditPress && onEditPress(itineraryItem.id);
+            }}
+          >
+            <SquarePen color={"#4db6b6"} />
+          </Pressable>
+          <Pressable>
+            <Trash2 color={"#ba1a1a"} />
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 };
 
-export default ItineraryCardItem;
+export default ItineraryDraftCardItem;

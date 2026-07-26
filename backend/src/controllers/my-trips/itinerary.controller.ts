@@ -7,6 +7,7 @@ import {
 } from "../../models/itinerary.service";
 import {
   createItinerariesBodySchema,
+  tripIdParamsSchema,
   updatItinerariesBodySchema,
 } from "../../schemas/trips.schema";
 
@@ -28,7 +29,24 @@ async function getItinerariesController(
     return;
   }
 
-  const { tripId } = req.params;
+  const paramsResult = tripIdParamsSchema.safeParse(req.params);
+
+  if (!paramsResult.success) {
+    return next(
+      new AppError(
+        400,
+        "VALIDATION_ERROR",
+        "Invalid trip ID.",
+        paramsResult.error.issues.map((issue) => ({
+          path: issue.path.join("."),
+          code: issue.code,
+          message: issue.message,
+        })),
+      ),
+    );
+  }
+
+  const { tripId } = paramsResult.data;
 
   const id = Array.isArray(tripId) ? tripId[0] : tripId;
 
@@ -55,7 +73,24 @@ async function createItineraryController(
     return;
   }
 
-  const { tripId } = req.params;
+  const paramsResult = tripIdParamsSchema.safeParse(req.params);
+
+  if (!paramsResult.success) {
+    return next(
+      new AppError(
+        400,
+        "VALIDATION_ERROR",
+        "Invalid trip ID.",
+        paramsResult.error.issues.map((issue) => ({
+          path: issue.path.join("."),
+          code: issue.code,
+          message: issue.message,
+        })),
+      ),
+    );
+  }
+
+  const { tripId } = paramsResult.data;
 
   // validation
 
@@ -84,7 +119,7 @@ async function createItineraryController(
     itineraries: itineraries,
   });
 
-  return res.status(200).json(data);
+  return res.status(201).json({ data });
 }
 
 async function updateItineraryController(
@@ -105,7 +140,24 @@ async function updateItineraryController(
     return;
   }
 
-  const { tripId } = req.params;
+  const paramsResult = tripIdParamsSchema.safeParse(req.params);
+
+  if (!paramsResult.success) {
+    return next(
+      new AppError(
+        400,
+        "VALIDATION_ERROR",
+        "Invalid trip ID.",
+        paramsResult.error.issues.map((issue) => ({
+          path: issue.path.join("."),
+          code: issue.code,
+          message: issue.message,
+        })),
+      ),
+    );
+  }
+
+  const { tripId } = paramsResult.data;
 
   // validate body
   const validatedResult = updatItinerariesBodySchema.safeParse(req.body);
@@ -129,7 +181,7 @@ async function updateItineraryController(
     userId,
     itineraries: validatedResult.data.itineraries,
   });
-  return res.status(200).json(data);
+  return res.status(200).json({ data });
 }
 
 export {

@@ -1,5 +1,5 @@
 import { grabAccessToken } from "@/lib/getAccessToken";
-import { ItineraryInput } from "../types/types";
+import { SavedItineraryItem, SaveItineraryItemInput } from "../types/types";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -7,7 +7,9 @@ if (!BACKEND_URL) {
   throw new Error("EXPO_PUBLIC_BACKEND_URL is not configured");
 }
 
-export async function fetchItineraries(tripId: string) {
+export async function fetchItineraries(
+  tripId: string,
+): Promise<SavedItineraryItem[]> {
   const accessToken = await grabAccessToken();
 
   const res = await fetch(`${BACKEND_URL}/api/itinerary/${tripId}`, {
@@ -38,8 +40,8 @@ export async function createItineraries({
   itineraryInputs,
 }: {
   tripId: string;
-  itineraryInputs: ItineraryInput[];
-}) {
+  itineraryInputs: SaveItineraryItemInput[];
+}): Promise<SavedItineraryItem[]> {
   const accessToken = await grabAccessToken();
 
   console.log("Sending data to itinerary backend");
@@ -71,8 +73,8 @@ export async function updateItineraries({
   itineraries,
 }: {
   tripId: string;
-  itineraries: ItineraryInput[];
-}) {
+  itineraries: SaveItineraryItemInput[];
+}): Promise<SavedItineraryItem[]> {
   const accessToken = await grabAccessToken();
 
   const res = await fetch(`${BACKEND_URL}/api/itinerary/${tripId}`, {

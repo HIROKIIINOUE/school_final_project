@@ -11,15 +11,16 @@ import {
 import { BlurView } from "expo-blur";
 import { CalendarDays, Clock, MapPin, X } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { ItineraryInput } from "../types/types";
+import { ItineraryDraftItem } from "../types/types";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Toast from "react-native-toast-message";
 import { toastConfig } from "@/config/toastConfig";
+import { createClientId } from "@/lib/createClientId";
 
 type Props = {
-  addItems: (item: ItineraryInput) => void;
+  addItems: (item: ItineraryDraftItem) => void;
   closeModal: () => void;
-  item: ItineraryInput | null;
+  item: ItineraryDraftItem | null;
 };
 
 export default function CreateOrEditItineraryModal({
@@ -27,7 +28,8 @@ export default function CreateOrEditItineraryModal({
   closeModal,
   item,
 }: Props) {
-  const [itineraryInputs, setItineraryInputs] = useState<ItineraryInput>({
+  const [itineraryInputs, setItineraryInputs] = useState<ItineraryDraftItem>({
+    clientId: createClientId(),
     title: "",
     detail: "",
     location: "",
@@ -63,12 +65,15 @@ export default function CreateOrEditItineraryModal({
   }
 
   function onPress() {
-    if (itineraryInputs.title.trim() === "" || !itineraryInputs.startTime) {
-      Toast.show({ type: "error", text1: "Title or start time is required" });
+    const title = itineraryInputs.title.trim();
+
+    if (!title) {
+      Toast.show({ type: "error", text1: "Activity title is required" });
       return;
     }
+
     const startTime = combineDateAndTime(date, time);
-    addItems({ ...itineraryInputs, startTime: startTime });
+    addItems({ ...itineraryInputs, title, startTime: startTime });
     resetInputs();
 
     Toast.show({ type: "success", text1: "Successfully added item" });
@@ -76,6 +81,7 @@ export default function CreateOrEditItineraryModal({
 
   function resetInputs() {
     setItineraryInputs({
+      clientId: createClientId(),
       title: "",
       detail: "",
       location: "",
@@ -89,17 +95,36 @@ export default function CreateOrEditItineraryModal({
 
   useEffect(() => {
     function setField() {
-      if (!item) return;
+      if (!item) {
+        const now = new Date();
+
+        setItineraryInputs({
+          clientId: createClientId(),
+          title: "",
+          detail: "",
+          location: "",
+          startTime: now,
+        });
+
+        setDate(now);
+        setTime(now);
+        return;
+      }
+
+      const existingStartTime = new Date(item.startTime);
       setItineraryInputs({
-        title: item.title,
-        location: item.location,
-        detail: item.detail,
-        startTime: item.startTime,
+        ...item,
+        detail: item.detail ?? "",
+        location: item.location ?? "",
+        startTime: existingStartTime,
       });
+
+      setDate(existingStartTime);
+      setTime(existingStartTime);
     }
 
     setField();
-  }, []);
+  }, [item]);
 
   return (
     <Modal
@@ -288,6 +313,7 @@ export default function CreateOrEditItineraryModal({
                     numberOfLines={4}
                     textAlignVertical="top"
                     placeholder="What are the plans? e.g., Dress code is smart casual."
+                    value={itineraryInputs.detail}
                     className="min-h-28 rounded-xl border border-outline-variant bg-surface-container p-md text-body-lg text-on-surface"
                     onChangeText={(details) =>
                       setItineraryInputs((prev) => ({

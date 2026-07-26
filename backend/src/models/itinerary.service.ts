@@ -13,6 +13,19 @@ async function getItinerary({
   tripId: string;
   userId: string;
 }) {
+  // check if the user belongs in this trip
+  const membership = await prisma.tripMember.findFirst({
+    where: { userId, tripId },
+    select: { id: true },
+  });
+  if (!membership) {
+    throw new AppError(
+      403,
+      "TRIP_ACCESS_DENIED",
+      "You do not have access to this trip.",
+    );
+  }
+
   const itineraryItems = await prisma.itineraryItem.findMany({
     where: { tripId },
     select: {
@@ -40,6 +53,19 @@ async function createItinerary({
   userId: string;
   itineraries: ItineraryItemInput[];
 }) {
+  // check if the user belongs in this trip
+  const membership = await prisma.tripMember.findFirst({
+    where: { userId, tripId },
+    select: { id: true },
+  });
+  if (!membership) {
+    throw new AppError(
+      403,
+      "TRIP_ACCESS_DENIED",
+      "You do not have access to this trip.",
+    );
+  }
+
   // accept arrays of itineraries items
   const passingData = itineraries.map((itinerary) => {
     return {

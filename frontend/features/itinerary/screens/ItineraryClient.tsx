@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, Pressable } from "react-native";
 import React, { useEffect, useState } from "react";
-import { ItineraryInput } from "../types/types";
+import { SavedItineraryItem } from "../types/types";
 import { fetchItineraries } from "../api/itinerary.api";
 import { getDateKey } from "@/lib/formatDate";
 import IndivisualItinerary from "../components/IndivisualItinerary";
@@ -13,7 +13,9 @@ import Toast from "react-native-toast-message";
 type Props = { tripId: string };
 
 const ItineraryClient = ({ tripId }: Props) => {
-  const [itineraryItems, setItineraryItems] = useState<ItineraryInput[]>([]);
+  const [itineraryItems, setItineraryItems] = useState<SavedItineraryItem[]>(
+    [],
+  );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
@@ -49,10 +51,6 @@ const ItineraryClient = ({ tripId }: Props) => {
     dateMap.set(formattedDate, currentItems);
   }
 
-  function onEdit() {
-    setIsEditMode((prev) => !prev);
-  }
-
   if (isLoading) {
     return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -70,7 +68,7 @@ const ItineraryClient = ({ tripId }: Props) => {
         <Link
           href={{
             pathname: "/trips/[id]/create-itinerary",
-            params: { id: tripId },
+            params: { id: tripId, mode: "create" },
           }}
           asChild
         >
@@ -93,7 +91,7 @@ const ItineraryClient = ({ tripId }: Props) => {
           <Link
             href={{
               pathname: "/trips/[id]/create-itinerary",
-              params: { id: tripId },
+              params: { id: tripId, mode: "create" },
             }}
             asChild
           >

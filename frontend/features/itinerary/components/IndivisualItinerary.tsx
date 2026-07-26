@@ -1,12 +1,12 @@
 import { View, Text } from "react-native";
 import React from "react";
-import { ItineraryInput } from "../types/types";
+import { SavedItineraryItem } from "../types/types";
 import ItineraryCardItem from "./ItineraryCardItem";
 import { formatDayLabel, formatDayNumber } from "@/lib/formatDate";
 
 type Props = {
   date: string;
-  itineraries: ItineraryInput[];
+  itineraries: SavedItineraryItem[];
   isEditMode: boolean;
 };
 
