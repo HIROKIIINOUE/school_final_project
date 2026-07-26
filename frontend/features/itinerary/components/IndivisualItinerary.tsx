@@ -4,9 +4,13 @@ import { ItineraryInput } from "../types/types";
 import ItineraryCardItem from "./ItineraryCardItem";
 import { formatDayLabel, formatDayNumber } from "@/lib/formatDate";
 
-type Props = { date: string; itineraries: ItineraryInput[] };
+type Props = {
+  date: string;
+  itineraries: ItineraryInput[];
+  isEditMode: boolean;
+};
 
-const IndivisualItinerary = ({ date, itineraries }: Props) => {
+const IndivisualItinerary = ({ date, itineraries, isEditMode }: Props) => {
   console.log(date);
   const firstDate = new Date(itineraries[0].startTime);
 
@@ -14,7 +18,7 @@ const IndivisualItinerary = ({ date, itineraries }: Props) => {
   const dayLabel = formatDayLabel(firstDate);
 
   return (
-    <View className="relative mb-xl bg-background px-container">
+    <View className="relative mb-xl bg-background px-container flex-1">
       <View className="absolute bottom-0 left-9.5 top-12 w-px bg-outline-variant" />
       <View className="mb-md flex-row items-center pl-11">
         <Text className="list-item-title flex-1 mt-md">
@@ -23,7 +27,11 @@ const IndivisualItinerary = ({ date, itineraries }: Props) => {
       </View>
       <View className="gap-md pl-11">
         {itineraries.map((item) => (
-          <ItineraryCardItem key={item.title} itineraryItem={item} />
+          <ItineraryCardItem
+            key={item.title}
+            itineraryItem={item}
+            isEditMode={isEditMode}
+          />
         ))}
       </View>
     </View>

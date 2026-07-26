@@ -7,11 +7,10 @@ import {
   TextInput,
   View,
   StyleSheet,
-  Keyboard,
 } from "react-native";
 import { BlurView } from "expo-blur";
 import { CalendarDays, Clock, MapPin, X } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ItineraryInput } from "../types/types";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Toast from "react-native-toast-message";
@@ -20,9 +19,14 @@ import { toastConfig } from "@/config/toastConfig";
 type Props = {
   addItems: (item: ItineraryInput) => void;
   closeModal: () => void;
+  item: ItineraryInput | null;
 };
 
-export default function CreateItineraryModal({ addItems, closeModal }: Props) {
+export default function CreateOrEditItineraryModal({
+  addItems,
+  closeModal,
+  item,
+}: Props) {
   const [itineraryInputs, setItineraryInputs] = useState<ItineraryInput>({
     title: "",
     detail: "",
@@ -82,6 +86,20 @@ export default function CreateItineraryModal({ addItems, closeModal }: Props) {
     setShowPicker(false);
     setShowTimePicker(false);
   }
+
+  useEffect(() => {
+    function setField() {
+      if (!item) return;
+      setItineraryInputs({
+        title: item.title,
+        location: item.location,
+        detail: item.detail,
+        startTime: item.startTime,
+      });
+    }
+
+    setField();
+  }, []);
 
   return (
     <Modal

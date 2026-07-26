@@ -45,3 +45,30 @@ export const createItinerariesBodySchema = z.object({
 export type ItineraryItemInput = z.infer<typeof itineraryItemSchema>;
 
 export type CreateItinerariesBody = z.infer<typeof createItinerariesBodySchema>;
+
+export const updateItineraryItemSchema = z.object({
+  id: z.string().trim().min(1).optional(),
+  title: z
+    .string({ error: "Title must be a string." })
+    .trim()
+    .min(1, { error: "Title is required." })
+    .max(100, { error: "Title must be 100 characters or fewer." }),
+
+  detail: z.string().trim().max(200).optional(),
+  location: z
+    .string({ error: "Location must be a string" })
+    .trim()
+    .max(300)
+    .optional(),
+  startTime: z.iso.datetime(),
+});
+
+export const updatItinerariesBodySchema = z.object({
+  itineraries: z
+    .array(updateItineraryItemSchema)
+    .min(1)
+    .max(30, "You can create at most 30 items at once."),
+});
+
+export type UpdateItineraryInput = z.infer<typeof updateItineraryItemSchema>;
+export type UpdateItinerariesBody = z.infer<typeof updatItinerariesBodySchema>;

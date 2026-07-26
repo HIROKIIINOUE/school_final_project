@@ -56,7 +56,11 @@ const MyTripScreen = () => {
   }, [isReady]);
 
   if (isLoading) {
-    return <Spinner />;
+    return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <Spinner />
+      </SafeAreaView>
+    );
   }
 
   return (

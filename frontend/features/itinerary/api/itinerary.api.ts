@@ -65,3 +65,35 @@ export async function createItineraries({
 
   return data.data;
 }
+
+export async function updateItineraries({
+  tripId,
+  itineraries,
+}: {
+  tripId: string;
+  itineraries: ItineraryInput[];
+}) {
+  const accessToken = await grabAccessToken();
+
+  const res = await fetch(`${BACKEND_URL}/api/itinerary/${tripId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ itineraries }),
+    credentials: "include",
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    console.error(
+      "Failed to create itineraries",
+      data.error?.message ?? data.message ?? "Failed to create itineraries",
+    );
+    throw new Error(data.error?.message ?? "Failed to create itineraries");
+  }
+
+  return data.data;
+}

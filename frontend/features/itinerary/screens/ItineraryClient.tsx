@@ -4,20 +4,34 @@ import { ItineraryInput } from "../types/types";
 import { fetchItineraries } from "../api/itinerary.api";
 import { getDateKey } from "@/lib/formatDate";
 import IndivisualItinerary from "../components/IndivisualItinerary";
-import { Plus } from "lucide-react-native";
+import { Plus, SquarePen, Trash2 } from "lucide-react-native";
 import { Link } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Spinner from "@/components/Spinner";
+import Toast from "react-native-toast-message";
 
 type Props = { tripId: string };
 
 const ItineraryClient = ({ tripId }: Props) => {
   const [itineraryItems, setItineraryItems] = useState<ItineraryInput[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   // get the itineraries for this trip on load
   useEffect(() => {
     async function fetchAndSetItineraries() {
-      const itineraries = await fetchItineraries(tripId);
-      setItineraryItems(itineraries);
+      try {
+        setIsLoading(true);
+        const itineraries = await fetchItineraries(tripId);
+        setItineraryItems(itineraries);
+      } catch (e) {
+        Toast.show({
+          type: "error",
+          text1: "Failed to fetch your itinerary. Try again",
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
 
     fetchAndSetItineraries();
@@ -33,6 +47,18 @@ const ItineraryClient = ({ tripId }: Props) => {
 
     currentItems.push(item);
     dateMap.set(formattedDate, currentItems);
+  }
+
+  function onEdit() {
+    setIsEditMode((prev) => !prev);
+  }
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <Spinner />
+      </SafeAreaView>
+    );
   }
 
   if (itineraryItems.length === 0) {
@@ -59,21 +85,45 @@ const ItineraryClient = ({ tripId }: Props) => {
   // display itineararies
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Link
-        href={{
-          pathname: "/trips/[id]/create-itinerary",
-          params: { id: tripId },
-        }}
-        asChild
-      >
-        <Pressable className="bg-primary-container h-15 w-15 rounded-full flex items-center justify-center mt-md mx-md">
-          <Plus className="material-symbols-outlined" />
-        </Pressable>
-      </Link>
+      <View className="flex flex-row justify-between items-center mx-md">
+        <View>
+          <Text className="text-title">View your itinerary</Text>
+        </View>
+        <View className="flex flex-row my-sm">
+          <Link
+            href={{
+              pathname: "/trips/[id]/create-itinerary",
+              params: { id: tripId },
+            }}
+            asChild
+          >
+            <Pressable className="bg-primary-container h-15 w-15 rounded-full flex items-center justify-center mt-md mx-md">
+              <Plus className="material-symbols-outlined" />
+            </Pressable>
+          </Link>
+          <Link
+            href={{
+              pathname: "/trips/[id]/create-itinerary",
+              params: { id: tripId, mode: "edit" },
+            }}
+            asChild
+          >
+            <Pressable className="flex-row items-center justify-center rounded-app-lg px-md py-sm bg-secondary-container active:opacity-80">
+              <Text>{isEditMode ? "Cancel" : "Edit"}</Text>
+            </Pressable>
+          </Link>
+        </View>
+      </View>
 
       <ScrollView className="screen">
         {Array.from(dateMap.entries()).map(([key, value]) => (
-          <IndivisualItinerary date={key} itineraries={value} key={key} />
+          <View className="flex flex-row items-center" key={key}>
+            <IndivisualItinerary
+              date={key}
+              itineraries={value}
+              isEditMode={isEditMode}
+            />
+          </View>
         ))}
       </ScrollView>
     </SafeAreaView>

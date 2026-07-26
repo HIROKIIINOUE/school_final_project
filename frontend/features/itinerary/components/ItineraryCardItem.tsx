@@ -1,17 +1,25 @@
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import React from "react";
 import { ItineraryInput } from "../types/types";
 import { formatTime } from "@/lib/formatDate";
-import { MapPin } from "lucide-react-native";
+import { MapPin, SquarePen, Trash2 } from "lucide-react-native";
 
-type Props = { itineraryItem: ItineraryInput };
+type Props = {
+  itineraryItem: ItineraryInput;
+  isEditMode: boolean;
+  onEditPress?: (id: string) => void;
+};
 
-const ItineraryCardItem = ({ itineraryItem }: Props) => {
+const ItineraryCardItem = ({
+  itineraryItem,
+  isEditMode,
+  onEditPress,
+}: Props) => {
   const time = formatTime(new Date(itineraryItem.startTime));
   return (
-    <View className="relative mb-md">
+    <View className="relative mb-md flex flex-row">
       <View className="absolute -left-7.75 top-sm h-3 w-3 rounded-app-full bg-primary"></View>
-      <View className="rounded-app-md border border-outline-variant bg-card px-md py-sm shadow-sm">
+      <View className="rounded-app-md border border-outline-variant bg-card px-md py-sm shadow-sm flex-1">
         <View className="stack-xs">
           <View className="badge-secondary self-start">
             <Text className="badge-secondary-text">{time}</Text>
@@ -34,6 +42,21 @@ const ItineraryCardItem = ({ itineraryItem }: Props) => {
           </Text>
         </View>
       </View>
+      {isEditMode && (
+        <View className="flex gap-2 items-center justify-center ml-sm">
+          <Pressable
+            onPress={() => {
+              if (!itineraryItem.id) return;
+              onEditPress && onEditPress(itineraryItem.id);
+            }}
+          >
+            <SquarePen color={"#4db6b6"} />
+          </Pressable>
+          <Pressable>
+            <Trash2 color={"#ba1a1a"} />
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 };

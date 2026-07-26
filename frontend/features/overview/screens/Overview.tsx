@@ -31,7 +31,11 @@ const OverView = ({ id }: Props) => {
   }, [id]);
 
   if (isLoading) {
-    return <Spinner />;
+    return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <Spinner />
+      </SafeAreaView>
+    );
   }
 
   console.log(overviewData);

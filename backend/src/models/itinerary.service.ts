@@ -1,5 +1,10 @@
+import { AppError } from "../lib/appError";
 import { prisma } from "../lib/prisma";
-import { ItineraryItemInput } from "../schemas/trips.schema";
+import {
+  ItineraryItemInput,
+  UpdateItineraryInput,
+} from "../schemas/trips.schema";
+import { SaveItineraryItemInput } from "../types/itinerary.types";
 
 async function getItinerary({
   tripId,
@@ -61,4 +66,92 @@ async function createItinerary({
   return result;
 }
 
-export { getItinerary, createItinerary };
+async function updateItinerary({
+  tripId,
+  userId,
+  itineraries,
+}: {
+  tripId: string;
+  userId: string;
+  itineraries: UpdateItineraryInput[];
+}) {
+  // if id is provied, it's the data to update
+  type ExistingItineraryItemInput = SaveItineraryItemInput & { id: string };
+
+  const itemsToUpdate = itineraries.filter(
+    (item): item is ExistingItineraryItemInput => typeof item.id === "string",
+  );
+
+  // if id is not provied, that's the data to add newly
+  const itemsToAdd = itineraries.filter((item) => !item.id);
+
+  const submittedIds = itemsToUpdate.map((item) => item.id);
+
+  const upsertedResults = await prisma.$transaction(async (tx) => {
+    // check if the user belongs to this trip
+    const membership = await tx.tripMember.findFirst({
+      where: { tripId, userId },
+      select: { id: true },
+    });
+
+    if (!membership) {
+      throw new AppError(
+        403,
+        "TRIP_ACCESS_DENIED",
+        "You do not have access to this trip.",
+      );
+    }
+
+    // check if the passed id is valid = try to find and can't find === invalid id
+    const existingItems =
+      submittedIds.length === 0
+        ? []
+        : await tx.itineraryItem.findMany({
+            where: { tripId, id: { in: submittedIds } },
+            select: { id: true },
+          });
+
+    const existingIds = new Set(existingItems.map((item) => item.id));
+
+    const invalidIds = submittedIds.filter((id) => !existingIds.has(id));
+
+    if (invalidIds.length > 0) {
+      throw new AppError(
+        400,
+        "INVALID_ITINERARY_ITEM_IDS",
+        "One or more itinerary items do not belong to this trip.",
+      );
+    }
+
+    const updateOperations = itemsToUpdate.map((item) =>
+      tx.itineraryItem.update({
+        where: { id: item.id },
+        data: {
+          title: item.title,
+          detail: item.detail ?? null,
+          location: item.location ?? null,
+          startTime: new Date(item.startTime),
+        },
+      }),
+    );
+
+    const createOperations = itemsToAdd.map((item) =>
+      tx.itineraryItem.create({
+        data: {
+          tripId,
+          createdById: userId,
+          title: item.title,
+          detail: item.detail ?? null,
+          location: item.location ?? null,
+          startTime: new Date(item.startTime),
+        },
+      }),
+    );
+
+    return Promise.all([...updateOperations, ...createOperations]);
+  });
+
+  return upsertedResults;
+}
+
+export { getItinerary, createItinerary, updateItinerary };
