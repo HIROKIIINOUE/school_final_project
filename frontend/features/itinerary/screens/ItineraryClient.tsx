@@ -1,11 +1,11 @@
 import { View, Text, ScrollView, Pressable } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { SavedItineraryItem } from "../types/types";
 import { fetchItineraries } from "../api/itinerary.api";
 import { getDateKey } from "@/lib/formatDate";
 import IndivisualItinerary from "../components/IndivisualItinerary";
 import { Plus, SquarePen, Trash2 } from "lucide-react-native";
-import { Link } from "expo-router";
+import { Link, useFocusEffect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Spinner from "@/components/Spinner";
 import Toast from "react-native-toast-message";
@@ -20,24 +20,44 @@ const ItineraryClient = ({ tripId }: Props) => {
   const [isEditMode, setIsEditMode] = useState(false);
 
   // get the itineraries for this trip on load
-  useEffect(() => {
-    async function fetchAndSetItineraries() {
-      try {
-        setIsLoading(true);
-        const itineraries = await fetchItineraries(tripId);
-        setItineraryItems(itineraries);
-      } catch (e) {
-        Toast.show({
-          type: "error",
-          text1: "Failed to fetch your itinerary. Try again",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
 
-    fetchAndSetItineraries();
-  }, []);
+      async function loadItineraries() {
+        try {
+          setIsLoading(true);
+
+          const itineraries = await fetchItineraries(tripId);
+
+          if (!isActive) {
+            return;
+          }
+
+          setItineraryItems(itineraries);
+        } catch {
+          if (!isActive) {
+            return;
+          }
+
+          Toast.show({
+            type: "error",
+            text1: "Failed to fetch your itinerary. Try again",
+          });
+        } finally {
+          if (isActive) {
+            setIsLoading(false);
+          }
+        }
+      }
+
+      void loadItineraries();
+
+      return () => {
+        isActive = false;
+      };
+    }, [tripId]),
+  );
 
   // set Itineraries by date:
   // goal output : [ { "Aug 3": [itinerariItems] }, { "Aug 4": [itineraryItems] }... ]

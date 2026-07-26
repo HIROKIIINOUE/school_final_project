@@ -48,7 +48,7 @@ export type ItineraryItemInput = z.infer<typeof itineraryItemSchema>;
 export type CreateItinerariesBody = z.infer<typeof createItinerariesBodySchema>;
 
 export const updateItineraryItemSchema = z.object({
-  id: z.string().trim().min(1).optional(),
+  id: z.string().uuid().trim().min(1).optional(),
   title: z
     .string({ error: "Title must be a string." })
     .trim()
@@ -68,7 +68,6 @@ export const updateItineraryItemSchema = z.object({
 export const updatItinerariesBodySchema = z.object({
   itineraries: z
     .array(updateItineraryItemSchema)
-    .min(1)
     .max(30, "You can create at most 30 items at once."),
 });
 

@@ -81,22 +81,49 @@ const CreateItineraryPage = ({ tripId, mode }: Props) => {
   }
 
   useEffect(() => {
-    if (mode === "create") return;
-    async function fillUpField() {
+    let isActive = true;
+
+    if (mode === "create") {
+      setCreatedItems([]);
+      setIsLoading(false);
+
+      return () => {
+        isActive = false;
+      };
+    }
+
+    async function loadEditableItinerary() {
       try {
         setIsLoading(true);
-        const data = await fetchItineraries(tripId);
-        const drafts = data.map(savedItemToDraft);
+
+        const savedItems = await fetchItineraries(tripId);
+
+        if (!isActive) {
+          return;
+        }
+
+        const drafts = savedItems.map(savedItemToDraft);
+
         setCreatedItems(drafts);
-      } catch (e) {
+      } catch {
+        if (!isActive) {
+          return;
+        }
+
         Toast.show({ type: "error", text1: "Failed to fetch your data" });
       } finally {
-        setIsLoading(false);
+        if (isActive) {
+          setIsLoading(false);
+        }
       }
     }
 
-    fillUpField();
-  }, []);
+    void loadEditableItinerary();
+
+    return () => {
+      isActive = false;
+    };
+  }, [tripId, mode]);
 
   function onEditPress(id: string) {
     const targetItem = createdItems.find(
@@ -107,6 +134,12 @@ const CreateItineraryPage = ({ tripId, mode }: Props) => {
     setIsModalOpen(true);
   }
 
+  function onDeletePress(id: string) {
+    setCreatedItems((prev) =>
+      prev.filter((item) => (item.id ?? item.clientId) !== id),
+    );
+  }
+
   if (isLoading) {
     return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -114,7 +147,7 @@ const CreateItineraryPage = ({ tripId, mode }: Props) => {
       </SafeAreaView>
     );
   }
-  if (createdItems.length === 0) {
+  if (mode === "create" && createdItems.length === 0) {
     return (
       <SafeAreaView style={{ flex: 1 }} className="m-md">
         <Link
@@ -146,6 +179,42 @@ const CreateItineraryPage = ({ tripId, mode }: Props) => {
       </SafeAreaView>
     );
   }
+
+  if (mode === "edit" && createdItems.length === 0) {
+    <SafeAreaView style={{ flex: 1 }} className="m-md">
+      <Link
+        href={`/(protected)/trips/${tripId}/(tabs)/itinerary`}
+        className=" ml-7"
+      >
+        <View className="flex flex-row items-center text-primary">
+          <ArrowLeft className="" />
+          <Text className="text-primary">Go back</Text>
+        </View>
+      </Link>
+      <Text className="text-muted text-center mb-md">Tap here to add item</Text>
+      <Pressable
+        className="btn-primary mx-md"
+        onPress={() => setIsModalOpen(true)}
+        disabled={isModalOpen}
+      >
+        <Text>Create item</Text>
+      </Pressable>
+      {isModalOpen && (
+        <CreateItineraryModal
+          addItems={addToItems}
+          closeModal={() => setIsModalOpen(false)}
+          item={selectedItem}
+        />
+      )}
+      <Pressable
+        className="btn-primary m-md"
+        onPress={onSubmit}
+        disabled={isSubmitting}
+      >
+        <Text>{isSubmitting ? "Submitting your data..." : "Submit"}</Text>
+      </Pressable>
+    </SafeAreaView>;
+  }
   return (
     <SafeAreaView style={{ flex: 1 }} className="mx-sm mt-md">
       <View className="flex flex-row justify-between items-center">
@@ -168,10 +237,10 @@ const CreateItineraryPage = ({ tripId, mode }: Props) => {
       <ScrollView className="mx-sm">
         {createdItems.map((item) => (
           <ItineraryDraftCardItem
-            key={item.id}
+            key={item.id ?? item.clientId}
             itineraryItem={item}
-            isEditMode={mode === "edit"}
             onEditPress={onEditPress}
+            onDeletePress={onDeletePress}
           />
         ))}
       </ScrollView>

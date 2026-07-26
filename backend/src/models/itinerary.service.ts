@@ -113,6 +113,10 @@ async function updateItinerary({
 
   const submittedIds = itemsToUpdate.map((item) => item.id);
 
+  const submittedExistingIds = itineraries
+    .map((item) => item.id)
+    .filter((id) => id !== undefined);
+
   const upsertedResults = await prisma.$transaction(async (tx) => {
     // check if the user belongs to this trip
     const membership = await tx.tripMember.findFirst({
@@ -149,6 +153,19 @@ async function updateItinerary({
       );
     }
 
+    const allExistingItems = await tx.itineraryItem.findMany({
+      where: { tripId },
+      select: { id: true },
+    });
+    const submittedIdSet = new Set(submittedIds);
+    const omittedIds = allExistingItems
+      .map((item) => item.id)
+      .filter((id) => !submittedIdSet.has(id));
+
+    await tx.itineraryItem.deleteMany({
+      where: { tripId, id: { in: omittedIds } },
+    });
+
     const updateOperations = itemsToUpdate.map((item) =>
       tx.itineraryItem.update({
         where: { id: item.id },
@@ -174,7 +191,20 @@ async function updateItinerary({
       }),
     );
 
-    return Promise.all([...updateOperations, ...createOperations]);
+    await Promise.all([...updateOperations, ...createOperations]);
+
+    return tx.itineraryItem.findMany({
+      where: { tripId },
+      select: {
+        id: true,
+        createdById: true,
+        title: true,
+        detail: true,
+        location: true,
+        startTime: true,
+      },
+      orderBy: { startTime: "asc" },
+    });
   });
 
   return upsertedResults;

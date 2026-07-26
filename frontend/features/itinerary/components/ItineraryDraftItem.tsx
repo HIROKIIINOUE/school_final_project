@@ -6,16 +6,17 @@ import { MapPin, SquarePen, Trash2 } from "lucide-react-native";
 
 type Props = {
   itineraryItem: ItineraryDraftItem;
-  isEditMode: boolean;
-  onEditPress?: (id: string) => void;
+  onEditPress: (id: string) => void;
+  onDeletePress: (id: string) => void;
 };
 
 const ItineraryDraftCardItem = ({
   itineraryItem,
-  isEditMode,
   onEditPress,
+  onDeletePress,
 }: Props) => {
   const time = formatTime(new Date(itineraryItem.startTime));
+  const identity = itineraryItem.id ?? itineraryItem.clientId;
   return (
     <View className="relative mb-md flex flex-row">
       <View className="absolute -left-7.75 top-sm h-3 w-3 rounded-app-full bg-primary"></View>
@@ -42,21 +43,18 @@ const ItineraryDraftCardItem = ({
           </Text>
         </View>
       </View>
-      {isEditMode && (
-        <View className="flex gap-2 items-center justify-center ml-sm">
-          <Pressable
-            onPress={() => {
-              if (!itineraryItem.id) return;
-              onEditPress && onEditPress(itineraryItem.id);
-            }}
-          >
-            <SquarePen color={"#4db6b6"} />
-          </Pressable>
-          <Pressable>
-            <Trash2 color={"#ba1a1a"} />
-          </Pressable>
-        </View>
-      )}
+      <View className="flex gap-2 items-center justify-center ml-sm">
+        <Pressable
+          onPress={() => {
+            onEditPress(identity);
+          }}
+        >
+          <SquarePen color={"#4db6b6"} />
+        </Pressable>
+        <Pressable onPress={() => onDeletePress(identity)}>
+          <Trash2 color={"#ba1a1a"} />
+        </Pressable>
+      </View>
     </View>
   );
 };
