@@ -1,8 +1,15 @@
 export type MyRoomType = {
   id: string;
   title: string;
+  description: string | null;
   memberCount: number;
   isOwner: boolean;
 };
 
-export type createMyRoomsInput = { title: string; description?: string | null };
+export type CreateMyRoomsInput = { title: string; description?: string | null };
+
+export type UpdateMyRoomInput = {
+  title: string;
+  description?: string | null;
+  tripId: string;
+};

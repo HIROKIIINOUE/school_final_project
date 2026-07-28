@@ -18,6 +18,21 @@ export const createTripBodySchema = z.strictObject({
 
 export type CreateTripBody = z.infer<typeof createTripBodySchema>;
 
+export const updateTripBodySchema = z.strictObject({
+  title: z
+    .string({ error: "Title must be a string." })
+    .trim()
+    .min(1, { error: "Title is required." })
+    .max(100, { error: "Title must be 100 characters or fewer." }),
+
+  description: z
+    .string({ error: "Description must be a string." })
+    .trim()
+    .max(500, { error: "Description must be 500 characters or fewer." })
+    .nullable()
+    .optional(),
+});
+
 export const itineraryItemSchema = z.object({
   title: z
     .string({ error: "Title must be a string." })

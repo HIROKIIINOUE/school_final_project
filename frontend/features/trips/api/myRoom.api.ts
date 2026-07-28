@@ -1,5 +1,5 @@
 import { grabAccessToken } from "@/lib/getAccessToken";
-import { createMyRoomsInput } from "../types/types";
+import { CreateMyRoomsInput, UpdateMyRoomInput } from "../types/types";
 
 const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -42,7 +42,7 @@ export async function fetchMyRooms() {
 export async function createMyTrips({
   title,
   description,
-}: createMyRoomsInput) {
+}: CreateMyRoomsInput) {
   const accessToken = await grabAccessToken();
 
   const res = await fetch(`${backendUrl}/api/trips/create-trip`, {
@@ -65,4 +65,37 @@ export async function createMyTrips({
   }
 
   return data.data.createdTrip;
+}
+
+export async function updateMyTrips(input: UpdateMyRoomInput) {
+  const accessToken = await grabAccessToken();
+  console.log("Trip Id for update: ", input.tripId);
+
+  const res = await fetch(
+    `${backendUrl}/api/trips/update-trip/${input.tripId}`,
+    {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        title: input.title,
+        description: input.description,
+      }),
+    },
+  );
+
+  const data = await res.json();
+  console.log(data);
+
+  if (!res.ok) {
+    console.error("Failed to update trip");
+    throw new Error(
+      data.error?.message ?? data.message ?? "Failed to update a trip",
+    );
+  }
+
+  return data.data.updatedTrip;
 }

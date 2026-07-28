@@ -69,6 +69,7 @@ const MyTripScreen = () => {
         <CreateTripModal
           visible={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
+          tripData={null}
         />
       )}
       <MytripHeader />

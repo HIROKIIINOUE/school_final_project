@@ -26,7 +26,7 @@ model Trip {
   id          String    @id @default(uuid()) @db.Uuid
   ownerId     String    @db.Uuid // supabase user id
   title       String
-  description String?
+  description String? 
   destination String?
   startDate   DateTime?
   endDate     DateTime?

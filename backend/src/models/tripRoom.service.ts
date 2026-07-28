@@ -14,6 +14,7 @@ async function getMyRooms(userId: string) {
         select: {
           id: true,
           title: true,
+          description: true,
           _count: { select: { members: true } }, // It is counting how many matching trip id appear in trip_members table
         },
       },
@@ -33,6 +34,7 @@ async function getMyRooms(userId: string) {
   const myTrips = memberships.map((mem) => ({
     title: mem.trip.title,
     id: mem.trip.id,
+    description: mem.trip.description || null,
     memberCount: mem.trip._count.members,
     isOwner: mem.role === "OWNER",
   }));
@@ -76,4 +78,33 @@ async function createRoom(
   }
 }
 
-export { getMyRooms, createRoom };
+async function updateMyTrips(data: {
+  id: string;
+  userId: string;
+  title: string;
+  description: string | null;
+}) {
+  const { id, userId, title, description } = data;
+
+  const membership = await prisma.tripMember.findFirst({
+    where: { tripId: id, userId },
+    select: { id: true },
+  });
+
+  if (!membership) {
+    throw new AppError(
+      403,
+      "TRIP_ACCESS_DENIED",
+      "You do not have access to this trip.",
+    );
+  }
+
+  const result = await prisma.trip.update({
+    where: { id },
+    data: { title, description },
+  });
+
+  return result;
+}
+
+export { getMyRooms, createRoom, updateMyTrips };
