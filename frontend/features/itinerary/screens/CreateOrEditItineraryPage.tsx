@@ -118,7 +118,7 @@ const CreateItineraryPage = ({ tripId, mode }: Props) => {
       }
     }
 
-    void loadEditableItinerary();
+    loadEditableItinerary();
 
     return () => {
       isActive = false;

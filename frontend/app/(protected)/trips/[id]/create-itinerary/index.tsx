@@ -11,8 +11,7 @@ export default function CreateItineraryRoute() {
 
   const tripId = Array.isArray(params.id) ? params.id[0] : params.id;
   const rawMode = Array.isArray(params.mode) ? params.mode[0] : params.mode;
-  const mode =
-    rawMode === "create" || rawMode === "edit" ? rawMode : undefined;
+  const mode = rawMode === "create" || rawMode === "edit" ? rawMode : undefined;
 
   if (!tripId || !mode) {
     return (

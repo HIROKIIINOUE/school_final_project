@@ -9,7 +9,7 @@ const TripRoomCard = ({ room }: Props) => {
   const router = useRouter();
 
   function handleOnpress() {
-    router.replace(`/(protected)/trips/${room.id}`);
+    router.navigate(`/(protected)/trips/${room.id}/(tabs)`);
   }
   return (
     <Pressable className="card" onPress={handleOnpress}>

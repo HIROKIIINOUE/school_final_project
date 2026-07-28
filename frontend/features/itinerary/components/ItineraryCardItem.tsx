@@ -4,11 +4,7 @@ import { SavedItineraryItem } from "../types/types";
 import { formatTime } from "@/lib/formatDate";
 import { MapPin } from "lucide-react-native";
 
-type Props = {
-  itineraryItem: SavedItineraryItem;
-  isEditMode: boolean;
-  onEditPress?: (id: string) => void;
-};
+type Props = { itineraryItem: SavedItineraryItem };
 
 const ItineraryCardItem = ({ itineraryItem }: Props) => {
   const time = formatTime(new Date(itineraryItem.startTime));

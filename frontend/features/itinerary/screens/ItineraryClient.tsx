@@ -22,6 +22,7 @@ const ItineraryClient = ({ tripId }: Props) => {
   // get the itineraries for this trip on load
   useFocusEffect(
     useCallback(() => {
+      if (!tripId) return;
       let isActive = true;
 
       async function loadItineraries() {

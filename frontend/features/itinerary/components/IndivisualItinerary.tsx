@@ -27,11 +27,7 @@ const IndivisualItinerary = ({ date, itineraries, isEditMode }: Props) => {
       </View>
       <View className="gap-md pl-11">
         {itineraries.map((item) => (
-          <ItineraryCardItem
-            key={item.title}
-            itineraryItem={item}
-            isEditMode={isEditMode}
-          />
+          <ItineraryCardItem key={item.title} itineraryItem={item} />
         ))}
       </View>
     </View>
