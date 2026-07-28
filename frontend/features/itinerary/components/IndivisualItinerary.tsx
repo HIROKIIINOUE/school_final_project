@@ -4,13 +4,9 @@ import { SavedItineraryItem } from "../types/types";
 import ItineraryCardItem from "./ItineraryCardItem";
 import { formatDayLabel, formatDayNumber } from "@/lib/formatDate";
 
-type Props = {
-  date: string;
-  itineraries: SavedItineraryItem[];
-  isEditMode: boolean;
-};
+type Props = { date: string; itineraries: SavedItineraryItem[] };
 
-const IndivisualItinerary = ({ date, itineraries, isEditMode }: Props) => {
+const IndivisualItinerary = ({ date, itineraries }: Props) => {
   console.log(date);
   const firstDate = new Date(itineraries[0].startTime);
 

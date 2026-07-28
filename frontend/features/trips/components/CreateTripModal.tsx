@@ -4,6 +4,7 @@ import { createMyTrips } from "../api/myRoom.api";
 import { useRouter } from "expo-router";
 import KeyboardDissmissBtn from "@/components/KeyboardDissmissBtn";
 import Toast from "react-native-toast-message";
+import MiniSpinner from "@/components/MiniSpinner";
 
 type Props = { visible: boolean; onClose: () => void };
 
@@ -32,8 +33,9 @@ const CreateTripModal = ({ visible, onClose }: Props) => {
 
       // toast successful message
       Toast.show({ type: "success", text1: "Successfully created new trip" });
+      onClose();
       // redirect to trip room
-      router.push(`/trips/${data.id}`);
+      router.navigate(`/trips/${data.id}`);
     } catch (e) {
       // toast error
       console.error("Failed to create trip", e);
@@ -92,7 +94,11 @@ const CreateTripModal = ({ visible, onClose }: Props) => {
               onPress={handleSubmit}
               disabled={isCreating}
             >
-              <Text className="btn-primary-text">Create Trip</Text>
+              {isCreating ? (
+                <MiniSpinner accessibilityLabel="Creating your trip" />
+              ) : (
+                <Text className="btn-primary-text">"Create Trip"</Text>
+              )}
             </Pressable>
           </View>
         </View>

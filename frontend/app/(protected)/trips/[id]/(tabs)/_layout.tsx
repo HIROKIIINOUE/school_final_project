@@ -13,7 +13,7 @@ export default function TripTabsLayout() {
       />
 
       <Tabs.Screen
-        name="itinerary"
+        name="itinerary/index"
         options={{
           title: "Itinerary",
           tabBarIcon: ({ color, size }) => (
@@ -23,7 +23,7 @@ export default function TripTabsLayout() {
       />
 
       <Tabs.Screen
-        name="chat"
+        name="chat/index"
         options={{
           title: "Chat",
           tabBarIcon: ({ color, size }) => (

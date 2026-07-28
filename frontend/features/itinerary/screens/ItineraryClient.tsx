@@ -17,7 +17,6 @@ const ItineraryClient = ({ tripId }: Props) => {
     [],
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isEditMode, setIsEditMode] = useState(false);
 
   // get the itineraries for this trip on load
   useFocusEffect(
@@ -103,12 +102,12 @@ const ItineraryClient = ({ tripId }: Props) => {
 
   // display itineararies
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
       <View className="flex flex-row justify-between items-center mx-md">
         <View>
-          <Text className="text-title">View your itinerary</Text>
+          <Text className="text-title text-primary">Itinerary Page</Text>
         </View>
-        <View className="flex flex-row my-sm">
+        <View className="flex flex-row gap-sm items-center my-sm justify-end">
           <Link
             href={{
               pathname: "/trips/[id]/create-itinerary",
@@ -116,8 +115,8 @@ const ItineraryClient = ({ tripId }: Props) => {
             }}
             asChild
           >
-            <Pressable className="bg-primary-container h-15 w-15 rounded-full flex items-center justify-center mt-md mx-md">
-              <Plus className="material-symbols-outlined" />
+            <Pressable className="bg-primary-container h-11 w-11 rounded-full flex items-center justify-center mt-md">
+              <Plus className="material-symbols-outlined" size={20} />
             </Pressable>
           </Link>
           <Link
@@ -127,8 +126,11 @@ const ItineraryClient = ({ tripId }: Props) => {
             }}
             asChild
           >
-            <Pressable className="flex-row items-center justify-center rounded-app-lg px-md py-sm bg-secondary-container active:opacity-80">
-              <Text>{isEditMode ? "Cancel" : "Edit"}</Text>
+            <Pressable className=" bg-secondary-container h-11 w-11 rounded-full flex items-center justify-center mt-md">
+              <View className="flex flex-row gap-2">
+                <SquarePen size={16} />
+                {/* <Text>{isEditMode ? "Cancel" : "Edit"}</Text> */}
+              </View>
             </Pressable>
           </Link>
         </View>
@@ -137,11 +139,7 @@ const ItineraryClient = ({ tripId }: Props) => {
       <ScrollView className="screen">
         {Array.from(dateMap.entries()).map(([key, value]) => (
           <View className="flex flex-row items-center" key={key}>
-            <IndivisualItinerary
-              date={key}
-              itineraries={value}
-              isEditMode={isEditMode}
-            />
+            <IndivisualItinerary date={key} itineraries={value} />
           </View>
         ))}
       </ScrollView>
