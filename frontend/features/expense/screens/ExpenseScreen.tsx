@@ -1,9 +1,11 @@
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
 import { styled } from "nativewind";
+import { useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MemberAvatars from "@/components/MemberAvatars";
+import AddExpenseModal from "@/features/expense/components/AddExpenseModal";
 import { Profile } from "@/features/profile/types/profile.type";
 
 const StyledSafeAreaView = styled(SafeAreaView);
@@ -29,9 +31,7 @@ const dummyExpenses = [
     title: "Team Dinner",
     price: 12000,
     paidBy: "Hiroki",
-    icon: "silverware-fork-knife" as const,
-    iconBackground: "bg-[#d9f0f0]",
-    iconColor: "#547071",
+    detail: "",
     members: [
       createDummyMember(1, "Hiroki", "https://i.pravatar.cc/64?img=12"),
       createDummyMember(2, "Takaki"),
@@ -48,9 +48,7 @@ const dummyExpenses = [
     title: "Museum Entry",
     price: 4000,
     paidBy: "You",
-    icon: "bank" as const,
-    iconBackground: "bg-[#ffe0d5]",
-    iconColor: "#aa593d",
+    detail: "",
     members: [
       createDummyMember(9, "Aiko", "https://i.pravatar.cc/64?img=32"),
       createDummyMember(10, "Ren"),
@@ -59,9 +57,12 @@ const dummyExpenses = [
   },
 ];
 
-const formatCurrency = (amount: number) => `¥${amount.toLocaleString()}`;
+const formatCurrency = (amount: number) => `$ ${amount.toLocaleString()}`;
 
 const ExpenseScreen = () => {
+  const [isAddExpenseModalVisible, setIsAddExpenseModalVisible] =
+    useState(false);
+
   return (
     <StyledSafeAreaView className="flex-1 bg-[#f7f8ff]" edges={["left", "right", "bottom"]}>
       <Stack.Screen options={{ title: "Expense Calculate" }} />
@@ -83,10 +84,10 @@ const ExpenseScreen = () => {
             </View>
             <View className="mt-3 h-px bg-[#dfe3eb]" />
             <View className="mt-[14px] rounded-[8px] border border-[#c9dce2] bg-[#f4ffff] px-4 py-[10px]">
-              <Text className="text-center text-[12px] font-bold tracking-[1.2px] text-[#687383]">
+              <Text className="text-center text-[12px] font-bold tracking-[1.2px] text-[#687383] capitalize">
                 TOTAL TRIP COST
               </Text>
-              <Text className="mt-1 text-center text-[27px] font-extrabold tracking-[-0.8px] text-[#273341]">
+              <Text className="mt-1 text-center text-[28px] font-extrabold tracking-[-0.8px] text-[#273341]">
                 {formatCurrency(142500)}
               </Text>
             </View>
@@ -110,7 +111,11 @@ const ExpenseScreen = () => {
 
             <View className="mt-[32px] flex-col items-center">
               <Text className="text-[20px] font-extrabold text-[#2e3a48]">Recent Expenses</Text>
-              <Pressable accessibilityRole="button" className="bg-[#238688] rounded  flex-row items-center gap-1 p-2 my-4 active:opacity-60">
+              <Pressable
+                accessibilityRole="button"
+                className="bg-[#238688] rounded flex-row items-center gap-1 p-2 my-4 active:opacity-60"
+                onPress={() => setIsAddExpenseModalVisible(true)}
+              >
                 <AntDesign name="plus" size={16} color="white" />
                 <Text className="text-[16px] font-bold text-white">Add expense</Text>
               </Pressable>
@@ -131,11 +136,15 @@ const ExpenseScreen = () => {
                 Paid by <Text className="font-bold text-[#278184]">{item.paidBy}</Text>
               </Text>
               <View className="mt-[4px]">
-                <MemberAvatars members={item.members} />
+                <MemberAvatars members={item.members} maxDisplay={5} />
               </View>
             </View>
           </View>
         )}
+      />
+      <AddExpenseModal
+        visible={isAddExpenseModalVisible}
+        onClose={() => setIsAddExpenseModalVisible(false)}
       />
     </StyledSafeAreaView>
   );
