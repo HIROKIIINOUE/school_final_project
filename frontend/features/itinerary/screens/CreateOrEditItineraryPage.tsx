@@ -181,39 +181,43 @@ const CreateItineraryPage = ({ tripId, mode }: Props) => {
   }
 
   if (mode === "edit" && createdItems.length === 0) {
-    <SafeAreaView style={{ flex: 1 }} className="m-md">
-      <Link
-        href={`/(protected)/trips/${tripId}/(tabs)/itinerary`}
-        className=" ml-7"
-      >
-        <View className="flex flex-row items-center text-primary">
-          <ArrowLeft className="" />
-          <Text className="text-primary">Go back</Text>
-        </View>
-      </Link>
-      <Text className="text-muted text-center mb-md">Tap here to add item</Text>
-      <Pressable
-        className="btn-primary mx-md"
-        onPress={() => setIsModalOpen(true)}
-        disabled={isModalOpen}
-      >
-        <Text>Create item</Text>
-      </Pressable>
-      {isModalOpen && (
-        <CreateItineraryModal
-          addItems={addToItems}
-          closeModal={() => setIsModalOpen(false)}
-          item={selectedItem}
-        />
-      )}
-      <Pressable
-        className="btn-primary m-md"
-        onPress={onSubmit}
-        disabled={isSubmitting}
-      >
-        <Text>{isSubmitting ? "Submitting your data..." : "Submit"}</Text>
-      </Pressable>
-    </SafeAreaView>;
+    return (
+      <SafeAreaView style={{ flex: 1 }} className="m-md">
+        <Link
+          href={`/(protected)/trips/${tripId}/(tabs)/itinerary`}
+          className=" ml-7"
+        >
+          <View className="flex flex-row items-center text-primary">
+            <ArrowLeft className="" />
+            <Text className="text-primary">Go back</Text>
+          </View>
+        </Link>
+        <Text className="text-muted text-center mb-md">
+          Tap here to add item
+        </Text>
+        <Pressable
+          className="btn-primary mx-md"
+          onPress={() => setIsModalOpen(true)}
+          disabled={isModalOpen}
+        >
+          <Text>Create item</Text>
+        </Pressable>
+        {isModalOpen && (
+          <CreateItineraryModal
+            addItems={addToItems}
+            closeModal={() => setIsModalOpen(false)}
+            item={selectedItem}
+          />
+        )}
+        <Pressable
+          className="btn-primary m-md"
+          onPress={onSubmit}
+          disabled={isSubmitting}
+        >
+          <Text>{isSubmitting ? "Submitting your data..." : "Submit"}</Text>
+        </Pressable>
+      </SafeAreaView>
+    );
   }
   return (
     <SafeAreaView style={{ flex: 1 }} className="mx-sm mt-md">

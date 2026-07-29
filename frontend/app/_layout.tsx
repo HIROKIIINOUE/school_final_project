@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import Toast from "react-native-toast-message";
 import { toastConfig } from "@/config/toastConfig";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 function RootNavigator() {
   const authStatus = useAuthStore((state) => state.authStatus);
@@ -61,9 +62,11 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <>
-      <AuthInitializer />
-      <RootNavigator />
-      <Toast config={toastConfig} />
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <AuthInitializer />
+        <RootNavigator />
+        <Toast config={toastConfig} />
+      </GestureHandlerRootView>
     </>
   );
 }

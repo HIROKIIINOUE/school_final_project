@@ -46,7 +46,7 @@ async function getItinerary({
       detail: itinerary.detail ?? null,
       location: itinerary.location ?? null,
       startTime: new Date(itinerary.startTime),
-      isCreatedByCurrentser: itinerary.createdById === userId,
+      isCreatedByCurrentUser: itinerary.createdById === userId,
     };
   });
 }
