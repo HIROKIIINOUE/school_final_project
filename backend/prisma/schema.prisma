@@ -83,11 +83,14 @@ model Message {
   userId String @db.Uuid
   tripId String @db.Uuid
   content String
+  clientMessageId String? @db.Uuid 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // tripId is related to Trip's id feild
   trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
 
   @@index([tripId, createdAt])
+  @@unique([userId, clientMessageId])
   @@index([userId])
 }
