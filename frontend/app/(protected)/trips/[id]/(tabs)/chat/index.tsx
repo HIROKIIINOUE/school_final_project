@@ -1,6 +1,7 @@
 import { View, Text } from "react-native";
 import React from "react";
 import { useGlobalSearchParams } from "expo-router";
+import ChatPageClient from "@/features/chat/screen/ChatPageClient";
 
 const index = () => {
   const { id } = useGlobalSearchParams();
@@ -11,11 +12,7 @@ const index = () => {
     return <Text>Invalid trip route.</Text>;
   }
 
-  return (
-    <View>
-      <Text>index</Text>
-    </View>
-  );
+  return <ChatPageClient tripId={tripId} />;
 };
 
 export default index;

@@ -7,10 +7,11 @@ const index = () => {
   const { id } = useGlobalSearchParams();
 
   const tripId = Array.isArray(id) ? id[0] : id;
-  console.log(tripId);
+
   if (!tripId) {
     return <Text>Invalid trip route.</Text>;
   }
+
   return <ItineraryClient tripId={tripId} />;
 };
 
