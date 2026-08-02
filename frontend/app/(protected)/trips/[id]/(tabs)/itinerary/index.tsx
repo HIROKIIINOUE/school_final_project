@@ -4,7 +4,7 @@ import ItineraryClient from "@/features/itinerary/screens/ItineraryClient";
 import { Text } from "react-native";
 
 const index = () => {
-  const { id } = useGlobalSearchParams(); // undefined
+  const { id } = useGlobalSearchParams();
 
   const tripId = Array.isArray(id) ? id[0] : id;
   console.log(tripId);
