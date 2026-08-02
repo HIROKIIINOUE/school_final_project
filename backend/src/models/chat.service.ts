@@ -21,9 +21,9 @@ async function getMessages({
     );
   }
 
-  await prisma.message.findMany({
+  const messages = await prisma.message.findMany({
     where: { tripId },
-    select: {},
+    select: { content: true, id: true },
     orderBy: { createdAt: "desc" },
   });
 }
