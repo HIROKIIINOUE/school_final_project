@@ -89,9 +89,15 @@ export const updatItinerariesBodySchema = z.object({
 export type UpdateItineraryInput = z.infer<typeof updateItineraryItemSchema>;
 export type UpdateItinerariesBody = z.infer<typeof updatItinerariesBodySchema>;
 
-export const postMessageBodySchema = z.object({
-  clientMessageId: z.uuid(),
-  content: z.string().trim().min(1).max(1000),
+export const postMessageBodySchema = z.strictObject({
+  clientMessageId: z.uuid({ error: "Client message ID must be a valid UUID." }),
+  content: z
+    .string({ error: "Message content must be a string." })
+    .trim()
+    .min(1, { error: "Message cannot be empty." })
+    .max(1000, { error: "Message must be 1000 characters or fewer." }),
 });
+
+export type PostMessageBody = z.infer<typeof postMessageBodySchema>;
 
 export const tripIdParamsSchema = z.object({ tripId: z.string().uuid() });

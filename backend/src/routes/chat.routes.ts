@@ -8,6 +8,6 @@ import {
 const router = Router();
 
 router.get("/", authCheck, getMessagesController);
-router.post("/post-chat", authCheck, postMessageController);
+router.post("/", authCheck, postMessageController);
 
 export default router;

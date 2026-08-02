@@ -4,7 +4,7 @@ import {
   postMessageBodySchema,
   tripIdParamsSchema,
 } from "../../schemas/trips.schema";
-import { getMessages, postMessages } from "../../models/chat.service";
+import { getMessages, createMessage } from "../../models/chat.service";
 
 async function getMessagesController(
   req: Request,
@@ -43,9 +43,7 @@ async function getMessagesController(
 
   const { tripId } = paramsResult.data;
 
-  const id = Array.isArray(tripId) ? tripId[0] : tripId;
-
-  const results = await getMessages({ userId, tripId: id });
+  const results = await getMessages({ userId, tripId });
 
   return res.status(200).json({ data: results });
 }
@@ -87,8 +85,6 @@ async function postMessageController(
 
   const { tripId } = paramsResult.data;
 
-  const id = Array.isArray(tripId) ? tripId[0] : tripId;
-
   const validatedBody = postMessageBodySchema.safeParse(req.body);
 
   if (!validatedBody.success) {
@@ -108,7 +104,7 @@ async function postMessageController(
 
   const body = validatedBody.data;
 
-  const result = await postMessages({ userId, tripId: id, body: body });
+  const result = await createMessage({ userId, tripId, body: body });
 
   return res.status(201).json({ data: result });
 }

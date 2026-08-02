@@ -8,7 +8,7 @@ if (!BACKEND_URL) {
 export async function fetchMessages({ id }: { id: string }) {
   const accessToken = await grabAccessToken();
 
-  const res = await fetch(`${BACKEND_URL}/api/trip/${id}/chat`, {
+  const res = await fetch(`${BACKEND_URL}/api/trip/${id}/messages`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -39,7 +39,7 @@ export async function postMessage({
 }) {
   const accessToken = await grabAccessToken();
 
-  const res = await fetch(`${BACKEND_URL}/api/trip/${id}/chat/post-chat`, {
+  const res = await fetch(`${BACKEND_URL}/api/trip/${id}/messages`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
