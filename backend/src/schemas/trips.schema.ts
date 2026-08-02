@@ -89,4 +89,9 @@ export const updatItinerariesBodySchema = z.object({
 export type UpdateItineraryInput = z.infer<typeof updateItineraryItemSchema>;
 export type UpdateItinerariesBody = z.infer<typeof updatItinerariesBodySchema>;
 
+export const postMessageBodySchema = z.object({
+  clientMessageId: z.uuid(),
+  content: z.string().trim().min(1).max(1000),
+});
+
 export const tripIdParamsSchema = z.object({ tripId: z.string().uuid() });
