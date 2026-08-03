@@ -1,17 +1,30 @@
 import { Stack } from "expo-router";
+import { styled } from "nativewind";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { toast } from "sonner";
 import ProfileDetailsForm from "../components/ProfileDetailsForm";
 import { useCreateProfile } from "../hooks/useCreateProfile";
 import { ProfileFormValues } from "../types/profileForm.type";
+import KeyboardDismissButton from "@/components/keyboard/KeyboardDismissButton";
+import { useKeyboard } from "@/components/keyboard/useKeyboard";
+
+const StyledSafeAreaView = styled(SafeAreaView); // <SafeAreaView> has to be captured by selected() in order to apply NativeWind
 
 const ProfileSetupScreen = () => {
   const [values, setValues] = useState<ProfileFormValues>({ displayName: "" });
   const { createdProfile, isSubmitting, submitProfile } = useCreateProfile();
   const isContinueDisabled =
     !values.displayName.trim() || isSubmitting || createdProfile !== null;
+  const { keyboardVisible, keyboardHeight, dismissKeyboard } = useKeyboard()
 
   const handleContinue = async () => {
     try {
@@ -24,147 +37,63 @@ const ProfileSetupScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <StyledSafeAreaView className="flex-1 bg-[#f4f7fb]">
       <Stack.Screen options={{ title: "Set up profile" }} />
-      <View style={styles.screen}>
-        <View style={styles.content}>
-          <View style={styles.hero}>
-            <View style={styles.avatarPlaceholder}>
-              <Text style={styles.avatarInitial}>?</Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className="flex-1"
+      >
+        <ScrollView
+          className="flex-1"
+          contentContainerClassName="flex-grow px-5 pt-6"
+          contentContainerStyle={{
+            paddingBottom: keyboardVisible ? 120 : 32,
+          }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View className="items-center px-[18px]">
+            <View className="h-[72px] w-[72px] items-center justify-center rounded-full border border-[#bae6fd] bg-[#e0f2fe]">
+              <Text className="text-[30px] font-bold text-[#0369a1]">?</Text>
             </View>
-            <Text style={styles.kicker}>ONE LAST STEP</Text>
-            <Text style={styles.title}>Tell us what to call you</Text>
-            <Text style={styles.subtitle}>
+            <Text className="mt-[22px] text-xs font-bold leading-4 tracking-[1.4px] text-[#0f766e]">
+              ONE LAST STEP
+            </Text>
+            <Text className="mt-2.5 text-center text-[30px] font-bold leading-[37px] tracking-[-0.6px] text-[#0f172a]">
+              Tell us what to call you
+            </Text>
+            <Text className="mt-3 text-center text-base leading-6 text-[#667085]">
               Set up your profile before you start planning trips with friends.
             </Text>
           </View>
 
-          <View style={styles.card}>
+          <View className="mt-8 rounded-[28px] border border-[#e4ebf5] bg-white/[0.92] p-6 shadow-[0_14px_24px_rgba(100,116,139,0.1)]">
             <ProfileDetailsForm
               values={values}
               onChangeDisplayName={(displayName) => setValues({ displayName })}
             />
+
             <Pressable
               accessibilityRole="button"
               disabled={isContinueDisabled}
               onPress={handleContinue}
-              style={({ pressed }) => [
-                styles.continueButton,
-                isContinueDisabled && styles.continueButtonDisabled,
-                pressed && !isContinueDisabled && styles.continueButtonPressed,
-              ]}
+              className="mt-6 min-h-[54px] items-center justify-center rounded-[14px] bg-[#0f766e] disabled:opacity-[0.45] active:scale-[0.995] active:opacity-[0.85]"
             >
-              <Text style={styles.continueButtonLabel}>
+              <Text className="text-base font-bold text-white">
                 {isSubmitting ? "Saving..." : "Continue"}
               </Text>
             </Pressable>
-            <Text style={styles.footnote}>
+            <Text className="mt-[14px] text-center text-xs leading-[18px] text-[#94a3b8]">
               {createdProfile
                 ? `Profile saved as ${createdProfile.displayName}.`
                 : "You can add a profile picture later."}
             </Text>
           </View>
-        </View>
-      </View>
-    </SafeAreaView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+      {keyboardVisible ? <KeyboardDismissButton keyboardHeight={keyboardHeight} onPress={dismissKeyboard} /> : null}
+    </StyledSafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  safeArea: {
-    backgroundColor: "#f4f7fb",
-    flex: 1,
-  },
-  screen: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 24,
-  },
-  content: {
-    flex: 1,
-  },
-  hero: {
-    alignItems: "center",
-    paddingHorizontal: 18,
-  },
-  avatarPlaceholder: {
-    alignItems: "center",
-    backgroundColor: "#e0f2fe",
-    borderColor: "#bae6fd",
-    borderRadius: 36,
-    borderWidth: 1,
-    height: 72,
-    justifyContent: "center",
-    width: 72,
-  },
-  avatarInitial: {
-    color: "#0369a1",
-    fontSize: 30,
-    fontWeight: "700",
-  },
-  kicker: {
-    color: "#0f766e",
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 1.4,
-    lineHeight: 16,
-    marginTop: 22,
-  },
-  title: {
-    color: "#0f172a",
-    fontSize: 30,
-    fontWeight: "700",
-    letterSpacing: -0.6,
-    lineHeight: 37,
-    marginTop: 10,
-    textAlign: "center",
-  },
-  subtitle: {
-    color: "#667085",
-    fontSize: 16,
-    lineHeight: 24,
-    marginTop: 12,
-    textAlign: "center",
-  },
-  card: {
-    backgroundColor: "rgba(255,255,255,0.92)",
-    borderColor: "#e4ebf5",
-    borderRadius: 28,
-    borderWidth: 1,
-    marginTop: 32,
-    padding: 24,
-    shadowColor: "#64748b",
-    shadowOffset: { width: 0, height: 14 },
-    shadowOpacity: 0.1,
-    shadowRadius: 24,
-  },
-  continueButton: {
-    alignItems: "center",
-    backgroundColor: "#0f766e",
-    borderRadius: 14,
-    marginTop: 24,
-    minHeight: 54,
-    justifyContent: "center",
-  },
-  continueButtonDisabled: {
-    opacity: 0.45,
-  },
-  continueButtonPressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.995 }],
-  },
-  continueButtonLabel: {
-    color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  footnote: {
-    color: "#94a3b8",
-    fontSize: 12,
-    lineHeight: 18,
-    marginTop: 14,
-    textAlign: "center",
-  },
-});
 
 export default ProfileSetupScreen;
