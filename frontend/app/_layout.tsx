@@ -1,20 +1,13 @@
 import { Stack } from "expo-router";
 import "../globals.css";
 import Spinner from "@/components/Spinner";
-import { AuthInitializer } from "@/features/auth/components/AuthInitializer";
 import { useAuthStore } from "@/store/auth.store";
-import { useEffect } from "react";
+import { useInitializeAuth } from "@/features/auth/hooks/useInitializeAuth";
 
-function RootNavigator() {
+export default function RootNavigator() {
+  useInitializeAuth()
   const authStatus = useAuthStore((state) => state.authStatus);
   const profileStatus = useAuthStore((state) => state.profileStatus);
-
-  useEffect(() => {
-    console.log("[RootNavigator] guard state changed", {
-      authStatus,
-      profileStatus,
-    });
-  }, [authStatus, profileStatus]);
 
   if (authStatus === "initializing" || profileStatus === "loading") {
     return <Spinner message="Loading user..." />;
@@ -49,11 +42,3 @@ function RootNavigator() {
   );
 }
 
-export default function RootLayout() {
-  return (
-    <>
-      <AuthInitializer />
-      <RootNavigator />
-    </>
-  );
-}
