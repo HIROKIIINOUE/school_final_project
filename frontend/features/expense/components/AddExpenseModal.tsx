@@ -1,4 +1,5 @@
 import { Controller, useWatch } from "react-hook-form";
+import { useState } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -11,8 +12,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import MemberAvatars from "@/components/MemberAvatars";
-import { Profile } from "@/features/profile/types/profile.type";
 import { useAppZodForm } from "@/hooks/useAppZodForm";
+import { dummyTripMembers } from "../data/dummyTripMembers";
 import { expenseSchema } from "../schemas/expenseSchema";
 import { useKeyboard } from "@/components/keyboard/useKeyboard";
 import KeyboardDismissButton from "@/components/keyboard/KeyboardDismissButton";
@@ -22,19 +23,16 @@ type Props = {
   onClose: () => void;
 };
 
-const teamMembers: Profile[] = [
-  { id: 1, userId: "hiroki", displayName: "Hiroki", image: null, createdAt: "2026-07-26T00:00:00.000Z", updatedAt: "2026-07-26T00:00:00.000Z" },
-  { id: 2, userId: "takaki", displayName: "Takaki", image: null, createdAt: "2026-07-26T00:00:00.000Z", updatedAt: "2026-07-26T00:00:00.000Z" },
-  { id: 3, userId: "taisei", displayName: "Taisei", image: null, createdAt: "2026-07-26T00:00:00.000Z", updatedAt: "2026-07-26T00:00:00.000Z" },
-  { id: 4, userId: "suzuna", displayName: "Suzuna", image: null, createdAt: "2026-07-26T00:00:00.000Z", updatedAt: "2026-07-26T00:00:00.000Z" },
-];
-
 const AddExpenseModal = ({ visible, onClose }: Props) => {
   const insets = useSafeAreaInsets();
+  // customSplitInputs type definition is <"string", "string"> to show the number properly in TextInput.
+  // whereas customSplits type definition is <"number", "number"> to calculate, validate and save data.
+  const [customSplitInputs, setCustomSplitInputs] = useState<Record<string, string>>({});
   const { keyboardVisible, keyboardHeight, dismissKeyboard } = useKeyboard()
   const {
     control,
     setValue,
+    getValues,
     handleSubmit,
     formState: { errors },
     reset,
@@ -42,33 +40,79 @@ const AddExpenseModal = ({ visible, onClose }: Props) => {
     schema: expenseSchema,
     defaultValues: {
       title: "",
-      paidBy: teamMembers[0].userId,
-      owe_members: [teamMembers[0].userId],
+      paidByMemberId: dummyTripMembers[0].id,
+      oweMemberIds: [dummyTripMembers[0].id],
+      splitType: "EQUAL",
+      customSplits: {},
       note: "",
     },
     mode: "onSubmit",
     reValidateMode: "onChange",
   });
 
-  const paidBy = useWatch({ control, name: "paidBy" });
-  const selectedMemberIds = useWatch({ control, name: "owe_members" }) ?? [];
+  const paidByMemberId = useWatch({ control, name: "paidByMemberId" });
+  const selectedMemberIds = useWatch({ control, name: "oweMemberIds" }) ?? [];
+  const splitType = useWatch({ control, name: "splitType" });
+  const customSplits = useWatch({ control, name: "customSplits" });
 
-  const selectedMembers = teamMembers.filter((member) =>
-    selectedMemberIds.includes(member.userId),
-  );
+  const selectedMembers = dummyTripMembers
+    .filter((member) => selectedMemberIds.includes(member.id))
+    .map((member) => member.profile);
 
-  const toggleMember = (memberUserId: string) => {
+  const toggleMember = (tripMemberId: string) => {
+    // check if toggled member is "to add" or "to remove"
+    const nextMemberIds = selectedMemberIds.includes(tripMemberId)
+      ? selectedMemberIds.filter((memberId) => memberId !== tripMemberId)
+      : [...selectedMemberIds, tripMemberId];
+    const currentSplits = getValues("customSplits");
+
     setValue(
-      "owe_members",
-      selectedMemberIds.includes(memberUserId)
-        ? selectedMemberIds.filter((userId) => userId !== memberUserId)
-        : [...selectedMemberIds, memberUserId],
+      "oweMemberIds",
+      nextMemberIds,
+      { shouldValidate: true },
+    );
+    setValue(
+      "customSplits",
+      Object.fromEntries(
+        nextMemberIds.map((memberId) => [memberId, currentSplits[memberId] ?? 0]),
+      ),
+      { shouldValidate: splitType === "CUSTOM" },
+    );
+    setCustomSplitInputs((currentInputs) =>
+      Object.fromEntries(
+        nextMemberIds.map((memberId) => [memberId, currentInputs[memberId] ?? ""]),
+      ),
+    );
+  };
+
+  const updateCustomSplit = (tripMemberId: string, inputValue: string) => {
+    setCustomSplitInputs((currentInputs) => ({
+      ...currentInputs,
+      [tripMemberId]: inputValue,
+    }));
+    setValue(
+      "customSplits",
+      {
+        ...getValues("customSplits"),
+        [tripMemberId]: inputValue === "" ? 0 : Number(inputValue),
+      },
       { shouldValidate: true },
     );
   };
 
+  const customTotal = selectedMemberIds.reduce(
+    (total, memberId) => total + Number(customSplits?.[memberId] ?? 0),
+    0,
+  );
+  const customSplitsError = errors.customSplits;
+  const customSplitsErrorMessage =
+    customSplitsError && "message" in customSplitsError && typeof customSplitsError.message === "string"
+      ? customSplitsError.message
+      : null;
+
   const handleClose = () => {
     reset();
+    setCustomSplitInputs({});
     onClose();
   };
 
@@ -88,7 +132,7 @@ const AddExpenseModal = ({ visible, onClose }: Props) => {
           className="absolute inset-0"
           onPress={handleClose}
         />
-        <View className="h-2/3 rounded-t-[28px] bg-white px-5 pt-3">
+        <View className="h-[85%] rounded-t-[28px] bg-white px-5 pt-3">
           <View className="h-1 w-10 self-center rounded-full bg-[#cbd5e1]" />
           <Text className="mt-4 text-xl font-bold text-[#263342]">Add expense</Text>
 
@@ -122,8 +166,8 @@ const AddExpenseModal = ({ visible, onClose }: Props) => {
             <View>
               <Text className="mb-2 text-sm font-semibold text-[#445160]">Paid by</Text>
               <View className="flex-row flex-wrap gap-2">
-                {teamMembers.map((member) => {
-                  const isSelected = paidBy === member.userId;
+                {dummyTripMembers.map((member) => {
+                  const isSelected = paidByMemberId === member.id;
                   return (
                     <Pressable
                       key={member.id}
@@ -133,14 +177,14 @@ const AddExpenseModal = ({ visible, onClose }: Props) => {
                         borderColor: isSelected ? "#238688" : "#d5dde7",
                       }}
                       onPress={() =>
-                        setValue("paidBy", member.userId, { shouldValidate: true })
+                        setValue("paidByMemberId", member.id, { shouldValidate: true })
                       }
                     >
                       <Text
                         className="text-sm font-semibold"
                         style={{ color: isSelected ? "#176a6d" : "#647184" }}
                       >
-                        {member.displayName}
+                        {member.profile.displayName}
                       </Text>
                     </Pressable>
                   );
@@ -173,8 +217,8 @@ const AddExpenseModal = ({ visible, onClose }: Props) => {
             <View>
               <Text className="mb-2 text-sm font-semibold text-[#445160]">Split with</Text>
               <View className="flex-row flex-wrap gap-2">
-                {teamMembers.map((member) => {
-                  const isSelected = selectedMemberIds.includes(member.userId);
+                {dummyTripMembers.map((member) => {
+                  const isSelected = selectedMemberIds.includes(member.id);
                   return (
                     <Pressable
                       key={member.id}
@@ -183,13 +227,13 @@ const AddExpenseModal = ({ visible, onClose }: Props) => {
                         backgroundColor: isSelected ? "#dff2f3" : "#ffffff",
                         borderColor: isSelected ? "#238688" : "#d5dde7",
                       }}
-                      onPress={() => toggleMember(member.userId)}
+                      onPress={() => toggleMember(member.id)}
                     >
                       <Text
                         className="text-sm font-semibold"
                         style={{ color: isSelected ? "#176a6d" : "#647184" }}
                       >
-                        {member.displayName}
+                        {member.profile.displayName}
                       </Text>
                     </Pressable>
                   );
@@ -201,10 +245,83 @@ const AddExpenseModal = ({ visible, onClose }: Props) => {
                   <MemberAvatars members={selectedMembers} maxDisplay={10} />
                 </View>
               ) : null}
-              {errors.owe_members?.message ? (
+              {errors.oweMemberIds?.message ? (
                 <Text className="mt-1 text-xs text-red-500">
-                  {errors.owe_members.message}
+                  {errors.oweMemberIds.message}
                 </Text>
+              ) : null}
+            </View>
+
+            <View>
+              <Text className="mb-2 text-sm font-semibold text-[#445160]">How to split</Text>
+              <View className="flex-row gap-2">
+                {[
+                  { label: "Equal split", value: "EQUAL" as const },
+                  { label: "Custom", value: "CUSTOM" as const },
+                ].map((option) => {
+                  const isSelected = splitType === option.value;
+
+                  return (
+                    <Pressable
+                      key={option.value}
+                      className="flex-1 items-center rounded-xl border px-3 py-3"
+                      style={{
+                        backgroundColor: isSelected ? "#dff2f3" : "#ffffff",
+                        borderColor: isSelected ? "#238688" : "#d5dde7",
+                      }}
+                      onPress={() =>
+                        setValue("splitType", option.value, { shouldValidate: true })
+                      }
+                    >
+                      <Text
+                        className="text-sm font-bold"
+                        style={{ color: isSelected ? "#176a6d" : "#647184" }}
+                      >
+                        {option.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              {splitType === "CUSTOM" ? (
+                <View className="mt-3 gap-2 rounded-xl bg-[#f7fafc] p-3">
+                  {dummyTripMembers
+                    .filter((member) => selectedMemberIds.includes(member.id))
+                    .map((member) => (
+                      <View key={member.id} className="flex-row items-center gap-3">
+                        <Text className="flex-1 text-sm font-semibold text-[#445160]">
+                          {member.profile.displayName}
+                        </Text>
+                        <TextInput
+                          keyboardType="decimal-pad"
+                          placeholder="0.00"
+                          placeholderTextColor="#94a3b8"
+                          style={{
+                            height: 40,
+                            width: 112,
+                            borderWidth: 1,
+                            borderColor: "#d5dde7",
+                            borderRadius: 8,
+                            backgroundColor: "#ffffff",
+                            paddingHorizontal: 12,
+                            color: "#263342",
+                            fontSize: 16,
+                            textAlign: "right",
+                          }}
+                          value={customSplitInputs[member.id] ?? ""}
+                          onChangeText={(value) => updateCustomSplit(member.id, value)}
+                        />
+                      </View>
+                    ))}
+                  <View className="mt-1 flex-row justify-between border-t border-[#dce5ed] pt-2">
+                    <Text className="text-xs font-semibold text-[#647184]">Custom total</Text>
+                    <Text className="text-xs font-bold text-[#263342]">{customTotal.toFixed(2)}</Text>
+                  </View>
+                  {customSplitsErrorMessage ? (
+                    <Text className="text-xs text-red-500">{customSplitsErrorMessage}</Text>
+                  ) : null}
+                </View>
               ) : null}
             </View>
 
