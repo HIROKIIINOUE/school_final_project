@@ -8,7 +8,19 @@ import itineraryrouter from "./routes/itinerary.routes";
 import chatRouter from "./routes/chat.routes";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
-import { SocketData } from "./types/chat.types";
+import {
+  ClientToServerEvents,
+  InterServerEvents,
+  ServerToClientEvents,
+  SocketData,
+} from "./types/chat.types";
+import {
+  joinTripPayloadSchema,
+  socketAuthSchema,
+} from "./schemas/trips.schema";
+import { verifyAccessToken } from "./lib/supabase-jws.service";
+import { prisma } from "./lib/prisma";
+import { getTripRoomName } from "./lib/tripRoomName";
 
 dotenv.config();
 
@@ -17,10 +29,10 @@ const app = express();
 const httpServer = createServer(app);
 // websocket
 const io = new Server<
-  Record<string, never>, // ClientToServerEvents,
-  Record<string, never>, // ServerToClientEvents,
-  Record<string, never>, // InterServerEvents,
-  SocketData // SocketData
+  ClientToServerEvents, // events the client may send
+  ServerToClientEvents, // events the server may send
+  InterServerEvents, // events between Socket.IO servers,
+  SocketData // trusted data attached to each socket
 >(httpServer);
 
 // ############### NORMAL APP SETUP ##################
@@ -46,8 +58,101 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 // ############### SOCKET IO FOR CHAT FEATURES ##################
+
+// middleware for socket connection
+io.use(async (socket, next) => {
+  // it's like req.headers.authorization for http flow
+  const authResult = socketAuthSchema.safeParse(socket.handshake.auth);
+  if (!authResult.success) {
+    next(new Error("AUTHENTICATION_REQUIRED"));
+    return;
+  }
+
+  try {
+    const payload = await verifyAccessToken(authResult.data.accessToken);
+    if (!payload.sub) {
+      next(new Error("AUTHENTICATION_REQUIRED"));
+      return;
+    }
+
+    // attaching userId to socket data
+    socket.data.userId = String(payload.sub);
+
+    next();
+  } catch (e) {
+    console.error("Socket authentication failed", e);
+
+    next(new Error("AUTHENTICATION_FAILED"));
+  }
+});
+
 io.on("connection", (socket) => {
-  console.log(`Socket connected: ${socket.id}`);
+  // it conceptually look like this
+  //   socket = {
+  //   id: "temporary-socket-id",
+  //   handshake: {
+  //     auth: {
+  //       accessToken: "eyJhbGciOi...",
+  //     },
+  //   },
+  //   data: {
+  //     userId: "user-123",
+  //   },
+  // };
+  console.log(`Socket connected: ${socket.id}, UserId: ${socket.data.userId}`);
+
+  socket.on("trip:join", async (payload, acknowledge) => {
+    const validationResult = joinTripPayloadSchema.safeParse(payload);
+
+    if (!validationResult.success) {
+      acknowledge({
+        ok: false,
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Invalid trip join request",
+        },
+      });
+      return;
+    }
+
+    const { tripId } = validationResult.data;
+    const userId = socket.data.userId;
+
+    try {
+      const membership = await prisma.tripMember.findUnique({
+        where: { tripId_userId: { tripId, userId } },
+        select: { id: true },
+      });
+
+      if (!membership) {
+        acknowledge({
+          ok: false,
+          error: {
+            code: "TRIP_ACCESS_DENIED",
+            message: "You do not have access to this trip.",
+          },
+        });
+
+        return;
+      }
+
+      const roomName = getTripRoomName(tripId);
+
+      await socket.join(roomName);
+
+      acknowledge({ ok: true, tripId });
+    } catch (e) {
+      console.error("Failed to join trip room ", e);
+
+      acknowledge({
+        ok: false,
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Unable to join the trip room.",
+        },
+      });
+    }
+  });
 
   socket.on("disconnect", (reason) => {
     console.log(`Socket disconnected: ${socket.id}. Reason: ${reason}`);

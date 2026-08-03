@@ -107,4 +107,8 @@ export const socketAuthSchema = z.strictObject({
     .min(1, { error: "Access token is required." }),
 });
 
+export const joinTripPayloadSchema = z.strictObject({
+  tripId: z.uuid({ error: "Trip ID must be a valid UUID." }),
+});
+
 export const tripIdParamsSchema = z.object({ tripId: z.string().uuid() });

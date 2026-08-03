@@ -24,11 +24,9 @@ type SenderProfile = {
 function toSavedMessage({
   message,
   profile,
-  currentUserId,
 }: {
   message: MessageRecord;
   profile: SenderProfile;
-  currentUserId: string;
 }): SavedMessage {
   return {
     id: message.id,
@@ -41,7 +39,6 @@ function toSavedMessage({
       displayName: profile.displayName,
       image: profile.image,
     },
-    isSentByCurrentUser: message.userId === currentUserId,
   };
 }
 
@@ -100,7 +97,7 @@ async function getMessages({
       );
     }
 
-    return toSavedMessage({ message, profile, currentUserId: userId });
+    return toSavedMessage({ message, profile });
   });
 }
 
@@ -153,11 +150,7 @@ async function createMessage({
     select: messageSelect,
   });
 
-  return toSavedMessage({
-    message: createdMessage,
-    profile,
-    currentUserId: userId,
-  });
+  return toSavedMessage({ message: createdMessage, profile });
 }
 
 export { getMessages, createMessage };
