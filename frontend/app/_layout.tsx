@@ -1,24 +1,17 @@
 import { Stack } from "expo-router";
 import "../globals.css";
 import Spinner from "@/components/Spinner";
-import { AuthInitializer } from "@/features/auth/components/AuthInitializer";
 import { useAuthStore } from "@/store/auth.store";
-import { useEffect } from "react";
 import Toast from "react-native-toast-message";
 import { toastConfig } from "@/config/toastConfig";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useInitializeAuth } from "@/features/auth/hooks/useInitializeAuth";
 
-function RootNavigator() {
+export default function RootNavigator() {
+  useInitializeAuth();
   const authStatus = useAuthStore((state) => state.authStatus);
   const profileStatus = useAuthStore((state) => state.profileStatus);
-
-  useEffect(() => {
-    console.log("[RootNavigator] guard state changed", {
-      authStatus,
-      profileStatus,
-    });
-  }, [authStatus, profileStatus]);
 
   if (authStatus === "initializing" || profileStatus === "loading") {
     return (
@@ -39,34 +32,38 @@ function RootNavigator() {
   const profileLoadFailed = isAuthenticated && profileStatus === "error";
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Protected guard={authStatus === "unauthenticated"}>
-        <Stack.Screen name="auth" />
-      </Stack.Protected>
-
-      <Stack.Protected guard={needsProfile}>
-        <Stack.Screen name="(onboarding)" />
-      </Stack.Protected>
-
-      <Stack.Protected guard={hasProfile}>
-        <Stack.Screen name="(protected)" />
-      </Stack.Protected>
-
-      <Stack.Protected guard={profileLoadFailed}>
-        <Stack.Screen name="profile-error" />
-      </Stack.Protected>
-    </Stack>
-  );
-}
-
-export default function RootLayout() {
-  return (
     <>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <AuthInitializer />
-        <RootNavigator />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Protected guard={authStatus === "unauthenticated"}>
+            <Stack.Screen name="auth" />
+          </Stack.Protected>
+
+          <Stack.Protected guard={needsProfile}>
+            <Stack.Screen name="(onboarding)" />
+          </Stack.Protected>
+
+          <Stack.Protected guard={hasProfile}>
+            <Stack.Screen name="(protected)" />
+          </Stack.Protected>
+
+          <Stack.Protected guard={profileLoadFailed}>
+            <Stack.Screen name="profile-error" />
+          </Stack.Protected>
+        </Stack>
         <Toast config={toastConfig} />
       </GestureHandlerRootView>
     </>
   );
 }
+
+// export default function RootLayout() {
+//   return (
+//     <>
+//       <GestureHandlerRootView style={{ flex: 1 }}>
+//         <AuthInitializer />
+//         <RootNavigator />
+//       </GestureHandlerRootView>
+//     </>
+//   );
+// }
