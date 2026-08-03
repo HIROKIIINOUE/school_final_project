@@ -51,7 +51,7 @@ async function getMessages({
 }: {
   userId: string;
   tripId: string;
-}) {
+}): Promise<SavedMessage[]> {
   const membership = await prisma.tripMember.findUnique({
     where: { tripId_userId: { tripId, userId } },
     select: { id: true },
@@ -76,8 +76,8 @@ async function getMessages({
 
   for (const msg of messages) {
     if (!senderIds.includes(msg.userId)) {
+      senderIds.push(msg.userId);
     }
-    senderIds.push(msg.userId);
   }
 
   const profiles = await prisma.profile.findMany({

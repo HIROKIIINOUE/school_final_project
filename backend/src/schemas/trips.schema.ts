@@ -100,4 +100,11 @@ export const postMessageBodySchema = z.strictObject({
 
 export type PostMessageBody = z.infer<typeof postMessageBodySchema>;
 
+// This one is for incoming access token for socket connection. It basically validates wether accessToken is string and none-empty
+export const socketAuthSchema = z.strictObject({
+  accessToken: z
+    .string({ error: "Access token must be a string." })
+    .min(1, { error: "Access token is required." }),
+});
+
 export const tripIdParamsSchema = z.object({ tripId: z.string().uuid() });

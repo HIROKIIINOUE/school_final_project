@@ -15,3 +15,6 @@ export type SavedMessage = {
   sender: MessageSender;
   isSentByCurrentUser: boolean;
 };
+
+// this is for socket data after attaching userId
+export type SocketData = { userId: string };
