@@ -27,7 +27,7 @@ dotenv.config();
 const app = express();
 // this one is for underlying http
 const httpServer = createServer(app);
-// websocket
+// It is the central manager responsible for accepting connections, tracking connected clients, organizing them, and sending events.
 const io = new Server<
   ClientToServerEvents, // events the client may send
   ServerToClientEvents, // events the server may send
@@ -88,17 +88,10 @@ io.use(async (socket, next) => {
 
 io.on("connection", (socket) => {
   // it conceptually look like this
-  //   socket = {
-  //   id: "temporary-socket-id",
-  //   handshake: {
-  //     auth: {
-  //       accessToken: "eyJhbGciOi...",
-  //     },
-  //   },
-  //   data: {
-  //     userId: "user-123",
-  //   },
-  // };
+  //   socket = { id: "temporary-socket-id", handshake: { auth: { accessToken: "eyJhbGciOi...", }, }, data: {
+  //     userId: "user-123", }, };
+
+  // when new client connects
   console.log(`Socket connected: ${socket.id}, UserId: ${socket.data.userId}`);
 
   socket.on("trip:join", async (payload, acknowledge) => {
@@ -138,9 +131,10 @@ io.on("connection", (socket) => {
 
       const roomName = getTripRoomName(tripId);
 
+      // add this user to the room: "trip: tokyo-trip-uuid"
       await socket.join(roomName);
 
-      acknowledge({ ok: true, tripId });
+      acknowledge({ ok: true, tripId }); // this is what frontend recieves
     } catch (e) {
       console.error("Failed to join trip room ", e);
 

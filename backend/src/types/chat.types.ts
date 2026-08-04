@@ -1,4 +1,4 @@
-export type CreateMessageInput = { clientMessageId: string; content: string };
+import { SendMessagePayload } from "../schemas/trips.schema";
 
 export type MessageSender = {
   id: string;
@@ -38,8 +38,25 @@ export type ClientToServerEvents = {
     payload: JoinTripPayload,
     acknowledge: (result: JoinTripResult) => void,
   ) => void;
+
+  "message:send": (
+    payload: SendMessagePayload,
+    acknowledge: (result: SendMessageResult) => void,
+  ) => void;
 };
 
-export type ServerToClientEvents = Record<string, never>;
+export type ServerToClientEvents = {
+  "message:created": (message: SavedMessage) => void;
+};
 
 export type InterServerEvents = Record<string, never>;
+
+export type SendMessageErrorCode =
+  | "VALIDATION_ERROR"
+  | "TRIP_ACCESS_DENIED"
+  | "PROFILE_REQUIRED"
+  | "INTERNAL_SERVER_ERROR";
+
+export type SendMessageResult =
+  | { ok: true; message: SavedMessage }
+  | { ok: false; error: { code: SendMessageErrorCode; message: string } };

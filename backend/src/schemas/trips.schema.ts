@@ -111,4 +111,10 @@ export const joinTripPayloadSchema = z.strictObject({
   tripId: z.uuid({ error: "Trip ID must be a valid UUID." }),
 });
 
+export const sendMessagePayloadSchema = postMessageBodySchema.extend({
+  tripId: z.uuid({ error: "Trip ID must be a valid UUID." }),
+});
+
+export type SendMessagePayload = z.infer<typeof sendMessagePayloadSchema>;
+
 export const tripIdParamsSchema = z.object({ tripId: z.string().uuid() });
