@@ -91,7 +91,7 @@ model Message {
   userId String @db.Uuid
   tripId String @db.Uuid
   content String
-  clientMessageId String? @db.Uuid 
+  clientMessageId String @db.Uuid 
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

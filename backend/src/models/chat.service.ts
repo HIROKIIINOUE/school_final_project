@@ -1,5 +1,7 @@
 import { Prisma } from "../generated/prisma/client";
 import { AppError } from "../lib/appError";
+import { isUniqueConstraintError } from "../lib/isPrismaConflictError";
+import { isSameMessageCommand } from "../lib/isSameMessage";
 import { prisma } from "../lib/prisma";
 import { PostMessageBody } from "../schemas/trips.schema";
 import { SavedMessage } from "../types/chat.types";
@@ -140,17 +142,57 @@ async function createMessage({
     );
   }
 
-  const createdMessage = await prisma.message.create({
-    data: {
-      userId: userId,
-      tripId: tripId,
-      content: body.content,
-      clientMessageId: body.clientMessageId,
-    },
-    select: messageSelect,
-  });
+  try {
+    const createdMessage = await prisma.message.create({
+      data: {
+        userId: userId,
+        tripId: tripId,
+        content: body.content,
+        clientMessageId: body.clientMessageId,
+      },
+      select: messageSelect,
+    });
 
-  return toSavedMessage({ message: createdMessage, profile });
+    return toSavedMessage({ message: createdMessage, profile });
+  } catch (e) {
+    if (!isUniqueConstraintError(e)) {
+      throw e;
+    }
+
+    // 実体が同じじゃないとだめ。userId, clientMessageId が一緒でも、content, tripId が違ったら、実体が違うから却下。
+    const existingMessage = await prisma.message.findUnique({
+      where: {
+        userId_clientMessageId: {
+          userId,
+          clientMessageId: body.clientMessageId,
+        },
+      },
+      select: messageSelect,
+    });
+
+    if (!existingMessage) {
+      // A P2002 occurred, but the expected idempotency row cannot be found.
+      // This means our assumption about the constraint was wrong or the data
+      // changed unexpectedly, so preserve it as an unexpected server error.
+      throw e;
+    }
+
+    const isSameMessage = isSameMessageCommand({
+      existingMessage: existingMessage,
+      tripId,
+      body: body,
+    });
+
+    if (!isSameMessage) {
+      throw new AppError(
+        409,
+        "IDEMPOTENCY_CONFLICT",
+        "This client message ID has already been used for a different message.",
+      );
+    }
+
+    return toSavedMessage({ message: existingMessage, profile });
+  }
 }
 
 export { getMessages, createMessage };
