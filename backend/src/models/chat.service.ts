@@ -1,7 +1,6 @@
 import { Prisma } from "../generated/prisma/client";
 import { AppError } from "../lib/appError";
 import { isUniqueConstraintError } from "../lib/isPrismaConflictError";
-import { isSameMessageCommand } from "../lib/isSameMessage";
 import { prisma } from "../lib/prisma";
 import { PostMessageBody } from "../schemas/trips.schema";
 import { SavedMessage } from "../types/chat.types";
@@ -22,6 +21,23 @@ type SenderProfile = {
   displayName: string;
   image: string | null;
 };
+
+type CreateMessageResult = { message: SavedMessage; wasCreated: boolean };
+
+function isSameMessageCommand({
+  existingMessage,
+  tripId,
+  body,
+}: {
+  existingMessage: { tripId: string; content: string };
+  tripId: string;
+  body: PostMessageBody;
+}): boolean {
+  return (
+    existingMessage.tripId === tripId &&
+    existingMessage.content === body.content
+  );
+}
 
 function toSavedMessage({
   message,
@@ -111,7 +127,7 @@ async function createMessage({
   userId: string;
   tripId: string;
   body: PostMessageBody;
-}): Promise<SavedMessage> {
+}): Promise<CreateMessageResult> {
   // rule: only the authenticated user and the member of the trip can post messages
 
   // 1: check if the user is the memeber of this trip
@@ -153,7 +169,10 @@ async function createMessage({
       select: messageSelect,
     });
 
-    return toSavedMessage({ message: createdMessage, profile });
+    return {
+      message: toSavedMessage({ message: createdMessage, profile }),
+      wasCreated: true,
+    };
   } catch (e) {
     if (!isUniqueConstraintError(e)) {
       throw e;
@@ -191,7 +210,10 @@ async function createMessage({
       );
     }
 
-    return toSavedMessage({ message: existingMessage, profile });
+    return {
+      message: toSavedMessage({ message: existingMessage, profile }),
+      wasCreated: true,
+    };
   }
 }
 

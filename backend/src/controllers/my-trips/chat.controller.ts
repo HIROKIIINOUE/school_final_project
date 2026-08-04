@@ -106,7 +106,9 @@ async function postMessageController(
 
   const result = await createMessage({ userId, tripId, body: body });
 
-  return res.status(201).json({ data: result });
+  return res
+    .status(result.wasCreated ? 201 : 200)
+    .json({ data: result.message });
 }
 
 export { getMessagesController, postMessageController };
