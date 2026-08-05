@@ -212,7 +212,7 @@ async function createMessage({
 
     return {
       message: toSavedMessage({ message: existingMessage, profile }),
-      wasCreated: true,
+      wasCreated: false,
     };
   }
 }

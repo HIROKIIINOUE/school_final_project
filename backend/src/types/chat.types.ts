@@ -8,7 +8,7 @@ export type MessageSender = {
 
 export type SavedMessage = {
   id: string;
-  clientMessageId: string | null;
+  clientMessageId: string;
   tripId: string;
   content: string;
   createdAt: string;
@@ -55,7 +55,8 @@ export type SendMessageErrorCode =
   | "VALIDATION_ERROR"
   | "TRIP_ACCESS_DENIED"
   | "PROFILE_REQUIRED"
-  | "INTERNAL_SERVER_ERROR";
+  | "INTERNAL_SERVER_ERROR"
+  | "IDEMPOTENCY_CONFLICT";
 
 export type SendMessageResult =
   | { ok: true; message: SavedMessage }
