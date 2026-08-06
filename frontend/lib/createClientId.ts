@@ -1,3 +1,5 @@
-export function createClientId() {
-  return `local-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+import * as Crypto from "expo-crypto";
+
+export function createClientId(): string {
+  return Crypto.randomUUID();
 }

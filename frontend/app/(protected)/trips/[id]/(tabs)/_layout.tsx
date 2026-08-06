@@ -1,5 +1,10 @@
 import { Tabs } from "expo-router";
-import { CalendarDays, House, MessageCircle } from "lucide-react-native";
+import {
+  CalendarDays,
+  CircleDollarSign,
+  House,
+  MessageCircle,
+} from "lucide-react-native";
 
 export default function TripTabsLayout() {
   return (
@@ -28,6 +33,16 @@ export default function TripTabsLayout() {
           title: "Chat",
           tabBarIcon: ({ color, size }) => (
             <MessageCircle color={color} size={size} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="expense/index"
+        options={{
+          title: "expense",
+          tabBarIcon: ({ color, size }) => (
+            <CircleDollarSign color={color} size={size} />
           ),
         }}
       />

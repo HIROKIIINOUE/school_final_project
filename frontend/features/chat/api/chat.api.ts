@@ -39,7 +39,7 @@ export async function postMessage({
 }) {
   const accessToken = await grabAccessToken();
 
-  const res = await fetch(`${BACKEND_URL}/api/trip/${id}/messages`, {
+  const res = await fetch(`${BACKEND_URL}/api/trips/${id}/messages`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -64,7 +64,10 @@ const ExpenseScreen = () => {
     useState(false);
 
   return (
-    <StyledSafeAreaView className="flex-1 bg-[#f7f8ff]" edges={["left", "right", "bottom"]}>
+    <StyledSafeAreaView
+      className="flex-1 bg-[#f7f8ff]"
+      edges={["left", "right", "bottom"]}
+    >
       <Stack.Screen options={{ title: "Expense Calculate" }} />
 
       <FlatList
@@ -78,8 +81,14 @@ const ExpenseScreen = () => {
                 Tokyo Summer Adventure
               </Text>
               <View className="mt-1 flex-row items-center gap-1">
-                <MaterialCommunityIcons name="calendar-blank-outline" size={16} color="#596574" />
-                <Text className="text-[16px] font-medium text-[#596574]">Aug 10 - Aug 20</Text>
+                <MaterialCommunityIcons
+                  name="calendar-blank-outline"
+                  size={16}
+                  color="#596574"
+                />
+                <Text className="text-[16px] font-medium text-[#596574]">
+                  Aug 10 - Aug 20
+                </Text>
               </View>
             </View>
             <View className="mt-3 h-px bg-[#dfe3eb]" />
@@ -95,45 +104,65 @@ const ExpenseScreen = () => {
             <View className="mt-[10px] flex-row gap-[10px]">
               <View className="flex-1 rounded-[8px] border border-[#f1cad0] bg-[#fff1f2] px-[10px] py-[10px]">
                 <View className="flex-row items-center justify-between">
-                  <Text className="text-[9px] font-bold tracking-[0.8px] text-[#7c6a70]">YOU OWE</Text>
+                  <Text className="text-[9px] font-bold tracking-[0.8px] text-[#7c6a70]">
+                    YOU OWE
+                  </Text>
                   <AntDesign name="arrow-up" size={12} color="#e44257" />
                 </View>
-                <Text className="mt-1 text-[15px] font-extrabold text-[#e44257]">¥4,500</Text>
+                <Text className="mt-1 text-[15px] font-extrabold text-[#e44257]">
+                  ¥4,500
+                </Text>
               </View>
               <View className="flex-1 rounded-[8px] border border-[#b9d7db] bg-[#dff2f3] px-[10px] py-[10px]">
                 <View className="flex-row items-center justify-between">
-                  <Text className="text-[9px] font-bold tracking-[0.8px] text-[#587175]">ARE OWED</Text>
+                  <Text className="text-[9px] font-bold tracking-[0.8px] text-[#587175]">
+                    ARE OWED
+                  </Text>
                   <AntDesign name="arrow-down" size={12} color="#238688" />
                 </View>
-                <Text className="mt-1 text-[15px] font-extrabold text-[#238688]">¥16,000</Text>
+                <Text className="mt-1 text-[15px] font-extrabold text-[#238688]">
+                  ¥16,000
+                </Text>
               </View>
             </View>
 
             <View className="mt-[32px] flex-col items-center">
-              <Text className="text-[20px] font-extrabold text-[#2e3a48]">Recent Expenses</Text>
+              <Text className="text-[20px] font-extrabold text-[#2e3a48]">
+                Recent Expenses
+              </Text>
               <Pressable
                 accessibilityRole="button"
                 className="bg-[#238688] rounded flex-row items-center gap-1 p-2 my-4 active:opacity-60"
                 onPress={() => setIsAddExpenseModalVisible(true)}
               >
                 <AntDesign name="plus" size={16} color="white" />
-                <Text className="text-[16px] font-bold text-white">Add expense</Text>
+                <Text className="text-[16px] font-bold text-white">
+                  Add expense
+                </Text>
               </Pressable>
             </View>
           </>
         }
         renderItem={({ item, index }) => (
           <View
-            className={`flex-col items-center px-[10px] py-[10px] ${index === 0 ? "rounded-t-[8px] border border-b-0 border-[#d2d9e2] bg-white" : "rounded-b-[8px] border border-[#d2d9e2] bg-white"
-              }`}
+            className={`flex-col items-center px-[10px] py-[10px] ${
+              index === 0
+                ? "rounded-t-[8px] border border-b-0 border-[#d2d9e2] bg-white"
+                : "rounded-b-[8px] border border-[#d2d9e2] bg-white"
+            }`}
           >
             <View className="w-full ml-[10px] flex flex-row justify-between">
-              <Text className="text-[16px] font-bold text-[#354150]">{item.title}</Text>
-              <Text className="text-[16px] font-extrabold text-[#354150]">{formatCurrency(item.price)}</Text>
+              <Text className="text-[16px] font-bold text-[#354150]">
+                {item.title}
+              </Text>
+              <Text className="text-[16px] font-extrabold text-[#354150]">
+                {formatCurrency(item.price)}
+              </Text>
             </View>
             <View className="w-full ml-[10px] flex flex-row justify-between">
               <Text className="mt-[2px] text-[12px] text-[#647184]">
-                Paid by <Text className="font-bold text-[#278184]">{item.paidBy}</Text>
+                Paid by{" "}
+                <Text className="font-bold text-[#278184]">{item.paidBy}</Text>
               </Text>
               <View className="mt-[4px]">
                 <MemberAvatars members={item.members} maxDisplay={5} />
