@@ -7,8 +7,11 @@ import { toastConfig } from "@/config/toastConfig";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useInitializeAuth } from "@/features/auth/hooks/useInitializeAuth";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-export default function RootNavigator() {
+const queryClient = new QueryClient();
+
+function RootNavigator() {
   useInitializeAuth();
   const authStatus = useAuthStore((state) => state.authStatus);
   const profileStatus = useAuthStore((state) => state.profileStatus);
@@ -57,13 +60,10 @@ export default function RootNavigator() {
   );
 }
 
-// export default function RootLayout() {
-//   return (
-//     <>
-//       <GestureHandlerRootView style={{ flex: 1 }}>
-//         <AuthInitializer />
-//         <RootNavigator />
-//       </GestureHandlerRootView>
-//     </>
-//   );
-// }
+export default function RootLayout() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RootNavigator />
+    </QueryClientProvider>
+  );
+}

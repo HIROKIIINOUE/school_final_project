@@ -10,10 +10,7 @@ export async function fetchMessages({ id }: { id: string }) {
 
   const res = await fetch(`${BACKEND_URL}/api/trips/${id}/messages`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
+    headers: { Authorization: `Bearer ${accessToken}` },
     credentials: "include",
   });
 
@@ -21,10 +18,10 @@ export async function fetchMessages({ id }: { id: string }) {
 
   if (!res.ok) {
     console.error(
-      "res.ok failed. Failed to fetch itineraries",
+      "res.ok failed. Failed to fetch chat messages",
       data.error?.message ?? data.message,
     );
-    throw new Error(data.error?.message ?? "Failed to fetch overview data");
+    throw new Error(data.error?.message ?? "Failed to fetch chat messages");
   }
 
   return data.data;
@@ -53,10 +50,10 @@ export async function postMessage({
 
   if (!res.ok) {
     console.error(
-      "res.ok failed. Failed to fetch itineraries",
+      "res.ok failed. Failed to send messages",
       data.error?.message ?? data.message,
     );
-    throw new Error(data.error?.message ?? "Failed to fetch overview data");
+    throw new Error(data.error?.message ?? "Failed to send messages");
   }
 
   return data.data;
