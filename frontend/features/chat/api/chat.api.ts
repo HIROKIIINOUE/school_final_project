@@ -11,13 +11,13 @@ type ApiResponse<T> = { data: T };
 type PostMessageBody = { clientMessageId: string; content: string };
 
 export async function fetchMessages({
-  id,
+  tripId,
 }: {
-  id: string;
+  tripId: string;
 }): Promise<SavedMessage[]> {
   const accessToken = await grabAccessToken();
 
-  const res = await fetch(`${BACKEND_URL}/api/trips/${id}/messages`, {
+  const res = await fetch(`${BACKEND_URL}/api/trips/${tripId}/messages`, {
     method: "GET",
     headers: { Authorization: `Bearer ${accessToken}` },
     credentials: "include",
