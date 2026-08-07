@@ -1,11 +1,20 @@
 import { grabAccessToken } from "@/lib/getAccessToken";
+import { SavedMessage } from "../types/types";
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 if (!BACKEND_URL) {
   throw new Error("EXPO_PUBLIC_BACKEND_URL is not configured");
 }
 
-export async function fetchMessages({ id }: { id: string }) {
+type ApiResponse<T> = { data: T };
+
+type PostMessageBody = { clientMessageId: string; content: string };
+
+export async function fetchMessages({
+  id,
+}: {
+  id: string;
+}): Promise<SavedMessage[]> {
   const accessToken = await grabAccessToken();
 
   const res = await fetch(`${BACKEND_URL}/api/trips/${id}/messages`, {
@@ -14,14 +23,11 @@ export async function fetchMessages({ id }: { id: string }) {
     credentials: "include",
   });
 
-  const data = await res.json();
+  const data: ApiResponse<SavedMessage[]> = await res.json();
 
   if (!res.ok) {
-    console.error(
-      "res.ok failed. Failed to fetch chat messages",
-      data.error?.message ?? data.message,
-    );
-    throw new Error(data.error?.message ?? "Failed to fetch chat messages");
+    console.error("res.ok failed. Failed to fetch chat messages", data);
+    throw new Error("Failed to fetch chat messages");
   }
 
   return data.data;

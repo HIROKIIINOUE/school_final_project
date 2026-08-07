@@ -35,28 +35,26 @@ function RootNavigator() {
   const profileLoadFailed = isAuthenticated && profileStatus === "error";
 
   return (
-    <>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Protected guard={authStatus === "unauthenticated"}>
-            <Stack.Screen name="auth" />
-          </Stack.Protected>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Protected guard={authStatus === "unauthenticated"}>
+          <Stack.Screen name="auth" />
+        </Stack.Protected>
 
-          <Stack.Protected guard={needsProfile}>
-            <Stack.Screen name="(onboarding)" />
-          </Stack.Protected>
+        <Stack.Protected guard={needsProfile}>
+          <Stack.Screen name="(onboarding)" />
+        </Stack.Protected>
 
-          <Stack.Protected guard={hasProfile}>
-            <Stack.Screen name="(protected)" />
-          </Stack.Protected>
+        <Stack.Protected guard={hasProfile}>
+          <Stack.Screen name="(protected)" />
+        </Stack.Protected>
 
-          <Stack.Protected guard={profileLoadFailed}>
-            <Stack.Screen name="profile-error" />
-          </Stack.Protected>
-        </Stack>
-        <Toast config={toastConfig} />
-      </GestureHandlerRootView>
-    </>
+        <Stack.Protected guard={profileLoadFailed}>
+          <Stack.Screen name="profile-error" />
+        </Stack.Protected>
+      </Stack>
+      <Toast config={toastConfig} />
+    </GestureHandlerRootView>
   );
 }
 
