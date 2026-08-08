@@ -18,9 +18,11 @@ import Toast from "react-native-toast-message";
 import { addMsgToChatCache } from "../lib/addMessageToTripCache";
 
 type Props = { tripId: string };
+type MessageCommand = { clientMessageId: string; content: string };
 
 const ChatPageClient = ({ tripId }: Props) => {
-  // fetch messages for this trip and cache with TanstackQuery
+  // fetch messages for this trip and cache with TanstackQuery on page load
+  // useQuery() handles the initial fetch-and-cache process for me
   const {
     isPending,
     isError,
@@ -33,6 +35,9 @@ const ChatPageClient = ({ tripId }: Props) => {
 
   const [textContent, setTextContent] = useState<string>("");
   const [isSending, setIsSending] = useState(false);
+  const [pendingMessage, setPendingMessage] = useState<MessageCommand | null>(
+    null,
+  );
 
   const queryClient = useQueryClient();
 
@@ -46,59 +51,103 @@ const ChatPageClient = ({ tripId }: Props) => {
       addMsgToChatCache({ tripId, newMessage: message, queryClient });
     }
 
+    function joinCurrentTrip({
+      needRepair = false,
+    }: { needRepair?: boolean } = {}) {
+      chatSocket.emit("trip:join", { tripId }, (result: JoinTripResult) => {
+        if (!result.ok) {
+          console.error("Failed to join trip chat:", result.error);
+          return;
+        }
+        console.log("Joined trip chat:", result.tripId);
+
+        // if reconnecting connection again, it has to trigger re-fetch messages from backend
+        if (needRepair) {
+          // invalidateQueries = trigger backend fetch
+          queryClient.invalidateQueries({
+            queryKey: chatQueryKey.byTrip(tripId),
+          });
+        }
+      });
+    }
+
+    function handleConnect() {
+      joinCurrentTrip({ needRepair: true });
+    }
+
     // attach listener
     // It is listening for whenever someone send a message, it is sent from backend and store them in the cache
     chatSocket.on("message:created", handleMessageCreated);
 
-    // on page load, user should join the trip automatically
-    chatSocket.emit("trip:join", { tripId }, (result: JoinTripResult) => {
-      if (!result.ok) {
-        console.error("Failed to join trip chat:", result.error);
-        return;
-      }
-      console.log("Joined trip chat:", result.tripId);
-    });
+    chatSocket.on("connect", handleConnect); // whenever connected, has to re-fetch messages
+
+    // on page load, socket might be connected already => in that case you have to trigger trip:join here
+    if (chatSocket.connected) {
+      joinCurrentTrip();
+    }
 
     return () => {
       // removing this listener function
       chatSocket.off("message:created", handleMessageCreated);
+      chatSocket.off("connect", handleConnect);
     };
-  }, [tripId]);
+  }, [tripId, queryClient]);
 
+  // first try sending message
   function handleSendMessage() {
     const content = textContent.trim();
 
-    if (!content || isSending) {
+    if (!content || isSending || pendingMessage) {
       return;
     }
 
-    const clientMessageId = createClientId();
+    const command = { clientMessageId: createClientId(), content };
 
-    setIsSending(true);
+    setPendingMessage(command);
 
-    chatSocket.emit(
-      "message:send",
-      { tripId, clientMessageId, content },
-      (returnedValue: SendMessageResult) => {
-        setIsSending(false);
-        if (!returnedValue.ok) {
-          console.error("Failed to send message:", returnedValue.error);
-          Toast.show({ type: "error", text1: "Failed to send message" });
-          return;
-        }
-
-        setTextContent("");
-
-        // add newly created message to the cache
-        addMsgToChatCache({
-          tripId,
-          newMessage: returnedValue.message,
-          queryClient,
-        });
-      },
-    );
+    sendMessageCommand(command);
   }
 
+  function sendMessageCommand(command: MessageCommand) {
+    setIsSending(true);
+
+    chatSocket
+      .timeout(5000)
+      .emit(
+        "message:send",
+        {
+          tripId,
+          clientMessageId: command.clientMessageId,
+          content: command.content,
+        },
+        (timeoutError: Error | null, returnedValue: SendMessageResult) => {
+          setIsSending(false);
+          if (timeoutError) {
+            Toast.show({ type: "error", text1: "Message send timed out" });
+
+            return;
+          }
+
+          if (!returnedValue.ok) {
+            setPendingMessage(null);
+            console.error("Failed to send message:", returnedValue.error);
+            Toast.show({ type: "error", text1: "Failed to send message" });
+            return;
+          }
+
+          // if successfull
+          setPendingMessage(null);
+          setTextContent("");
+
+          // add newly created message to the cache
+          addMsgToChatCache({
+            tripId,
+            newMessage: returnedValue.message,
+            queryClient,
+          });
+        },
+      );
+  }
   // loading chat messages...
   if (isPending) {
     return (
@@ -121,8 +170,18 @@ const ChatPageClient = ({ tripId }: Props) => {
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
-      <Text>ChatPageClient</Text>
-      <Text>{messages.length}</Text>
+      {
+        // retry logic
+        pendingMessage && !isSending && (
+          <Pressable
+            onPress={() => {
+              sendMessageCommand(pendingMessage);
+            }}
+          >
+            <Text>Retry</Text>
+          </Pressable>
+        )
+      }
       <FlatList
         keyExtractor={(message) => message.id}
         data={messages}
@@ -143,7 +202,7 @@ const ChatPageClient = ({ tripId }: Props) => {
         />
         <Pressable
           onPress={handleSendMessage}
-          disabled={isSending || !textContent.trim()}
+          disabled={isSending || !!pendingMessage || !textContent.trim()}
         >
           <Send size={20} />
         </Pressable>
