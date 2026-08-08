@@ -1,5 +1,5 @@
-import { View, Text, FlatList } from "react-native";
-import React, { useEffect } from "react";
+import { View, Text, FlatList, TextInput, Pressable } from "react-native";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { chatQueryKey } from "../lib/chatQueryKeys";
@@ -7,7 +7,14 @@ import { fetchMessages } from "../api/chat.api";
 import Spinner from "@/components/Spinner";
 import ChatMessageBubble from "../components/ChatMessageBubble";
 import { chatSocket } from "../socket/chatSocket";
-import { JoinTripResult, SavedMessage } from "../types/types";
+import {
+  JoinTripResult,
+  SavedMessage,
+  SendMessageResult,
+} from "../types/types";
+import { Send } from "lucide-react-native";
+import { createClientId } from "@/lib/createClientId";
+import Toast from "react-native-toast-message";
 
 type Props = { tripId: string };
 
@@ -22,6 +29,9 @@ const ChatPageClient = ({ tripId }: Props) => {
     queryKey: chatQueryKey.byTrip(tripId),
     queryFn: () => fetchMessages({ tripId }),
   });
+
+  const [textContent, setTextContent] = useState<string>("");
+  const [isSending, setIsSending] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -71,6 +81,53 @@ const ChatPageClient = ({ tripId }: Props) => {
     };
   }, [tripId]);
 
+  function handleSendMessage() {
+    const content = textContent.trim();
+
+    if (!content || isSending) {
+      return;
+    }
+
+    const clientMessageId = createClientId();
+
+    setIsSending(true);
+
+    chatSocket.emit(
+      "message:send",
+      { tripId, clientMessageId, content },
+      (returnedValue: SendMessageResult) => {
+        setIsSending(false);
+        if (!returnedValue.ok) {
+          console.error("Failed to send message:", returnedValue.error);
+          Toast.show({ type: "error", text1: "Failed to send message" });
+          return;
+        }
+
+        setTextContent("");
+
+        // add newly created message to the cache
+        queryClient.setQueryData<SavedMessage[]>(
+          chatQueryKey.byTrip(tripId),
+          (oldMessages) => {
+            if (!oldMessages) {
+              return [returnedValue.message];
+            }
+
+            const alreadyExistMsg = oldMessages.some(
+              (msg) => msg.id === returnedValue.message.id,
+            );
+
+            if (alreadyExistMsg) {
+              return oldMessages;
+            }
+
+            return [...oldMessages, returnedValue.message];
+          },
+        );
+      },
+    );
+  }
+
   // loading chat messages...
   if (isPending) {
     return (
@@ -103,6 +160,23 @@ const ChatPageClient = ({ tripId }: Props) => {
         )}
         ListEmptyComponent={<Text>No messages yet</Text>}
       ></FlatList>
+      <View className="flex flew-row">
+        <TextInput
+          placeholder="Type a message"
+          className="h-12 rounded-xl border border-outline-variant bg-surface-container px-md text-body-lg
+               text-on-surface"
+          onChangeText={(text) => {
+            setTextContent(text);
+          }}
+          value={textContent}
+        />
+        <Pressable
+          onPress={handleSendMessage}
+          disabled={isSending || !textContent.trim()}
+        >
+          <Send size={20} />
+        </Pressable>
+      </View>
     </SafeAreaView>
   );
 };

@@ -25,3 +25,14 @@ export type JoinTripResult =
         message: string;
       };
     };
+
+export type SendMessageErrorCode =
+  | "VALIDATION_ERROR"
+  | "TRIP_ACCESS_DENIED"
+  | "PROFILE_REQUIRED"
+  | "INTERNAL_SERVER_ERROR"
+  | "IDEMPOTENCY_CONFLICT";
+
+export type SendMessageResult =
+  | { ok: true; message: SavedMessage }
+  | { ok: false; error: { code: SendMessageErrorCode; message: string } };
