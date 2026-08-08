@@ -15,6 +15,7 @@ import {
 import { Send } from "lucide-react-native";
 import { createClientId } from "@/lib/createClientId";
 import Toast from "react-native-toast-message";
+import { addMsgToChatCache } from "../lib/addMessageToTripCache";
 
 type Props = { tripId: string };
 
@@ -42,28 +43,11 @@ const ChatPageClient = ({ tripId }: Props) => {
       }
 
       // you want to add the new message to the cached array
-      queryClient.setQueryData<SavedMessage[]>(
-        ["tripMessages", tripId],
-        (oldMessages) => {
-          // if old messages don't exist, the new message becomes the first msg
-          if (!oldMessages) {
-            return [message];
-          }
-
-          const alreadyExists = oldMessages.some(
-            (existingMessage) => existingMessage.id === message.id,
-          );
-
-          if (alreadyExists) {
-            return oldMessages;
-          }
-
-          return [...oldMessages, message];
-        },
-      );
+      addMsgToChatCache({ tripId, newMessage: message, queryClient });
     }
 
     // attach listener
+    // It is listening for whenever someone send a message, it is sent from backend and store them in the cache
     chatSocket.on("message:created", handleMessageCreated);
 
     // on page load, user should join the trip automatically
@@ -106,24 +90,11 @@ const ChatPageClient = ({ tripId }: Props) => {
         setTextContent("");
 
         // add newly created message to the cache
-        queryClient.setQueryData<SavedMessage[]>(
-          chatQueryKey.byTrip(tripId),
-          (oldMessages) => {
-            if (!oldMessages) {
-              return [returnedValue.message];
-            }
-
-            const alreadyExistMsg = oldMessages.some(
-              (msg) => msg.id === returnedValue.message.id,
-            );
-
-            if (alreadyExistMsg) {
-              return oldMessages;
-            }
-
-            return [...oldMessages, returnedValue.message];
-          },
-        );
+        addMsgToChatCache({
+          tripId,
+          newMessage: returnedValue.message,
+          queryClient,
+        });
       },
     );
   }
@@ -149,7 +120,7 @@ const ChatPageClient = ({ tripId }: Props) => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
       <Text>ChatPageClient</Text>
       <Text>{messages.length}</Text>
       <FlatList
@@ -160,11 +131,11 @@ const ChatPageClient = ({ tripId }: Props) => {
         )}
         ListEmptyComponent={<Text>No messages yet</Text>}
       ></FlatList>
-      <View className="flex flew-row">
+      <View className="flex flex-row m-md items-center">
         <TextInput
           placeholder="Type a message"
           className="h-12 rounded-xl border border-outline-variant bg-surface-container px-md text-body-lg
-               text-on-surface"
+               text-on-surface flex-1"
           onChangeText={(text) => {
             setTextContent(text);
           }}
