@@ -12,6 +12,7 @@ const index = () => {
     return <Text>Invalid trip route.</Text>;
   }
 
+  console.log(tripId);
   return <ChatPageClient tripId={tripId} />;
 };
 

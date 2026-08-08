@@ -7,7 +7,7 @@ import {
 
 const router = Router();
 
-router.get("/", authCheck, getMessagesController);
-router.post("/", authCheck, postMessageController);
+router.get("/:tripId/messages", authCheck, getMessagesController);
+router.post("/:tripId/messages", authCheck, postMessageController);
 
 export default router;

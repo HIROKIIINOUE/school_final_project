@@ -26,7 +26,7 @@ app.use("/api/itinerary", itineraryrouter);
 
 app.use("/api/user", userRouter);
 
-app.use("/api/trips/:tripId/messages", chatRouter);
+app.use("/api/trips", chatRouter);
 
 app.get("/api/health", (req: Request, res: Response) => {
   res.status(200).json({ message: "API is working" });

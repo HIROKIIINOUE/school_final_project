@@ -84,7 +84,7 @@ async function getMessages({
     where: { tripId },
     select: messageSelect,
     take: 30,
-    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
   });
 
   const senderIds: string[] = [];
