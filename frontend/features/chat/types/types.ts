@@ -12,3 +12,16 @@ export type SavedMessage = {
   createdAt: string;
   sender: MessageSender;
 };
+
+export type JoinTripResult =
+  | { ok: true; tripId: string }
+  | {
+      ok: false;
+      error: {
+        code:
+          | "VALIDATION_ERROR"
+          | "TRIP_ACCESS_DENIED"
+          | "INTERNAL_SERVER_ERROR";
+        message: string;
+      };
+    };

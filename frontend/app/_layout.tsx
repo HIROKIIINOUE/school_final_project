@@ -8,6 +8,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useInitializeAuth } from "@/features/auth/hooks/useInitializeAuth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { chatSocket } from "@/features/chat/socket/chatSocket";
+import { connectChatSocket } from "@/features/chat/socket/connectChatSocket";
 
 const queryClient = new QueryClient();
 
@@ -15,6 +18,34 @@ function RootNavigator() {
   useInitializeAuth();
   const authStatus = useAuthStore((state) => state.authStatus);
   const profileStatus = useAuthStore((state) => state.profileStatus);
+
+  useEffect(() => {
+    // If user is not logged in anymore, that's when disconnect socket connection
+    if (authStatus !== "authenticated") {
+      chatSocket.disconnect();
+      return;
+    }
+
+    const handleConnect = () => {
+      console.log("Chat socket connected:", chatSocket.id);
+    };
+
+    const handleConnectError = (error: Error) => {
+      console.error("Chat socket connection failed:", error.message);
+    };
+
+    chatSocket.on("connect", handleConnect);
+    chatSocket.on("connect_error", handleConnectError);
+
+    // if user is logged in, connect socket. one socker per app => that's why connecting here.
+    connectChatSocket().catch((error) => {
+      console.error("Failed to connect chat socket:", error);
+    });
+
+    return () => {
+      chatSocket.disconnect();
+    };
+  }, [authStatus]);
 
   if (authStatus === "initializing" || profileStatus === "loading") {
     return (
