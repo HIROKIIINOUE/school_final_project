@@ -108,6 +108,7 @@ const ChatPageClient = ({ tripId }: Props) => {
     sendMessageCommand(command);
   }
 
+  // actual sending message logic itself
   function sendMessageCommand(command: MessageCommand) {
     setIsSending(true);
 
