@@ -24,7 +24,7 @@ const ChatPageClient = ({ tripId }: Props) => {
   // loading chat messages...
   if (isPending) {
     return (
-      <SafeAreaView>
+      <SafeAreaView style={{ flex: 1 }}>
         <Spinner message="Loading your chat..." />
       </SafeAreaView>
     );
@@ -34,7 +34,7 @@ const ChatPageClient = ({ tripId }: Props) => {
   // eventually retry button
   if (isError) {
     return (
-      <SafeAreaView>
+      <SafeAreaView style={{ flex: 1 }}>
         <Text>Failed to load messages.</Text>
         <Text>{error.message}</Text>
       </SafeAreaView>
@@ -42,7 +42,7 @@ const ChatPageClient = ({ tripId }: Props) => {
   }
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{ flex: 1 }}>
       <Text>ChatPageClient</Text>
       <Text>{messages.length}</Text>
       <FlatList

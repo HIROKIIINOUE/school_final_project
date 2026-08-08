@@ -17,8 +17,6 @@ export async function fetchMessages({
 }): Promise<SavedMessage[]> {
   const accessToken = await grabAccessToken();
 
-  console.log("tripId for chat page fetching: ", tripId);
-
   const res = await fetch(`${BACKEND_URL}/api/trips/${tripId}/messages`, {
     method: "GET",
     headers: { Authorization: `Bearer ${accessToken}` },
@@ -36,15 +34,15 @@ export async function fetchMessages({
 }
 
 export async function postMessage({
-  id,
+  tripId,
   body,
 }: {
-  id: string;
+  tripId: string;
   body: { clientMessageId: string; content: string };
 }) {
   const accessToken = await grabAccessToken();
 
-  const res = await fetch(`${BACKEND_URL}/api/trips/${id}/messages`, {
+  const res = await fetch(`${BACKEND_URL}/api/trips/${tripId}/messages`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
