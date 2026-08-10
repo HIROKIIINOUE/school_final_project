@@ -701,7 +701,7 @@
   }
 
   .chat-bubble-me {
-    @apply self-end bg-primary;
+    @apply self-end bg-primary-container;
   }
 
   .chat-bubble-other {

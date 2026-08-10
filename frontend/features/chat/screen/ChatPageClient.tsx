@@ -173,7 +173,10 @@ const ChatPageClient = ({ tripId }: Props) => {
   // loading chat messages...
   if (isPending) {
     return (
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView
+        style={{ flex: 1 }}
+        className="flex-1 bg-surface-bright"
+      >
         <Spinner message="Loading your chat..." />
       </SafeAreaView>
     );
@@ -183,9 +186,16 @@ const ChatPageClient = ({ tripId }: Props) => {
   // eventually retry button
   if (isError) {
     return (
-      <SafeAreaView style={{ flex: 1 }}>
-        <Text>Failed to load messages.</Text>
-        <Text>{error.message}</Text>
+      <SafeAreaView
+        style={{ flex: 1 }}
+        className="flex-1 items-center justify-center gap-sm bg-surface-bright px-md"
+      >
+        <Text className="text-title-md font-title-md text-on-surface">
+          Failed to load messages.
+        </Text>
+        <Text className="text-center text-body-md font-body-md text-on-surface-variant">
+          {error.message}
+        </Text>
       </SafeAreaView>
     );
   }
@@ -205,15 +215,18 @@ const ChatPageClient = ({ tripId }: Props) => {
           // retry logic
           pendingMessage && !isSending && (
             <Pressable
+              className="btn-secondary btn-small mx-md mt-sm self-start"
               onPress={() => {
                 sendMessageCommand(pendingMessage);
               }}
             >
-              <Text>Retry</Text>
+              <Text className="btn-secondary-text">Retry</Text>
             </Pressable>
           )
         }
         <FlatList
+          className="chat-list"
+          contentContainerClassName="gap-lg px-md py-lg"
           keyExtractor={(message) => message.id}
           data={messages}
           renderItem={({ item: message }) => (
@@ -233,13 +246,17 @@ const ChatPageClient = ({ tripId }: Props) => {
           //     </View>
           //   </View>
           // }
-          ListEmptyComponent={<Text>No messages yet</Text>}
+          ListEmptyComponent={
+            <Text className="text-center text-body-md font-body-md text-on-surface-variant">
+              No messages yet
+            </Text>
+          }
         ></FlatList>
-        <View className="min-h-11 flex-1 flex-row items-center rounded-full border border-outline-variant bg-surface-container-low px-md">
+        <View className="chat-input-bar">
           <TextInput
             placeholder="Type a message"
             accessibilityLabel="Message"
-            className="flex-1 py-sm text-body-md font-body-md text-on-surface"
+            className="input flex-1 rounded-app-full"
             onChangeText={(text) => {
               setTextContent(text);
             }}
@@ -252,7 +269,7 @@ const ChatPageClient = ({ tripId }: Props) => {
             disabled={isSending || !!pendingMessage || !textContent.trim()}
             accessibilityLabel="Send message"
             accessibilityRole="button"
-            className="h-10 w-10 flex-none items-center justify-center rounded-full bg-primary-container active:opacity-80 disabled:opacity-40"
+            className="btn-primary h-11 w-11 flex-none rounded-app-full px-0 disabled:opacity-40"
           >
             <Send size={20} color="#004444" fill="#004444" />
           </Pressable>

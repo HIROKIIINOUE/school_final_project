@@ -1,22 +1,21 @@
 import { View, Text, Image } from "react-native";
 import React from "react";
 import { SavedMessage } from "../types/types";
+import { formatDayLabel, formatTime } from "@/lib/formatDate";
 
 type Props = { message: SavedMessage; currentUserId: string };
 
 const ChatMessageBubble = ({ message, currentUserId }: Props) => {
   const isMine = message.sender.id === currentUserId;
 
+  const formattedTime = formatTime(new Date(message.createdAt));
+
   if (isMine) {
     return (
-      <View className="max-w-[85%] self-end items-end gap-unit">
-        <Text className="mr-unit text-label-md font-label-md text-on-surface-variant">
-          {message.createdAt}
-        </Text>
-        <View className="rounded-xl rounded-br-none bg-primary-container p-md shadow-sm">
-          <Text className="text-body-lg font-body-lg text-on-primary-container">
-            {message.content}
-          </Text>
+      <View className="max-w-[80%] self-end items-end ">
+        <Text className="chat-meta mr-unit">{formattedTime}</Text>
+        <View className="chat-bubble chat-bubble-me rounded-br-none shadow-lg">
+          <Text className="chat-text-me">{message.content}</Text>
         </View>
       </View>
     );
@@ -40,14 +39,12 @@ const ChatMessageBubble = ({ message, currentUserId }: Props) => {
         )}
       </View>
 
-      <View className="shrink gap-unit">
-        <Text className="ml-unit text-label-md font-label-md text-on-surface-variant">
-          {message.sender.displayName} • {message.createdAt}
+      <View className="max-w-[80%] shrink">
+        <Text className="chat-meta ml-unit">
+          {message.sender.displayName} • {formattedTime}
         </Text>
-        <View className="rounded-xl rounded-bl-none bg-surface-container-high p-md shadow-sm">
-          <Text className="text-body-lg font-body-lg text-on-surface">
-            {message.content}
-          </Text>
+        <View className="chat-bubble chat-bubble-other rounded-bl-none shadow-sm">
+          <Text className="chat-text-other">{message.content}</Text>
         </View>
       </View>
     </View>
