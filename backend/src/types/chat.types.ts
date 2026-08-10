@@ -43,6 +43,8 @@ export type ClientToServerEvents = {
     payload: SendMessagePayload,
     acknowledge: (result: SendMessageResult) => void,
   ) => void;
+
+  "trip:leave": (tripId: string) => void;
 };
 
 export type ServerToClientEvents = {
@@ -61,3 +63,9 @@ export type SendMessageErrorCode =
 export type SendMessageResult =
   | { ok: true; message: SavedMessage }
   | { ok: false; error: { code: SendMessageErrorCode; message: string } };
+
+export type LeaveRoomResult =
+  | { ok: false; error: string }
+  | { ok: true; message: string };
+
+export type LeaveTripPayload = { tripId: string };

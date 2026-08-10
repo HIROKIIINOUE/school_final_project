@@ -16,6 +16,7 @@ import { Send } from "lucide-react-native";
 import { createClientId } from "@/lib/createClientId";
 import Toast from "react-native-toast-message";
 import { addMsgToChatCache } from "../lib/addMessageToTripCache";
+import { useAuthStore } from "@/store/auth.store";
 
 type Props = { tripId: string };
 type MessageCommand = { clientMessageId: string; content: string };
@@ -38,6 +39,8 @@ const ChatPageClient = ({ tripId }: Props) => {
   const [pendingMessage, setPendingMessage] = useState<MessageCommand | null>(
     null,
   );
+
+  const currentUserId = useAuthStore((state) => state.user?.id);
 
   const queryClient = useQueryClient();
 
@@ -86,10 +89,16 @@ const ChatPageClient = ({ tripId }: Props) => {
       joinCurrentTrip();
     }
 
+    // cleanup function : It runs when components unmount (like, user leaves the page), or before re-running
     return () => {
       // removing this listener function
       chatSocket.off("message:created", handleMessageCreated);
       chatSocket.off("connect", handleConnect);
+
+      // when user leaves, it should disconnect joined room
+      if (chatSocket.connected) {
+        chatSocket.emit("trip:leave", { tripId });
+      }
     };
   }, [tripId, queryClient]);
 
@@ -191,7 +200,7 @@ const ChatPageClient = ({ tripId }: Props) => {
         keyExtractor={(message) => message.id}
         data={messages}
         renderItem={({ item: message }) => (
-          <ChatMessageBubble message={message} />
+          <ChatMessageBubble message={message} currentUserId={currentUserId!} />
         )}
         ListEmptyComponent={<Text>No messages yet</Text>}
       ></FlatList>

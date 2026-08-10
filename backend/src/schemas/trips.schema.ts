@@ -117,4 +117,4 @@ export const sendMessagePayloadSchema = postMessageBodySchema.extend({
 
 export type SendMessagePayload = z.infer<typeof sendMessagePayloadSchema>;
 
-export const tripIdParamsSchema = z.object({ tripId: z.string().uuid() });
+export const tripIdParamsSchema = z.object({ tripId: z.uuid() });
