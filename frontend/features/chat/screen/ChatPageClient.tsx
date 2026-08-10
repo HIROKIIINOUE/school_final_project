@@ -1,4 +1,12 @@
-import { View, Text, FlatList, TextInput, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  TextInput,
+  Pressable,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -183,45 +191,73 @@ const ChatPageClient = ({ tripId }: Props) => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
-      {
-        // retry logic
-        pendingMessage && !isSending && (
-          <Pressable
-            onPress={() => {
-              sendMessageCommand(pendingMessage);
+    <SafeAreaView
+      style={{ flex: 1 }}
+      className="flex-1 bg-surface-bright"
+      edges={["top", "left", "right"]}
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className="flex-1"
+        keyboardVerticalOffset={80}
+      >
+        {
+          // retry logic
+          pendingMessage && !isSending && (
+            <Pressable
+              onPress={() => {
+                sendMessageCommand(pendingMessage);
+              }}
+            >
+              <Text>Retry</Text>
+            </Pressable>
+          )
+        }
+        <FlatList
+          keyExtractor={(message) => message.id}
+          data={messages}
+          renderItem={({ item: message }) => (
+            <ChatMessageBubble
+              message={message}
+              currentUserId={currentUserId!}
+            />
+          )}
+          keyboardDismissMode="interactive"
+          keyboardShouldPersistTaps="handled"
+          // ListHeaderComponent={
+          //   <View className="w-full items-center">
+          //     <View className="rounded-full bg-surface-container-high px-md py-xs">
+          //       <Text className="text-label-md font-label-md text-on-surface-variant">
+          //         Today
+          //       </Text>
+          //     </View>
+          //   </View>
+          // }
+          ListEmptyComponent={<Text>No messages yet</Text>}
+        ></FlatList>
+        <View className="min-h-11 flex-1 flex-row items-center rounded-full border border-outline-variant bg-surface-container-low px-md">
+          <TextInput
+            placeholder="Type a message"
+            accessibilityLabel="Message"
+            className="flex-1 py-sm text-body-md font-body-md text-on-surface"
+            onChangeText={(text) => {
+              setTextContent(text);
             }}
+            value={textContent}
+            placeholderTextColor="#3d4949"
+            editable={!pendingMessage} // when there is a pendingMessage, user shouldn't be able to edit
+          />
+          <Pressable
+            onPress={handleSendMessage}
+            disabled={isSending || !!pendingMessage || !textContent.trim()}
+            accessibilityLabel="Send message"
+            accessibilityRole="button"
+            className="h-10 w-10 flex-none items-center justify-center rounded-full bg-primary-container active:opacity-80 disabled:opacity-40"
           >
-            <Text>Retry</Text>
+            <Send size={20} color="#004444" fill="#004444" />
           </Pressable>
-        )
-      }
-      <FlatList
-        keyExtractor={(message) => message.id}
-        data={messages}
-        renderItem={({ item: message }) => (
-          <ChatMessageBubble message={message} currentUserId={currentUserId!} />
-        )}
-        ListEmptyComponent={<Text>No messages yet</Text>}
-      ></FlatList>
-      <View className="flex flex-row m-md items-center">
-        <TextInput
-          placeholder="Type a message"
-          className="h-12 rounded-xl border border-outline-variant bg-surface-container px-md text-body-lg
-               text-on-surface flex-1"
-          onChangeText={(text) => {
-            setTextContent(text);
-          }}
-          value={textContent}
-          editable={!pendingMessage} // when there is a pendingMessage, user shouldn't be able to edit
-        />
-        <Pressable
-          onPress={handleSendMessage}
-          disabled={isSending || !!pendingMessage || !textContent.trim()}
-        >
-          <Send size={20} />
-        </Pressable>
-      </View>
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
