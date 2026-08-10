@@ -19,7 +19,7 @@ export async function fetchMessages({
 
   const params = new URLSearchParams();
 
-  params.set("limit", "30");
+  params.set("limit", "5");
 
   if (before) {
     params.set("before", before);

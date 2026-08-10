@@ -7,7 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { chatQueryKey } from "../lib/chatQueryKeys";
@@ -32,7 +32,15 @@ type MessageCommand = { clientMessageId: string; content: string };
 const ChatPageClient = ({ tripId }: Props) => {
   // fetch messages for this trip and cache with TanstackQuery on page load
   // useQuery() handles the initial fetch-and-cache process for me
-  const { isPending, isError, error, data } = useInfiniteQuery({
+  const {
+    isPending,
+    isError,
+    error,
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: chatQueryKey.byTrip(tripId),
     initialPageParam: null as string | null,
     queryFn: ({ pageParam }) =>
@@ -51,6 +59,10 @@ const ChatPageClient = ({ tripId }: Props) => {
   const [pendingMessage, setPendingMessage] = useState<MessageCommand | null>(
     null,
   );
+
+  const listRef = useRef<FlatList<SavedMessage>>(null);
+
+  const didInitialScroll = useRef(false);
 
   const currentUserId = useAuthStore((state) => state.user?.id);
 
@@ -174,6 +186,23 @@ const ChatPageClient = ({ tripId }: Props) => {
         },
       );
   }
+
+  function handleStartReached() {
+    if (!didInitialScroll.current) {
+      return;
+    }
+
+    if (!hasNextPage) {
+      return;
+    }
+
+    if (isFetchingNextPage) {
+      return;
+    }
+
+    fetchNextPage();
+  }
+
   // loading chat messages...
   if (isPending) {
     return (
@@ -225,8 +254,11 @@ const ChatPageClient = ({ tripId }: Props) => {
             </Pressable>
           )
         }
+
         <FlatList
           className="chat-list"
+          maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
+          ref={listRef}
           contentContainerClassName="gap-lg px-md py-lg"
           keyExtractor={(message) => message.id}
           data={messages}
@@ -250,7 +282,17 @@ const ChatPageClient = ({ tripId }: Props) => {
           ListEmptyComponent={
             <Text className="empty-title empty-inline">No messages yet</Text>
           }
-        ></FlatList>
+          onContentSizeChange={() => {
+            if (!didInitialScroll.current && messages.length > 0) {
+              listRef.current?.scrollToEnd({ animated: false });
+
+              didInitialScroll.current = true;
+              // only send the user to the newest on initial load = shouldn't bring user to the bottom on every pagination
+            }
+          }}
+          onStartReached={handleStartReached}
+          onStartReachedThreshold={0.1}
+        />
         <View className="chat-input-bar">
           <TextInput
             placeholder="Type a message"
