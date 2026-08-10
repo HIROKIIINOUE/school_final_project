@@ -38,12 +38,13 @@ function RootNavigator() {
     chatSocket.on("connect_error", handleConnectError);
 
     // if user is logged in, connect socket. one socker per app => that's why connecting here.
-    connectChatSocket().catch((error) => {
-      console.error("Failed to connect chat socket:", error);
-    });
+    connectChatSocket();
 
     return () => {
       chatSocket.disconnect();
+
+      chatSocket.off("connect", handleConnect);
+      chatSocket.off("connect_error", handleConnect);
     };
   }, [authStatus]);
 
