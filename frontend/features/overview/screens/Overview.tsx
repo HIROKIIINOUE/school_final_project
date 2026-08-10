@@ -42,8 +42,8 @@ const OverView = ({ id }: Props) => {
 
   if (!overviewData?.tripDetails) {
     return (
-      <View>
-        <Text>No overview yet</Text>
+      <View className="empty-state">
+        <Text className="empty-title">No overview yet</Text>
       </View>
     );
   }

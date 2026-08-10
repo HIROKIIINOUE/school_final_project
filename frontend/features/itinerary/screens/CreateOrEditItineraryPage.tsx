@@ -149,25 +149,23 @@ const CreateItineraryPage = ({ tripId, mode }: Props) => {
   }
   if (mode === "create" && createdItems.length === 0) {
     return (
-      <SafeAreaView style={{ flex: 1 }} className="m-md">
+      <SafeAreaView style={{ flex: 1 }} className="empty-state">
         <Link
           href={`/(protected)/trips/${tripId}/(tabs)/itinerary`}
-          className=" ml-7"
+          className="self-start"
         >
-          <View className="flex flex-row items-center text-primary">
-            <ArrowLeft className="" />
+          <View className="flex flex-row items-center gap-xs text-primary">
+            <ArrowLeft className="text-primary" />
             <Text className="text-primary">Go back</Text>
           </View>
         </Link>
-        <Text className="text-muted text-center mb-md">
-          Tap here to add item
-        </Text>
+        <Text className="empty-title">Tap here to add item</Text>
         <Pressable
-          className="btn-primary mx-md"
+          className="btn-primary empty-action"
           onPress={() => setIsModalOpen(true)}
           disabled={isModalOpen}
         >
-          <Text>Create item</Text>
+          <Text className="btn-primary-text">Create item</Text>
         </Pressable>
         {isModalOpen && (
           <CreateItineraryModal
@@ -182,25 +180,23 @@ const CreateItineraryPage = ({ tripId, mode }: Props) => {
 
   if (mode === "edit" && createdItems.length === 0) {
     return (
-      <SafeAreaView style={{ flex: 1 }} className="m-md">
+      <SafeAreaView style={{ flex: 1 }} className="empty-state">
         <Link
           href={`/(protected)/trips/${tripId}/(tabs)/itinerary`}
-          className=" ml-7"
+          className="self-start"
         >
-          <View className="flex flex-row items-center text-primary">
-            <ArrowLeft className="" />
+          <View className="flex flex-row items-center gap-xs text-primary">
+            <ArrowLeft className="text-primary" />
             <Text className="text-primary">Go back</Text>
           </View>
         </Link>
-        <Text className="text-muted text-center mb-md">
-          Tap here to add item
-        </Text>
+        <Text className="empty-title">Tap here to add item</Text>
         <Pressable
-          className="btn-primary mx-md"
+          className="btn-primary empty-action"
           onPress={() => setIsModalOpen(true)}
           disabled={isModalOpen}
         >
-          <Text>Create item</Text>
+          <Text className="btn-primary-text">Create item</Text>
         </Pressable>
         {isModalOpen && (
           <CreateItineraryModal

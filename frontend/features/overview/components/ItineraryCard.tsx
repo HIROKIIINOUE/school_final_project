@@ -15,7 +15,7 @@ const ItineraryCard = ({ itineraries, tripId }: Props) => {
         Up next
       </Text>
       {false ? (
-        <Text className="text-body-md text-on-surface-variant">
+        <Text className="empty-text empty-inline">
           No upcoming itinerary items yet.
         </Text>
       ) : (

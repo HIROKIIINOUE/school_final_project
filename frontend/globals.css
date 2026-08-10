@@ -497,7 +497,7 @@
   ========================= */
 
   .empty-state {
-    @apply flex-1 items-center justify-center px-lg;
+    @apply flex-1 items-center justify-center bg-surface-bright px-lg py-xl;
   }
 
   .empty-title {
@@ -505,7 +505,15 @@
   }
 
   .empty-text {
-    @apply mt-sm font-sans text-[14px] font-normal leading-[20px] text-on-surface text-center text-on-surface-variant;
+    @apply mt-sm font-sans text-[14px] font-normal leading-[20px] text-center text-on-surface-variant;
+  }
+
+  .empty-inline {
+    @apply py-xl text-center;
+  }
+
+  .empty-action {
+    @apply mt-md;
   }
 
   .state-box {

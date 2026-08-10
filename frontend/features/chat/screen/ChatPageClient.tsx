@@ -247,7 +247,7 @@ const ChatPageClient = ({ tripId }: Props) => {
           //   </View>
           // }
           ListEmptyComponent={
-            <Text className="text-center text-body-md font-body-md text-on-surface-variant">
+            <Text className="empty-title empty-inline">
               No messages yet
             </Text>
           }

@@ -81,8 +81,8 @@ const ItineraryClient = ({ tripId }: Props) => {
 
   if (itineraryItems.length === 0) {
     return (
-      <SafeAreaView className="m-sm" style={{ flex: 1 }}>
-        <Text className="text-center text-xl text-muted">
+      <SafeAreaView className="empty-state" style={{ flex: 1 }}>
+        <Text className="empty-title">
           No Itineraries created yet
         </Text>
         <Link
@@ -92,8 +92,8 @@ const ItineraryClient = ({ tripId }: Props) => {
           }}
           asChild
         >
-          <Pressable className="btn-primary mt-md">
-            <Text className="text-on-primary">Create Itinerary here</Text>
+          <Pressable className="btn-primary empty-action">
+            <Text className="btn-primary-text">Create Itinerary here</Text>
           </Pressable>
         </Link>
       </SafeAreaView>

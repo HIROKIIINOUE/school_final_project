@@ -87,8 +87,8 @@ const MyTripScreen = () => {
 
       {tripRooms.length === 0 ? (
         // TODO: add styling
-        <View>
-          <Text>No room yet</Text>
+        <View className="empty-state">
+          <Text className="empty-title">No room yet</Text>
         </View>
       ) : (
         <FlatList
