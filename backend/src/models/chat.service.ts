@@ -1,9 +1,14 @@
 import { Prisma } from "../generated/prisma/client";
 import { AppError } from "../lib/appError";
 import { isUniqueConstraintError } from "../lib/isPrismaConflictError";
+import {
+  decodeCursor,
+  encodeCursor,
+  MessageCursor,
+} from "../lib/messageCursor";
 import { prisma } from "../lib/prisma";
 import { PostMessageBody } from "../schemas/trips.schema";
-import { SavedMessage } from "../types/chat.types";
+import { MessagePage, SavedMessage } from "../types/chat.types";
 
 const messageSelect = {
   id: true,
@@ -63,10 +68,14 @@ function toSavedMessage({
 async function getMessages({
   userId,
   tripId,
+  limit,
+  before,
 }: {
   userId: string;
   tripId: string;
-}): Promise<SavedMessage[]> {
+  limit: number;
+  before?: string;
+}): Promise<MessagePage> {
   const membership = await prisma.tripMember.findUnique({
     where: { tripId_userId: { tripId, userId } },
     select: { id: true },
@@ -80,16 +89,36 @@ async function getMessages({
     );
   }
 
+  const cursor = before ? decodeCursor(before) : null;
   const messages = await prisma.message.findMany({
-    where: { tripId },
+    where: {
+      tripId,
+      ...(cursor
+        ? {
+            OR: [
+              { createdAt: { lt: new Date(cursor.createdAt) } },
+              { createdAt: new Date(cursor.createdAt), id: { lt: cursor.id } },
+            ],
+          }
+        : {}),
+    },
     select: messageSelect,
-    take: 30,
-    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+    take: limit + 1,
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
   });
+
+  const hasOlderMessages = messages.length > limit;
+  const pageDesc = hasOlderMessages ? messages.slice(0, limit) : messages;
+
+  const oldestMessage = pageDesc[pageDesc.length - 1];
+  const nextCursor =
+    hasOlderMessages && oldestMessage ? encodeCursor(oldestMessage) : null;
+
+  const pageAsc = [...pageDesc].reverse();
 
   const senderIds: string[] = [];
 
-  for (const msg of messages) {
+  for (const msg of pageAsc) {
     if (!senderIds.includes(msg.userId)) {
       senderIds.push(msg.userId);
     }
@@ -104,7 +133,7 @@ async function getMessages({
     profiles.map((profile) => [profile.userId, profile]),
   );
 
-  return messages.map((message) => {
+  const savedMessages = pageAsc.map((message) => {
     const profile = profileByUserId.get(message.userId);
 
     if (!profile) {
@@ -117,6 +146,8 @@ async function getMessages({
 
     return toSavedMessage({ message, profile });
   });
+
+  return { messages: savedMessages, olderCursor: nextCursor };
 }
 
 async function createMessage({

@@ -118,3 +118,16 @@ export const sendMessagePayloadSchema = postMessageBodySchema.extend({
 export type SendMessagePayload = z.infer<typeof sendMessagePayloadSchema>;
 
 export const tripIdParamsSchema = z.object({ tripId: z.uuid() });
+
+export const getMessagesQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(50).default(30),
+
+  before: z.string().min(1).optional(),
+});
+
+export const messageCursorSchema = z.strictObject({
+  createdAt: z.iso.datetime(),
+  id: z.uuid(),
+});
+
+export type MessageCursor = z.infer<typeof messageCursorSchema>;

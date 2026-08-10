@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../../lib/appError";
 import {
+  getMessagesQuerySchema,
   postMessageBodySchema,
   tripIdParamsSchema,
 } from "../../schemas/trips.schema";
@@ -41,9 +42,28 @@ async function getMessagesController(
     );
   }
 
+  const queryResult = getMessagesQuerySchema.safeParse(req.query);
+
+  if (!queryResult.success) {
+    return next(
+      new AppError(
+        400,
+        "VALIDATION_ERROR",
+        "Invalid message pagination parameters.",
+        queryResult.error.issues.map((issue) => ({
+          path: issue.path.join("."),
+          code: issue.code,
+          message: issue.message,
+        })),
+      ),
+    );
+  }
+
+  const { limit, before } = queryResult.data;
+
   const { tripId } = paramsResult.data;
 
-  const results = await getMessages({ userId, tripId });
+  const results = await getMessages({ userId, tripId, limit, before });
 
   return res.status(200).json({ data: results });
 }
