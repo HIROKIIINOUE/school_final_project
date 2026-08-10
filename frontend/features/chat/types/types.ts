@@ -36,3 +36,8 @@ export type SendMessageErrorCode =
 export type SendMessageResult =
   | { ok: true; message: SavedMessage }
   | { ok: false; error: { code: SendMessageErrorCode; message: string } };
+
+export type MessagePage = {
+  messages: SavedMessage[];
+  olderCursor: string | null;
+};

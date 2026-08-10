@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { chatQueryKey } from "../lib/chatQueryKeys";
 import { fetchMessages } from "../api/chat.api";
 import Spinner from "@/components/Spinner";
@@ -32,15 +32,19 @@ type MessageCommand = { clientMessageId: string; content: string };
 const ChatPageClient = ({ tripId }: Props) => {
   // fetch messages for this trip and cache with TanstackQuery on page load
   // useQuery() handles the initial fetch-and-cache process for me
-  const {
-    isPending,
-    isError,
-    error,
-    data: messages,
-  } = useQuery({
+  const { isPending, isError, error, data } = useInfiniteQuery({
     queryKey: chatQueryKey.byTrip(tripId),
-    queryFn: () => fetchMessages({ tripId }),
+    initialPageParam: null as string | null,
+    queryFn: ({ pageParam }) =>
+      fetchMessages({ tripId, before: pageParam ?? undefined }),
+    getNextPageParam: (lastPage) => {
+      return lastPage.olderCursor ?? undefined;
+    },
   });
+
+  const messages = data
+    ? [...data.pages].reverse().flatMap((page) => page.messages)
+    : [];
 
   const [textContent, setTextContent] = useState<string>("");
   const [isSending, setIsSending] = useState(false);
@@ -173,10 +177,7 @@ const ChatPageClient = ({ tripId }: Props) => {
   // loading chat messages...
   if (isPending) {
     return (
-      <SafeAreaView
-        style={{ flex: 1 }}
-        className="flex-1 bg-surface-bright"
-      >
+      <SafeAreaView style={{ flex: 1 }} className="flex-1 bg-surface-bright">
         <Spinner message="Loading your chat..." />
       </SafeAreaView>
     );
@@ -247,9 +248,7 @@ const ChatPageClient = ({ tripId }: Props) => {
           //   </View>
           // }
           ListEmptyComponent={
-            <Text className="empty-title empty-inline">
-              No messages yet
-            </Text>
+            <Text className="empty-title empty-inline">No messages yet</Text>
           }
         ></FlatList>
         <View className="chat-input-bar">

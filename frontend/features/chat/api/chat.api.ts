@@ -1,5 +1,5 @@
 import { grabAccessToken } from "@/lib/getAccessToken";
-import { SavedMessage } from "../types/types";
+import { MessagePage } from "../types/types";
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 if (!BACKEND_URL) {
@@ -8,22 +8,33 @@ if (!BACKEND_URL) {
 
 type ApiResponse<T> = { data: T };
 
-type PostMessageBody = { clientMessageId: string; content: string };
-
 export async function fetchMessages({
   tripId,
+  before,
 }: {
   tripId: string;
-}): Promise<SavedMessage[]> {
+  before?: string;
+}): Promise<MessagePage> {
   const accessToken = await grabAccessToken();
 
-  const res = await fetch(`${BACKEND_URL}/api/trips/${tripId}/messages`, {
-    method: "GET",
-    headers: { Authorization: `Bearer ${accessToken}` },
-    credentials: "include",
-  });
+  const params = new URLSearchParams();
 
-  const data: ApiResponse<SavedMessage[]> = await res.json();
+  params.set("limit", "30");
+
+  if (before) {
+    params.set("before", before);
+  }
+
+  const res = await fetch(
+    `${BACKEND_URL}/api/trips/${tripId}/messages?${params.toString()}`,
+    {
+      method: "GET",
+      headers: { Authorization: `Bearer ${accessToken}` },
+      credentials: "include",
+    },
+  );
+
+  const data: ApiResponse<MessagePage> = await res.json();
 
   if (!res.ok) {
     console.error("res.ok failed. Failed to fetch chat messages", data);
