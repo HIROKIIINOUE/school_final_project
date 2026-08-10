@@ -100,16 +100,28 @@ export function registerSocketHandlers(io: ChatSocketServer) {
           body: { clientMessageId, content },
         });
 
-        // acknowledge is for the sender(socket) only.
-        // frontend defines this acknowledge function and server just kind of "remotely execute" this function (calling this function)
-        acknowledge({ ok: true, message: result.message });
-
         // to emit is for all the members in the room except to the sender
         if (result.wasCreated) {
           socket
             .to(getTripRoomName(tripId))
             .emit("message:created", result.message);
         }
+
+        if (
+          process.env.NODE_ENV !== "production" &&
+          result.wasCreated &&
+          payload.content === "__ACK_LOSS_TEST__"
+        ) {
+          console.log("TEST: deliberately dropping ack", {
+            clientMessageId: payload.clientMessageId,
+          });
+
+          return;
+        }
+
+        // acknowledge is for the sender(socket) only.
+        // frontend defines this acknowledge function and server just kind of "remotely execute" this function (calling this function)
+        acknowledge({ ok: true, message: result.message });
       } catch (e) {
         acknowledge(toSendMessageFailure(e));
       }

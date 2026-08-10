@@ -97,6 +97,7 @@ const ChatPageClient = ({ tripId }: Props) => {
   function handleSendMessage() {
     const content = textContent.trim();
 
+    // only allows message-send when content exists, no-sending, np pendingMessage
     if (!content || isSending || pendingMessage) {
       return;
     }
@@ -122,13 +123,16 @@ const ChatPageClient = ({ tripId }: Props) => {
           content: command.content,
         },
         (timeoutError: Error | null, returnedValue: SendMessageResult) => {
+          // no longer sending
           setIsSending(false);
+
           if (timeoutError) {
             Toast.show({ type: "error", text1: "Message send timed out" });
 
             return;
           }
 
+          // it reached the backend = no retry
           if (!returnedValue.ok) {
             setPendingMessage(null);
             console.error("Failed to send message:", returnedValue.error);
@@ -200,6 +204,7 @@ const ChatPageClient = ({ tripId }: Props) => {
             setTextContent(text);
           }}
           value={textContent}
+          editable={!pendingMessage} // when there is a pendingMessage, user shouldn't be able to edit
         />
         <Pressable
           onPress={handleSendMessage}
