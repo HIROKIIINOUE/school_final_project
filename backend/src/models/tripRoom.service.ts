@@ -107,4 +107,22 @@ async function updateMyTrips(data: {
   return result;
 }
 
+async function joinTrip({
+  inviteCode,
+  userId,
+}: {
+  inviteCode: string;
+  userId: string;
+}) {
+  const trip = await prisma.trip.findUnique({ where: { inviteCode } });
+
+  if (!trip) {
+    throw new AppError(
+      404,
+      "INVALID_INVITE_CODE",
+      "The invite code is invalid.",
+    );
+  }
+}
+
 export { getMyRooms, createRoom, updateMyTrips };

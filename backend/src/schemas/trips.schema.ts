@@ -130,4 +130,10 @@ export const messageCursorSchema = z.strictObject({
   id: z.uuid(),
 });
 
+export const joinTripBodySchema = z.object({
+  inviteCode: z.string().trim().min(1, "Invite code is required"),
+});
+
+export type JoinTripBody = z.infer<typeof joinTripBodySchema>;
+
 export type MessageCursor = z.infer<typeof messageCursorSchema>;
