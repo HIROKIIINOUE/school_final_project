@@ -1,10 +1,12 @@
 import AddExpenseModal from "./AddExpenseModal";
 import {
   CreateExpenseInput,
+  Expense,
   ExpenseTripMember,
 } from "../types/expense.type";
 
 type Props = {
+  expense: Expense;
   visible: boolean;
   members: ExpenseTripMember[];
   onClose: () => void;
@@ -12,6 +14,7 @@ type Props = {
 };
 
 const UpdateExpenseModal = ({
+  expense,
   visible,
   members,
   onClose,
@@ -22,6 +25,7 @@ const UpdateExpenseModal = ({
     members={members}
     onClose={onClose}
     onCreate={onUpdate}
+    expense={expense}
     mode="update"
   />
 );
