@@ -29,6 +29,8 @@ import {
   ExpenseTripData,
 } from "../types/expense.type";
 
+type Props = { tripId: string };
+
 const StyledSafeAreaView = styled(SafeAreaView);
 
 const formatCurrency = (amount: number) =>
@@ -43,8 +45,8 @@ const formatDateRange = (startDate: string | null, endDate: string | null) => {
   return `${format.format(new Date(startDate))} - ${format.format(new Date(endDate))}`;
 };
 
-const ExpenseScreen = () => {
-  const { id } = useLocalSearchParams<{ id: string }>();
+const ExpenseScreen = ({ tripId }: Props) => {
+  // const { id } = useLocalSearchParams<{ id: string }>();
   const currentUserId = useAuthStore((state) => state.user?.id);
   const [expenseData, setExpenseData] = useState<ExpenseTripData | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -56,13 +58,13 @@ const ExpenseScreen = () => {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
 
   const loadExpenseData = useCallback(async () => {
-    if (!id) return;
+    if (!tripId) return;
     setIsLoading(true);
     setError(null);
     try {
       const [tripData, fetchedExpenses] = await Promise.all([
-        fetchExpenseTripData(id),
-        fetchExpenses(id),
+        fetchExpenseTripData(tripId),
+        fetchExpenses(tripId),
       ]);
       setExpenseData(tripData);
       setExpenses(fetchedExpenses);
@@ -75,7 +77,7 @@ const ExpenseScreen = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [id]);
+  }, [tripId]);
 
   useEffect(() => {
     loadExpenseData();
@@ -84,14 +86,14 @@ const ExpenseScreen = () => {
   const summary = useExpenseSummary(expenses, currentUserId);
 
   const handleCreateExpense = async (input: CreateExpenseInput) => {
-    if (!id) throw new Error("Trip ID is missing");
-    const createdExpense = await createExpense(id, input);
+    if (!tripId) throw new Error("Trip ID is missing");
+    const createdExpense = await createExpense(tripId, input);
     setExpenses((currentExpenses) => [createdExpense, ...currentExpenses]);
   };
 
   const handleDeleteExpense = async (expenseId: string) => {
-    if (!id) throw new Error("Trip ID is missing");
-    await deleteExpense(id, expenseId);
+    if (!tripId) throw new Error("Trip ID is missing");
+    await deleteExpense(tripId, expenseId);
     await loadExpenseData();
   };
 
@@ -99,8 +101,8 @@ const ExpenseScreen = () => {
     expenseId: string,
     input: CreateExpenseInput,
   ) => {
-    if (!id) throw new Error("Trip ID is missing");
-    await updateExpense(id, expenseId, input);
+    if (!tripId) throw new Error("Trip ID is missing");
+    await updateExpense(tripId, expenseId, input);
     await loadExpenseData();
   };
 
@@ -131,7 +133,7 @@ const ExpenseScreen = () => {
   return (
     <StyledSafeAreaView
       className="flex-1 bg-[#f7f8ff]"
-      edges={["left", "right", "bottom"]}
+      edges={["top", "left", "right", "bottom"]}
     >
       <Stack.Screen options={{ title: "Expense Calculate" }} />
       <FlatList
