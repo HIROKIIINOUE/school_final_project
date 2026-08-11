@@ -156,6 +156,46 @@ const getExpenses = async ({
   );
 };
 
+const getExpenseTripMembers = async ({
+  tripId,
+  userId,
+}: {
+  tripId: string;
+  userId: string;
+}) => {
+  await assertTripAccess(tripId, userId);
+
+  const trip = await prisma.trip.findUnique({
+    where: { id: tripId },
+    select: { title: true, startDate: true, endDate: true },
+  });
+
+  if (!trip) {
+    throw new AppError(404, "TRIP_NOT_FOUND", "Trip was not found.");
+  }
+
+  const members = await prisma.tripMember.findMany({
+    where: { tripId },
+    select: { id: true, userId: true, role: true, joinedAt: true },
+    orderBy: { joinedAt: "asc" },
+  });
+  const profiles = await prisma.profile.findMany({
+    where: { userId: { in: members.map((member) => member.userId) } },
+    select: { id: true, userId: true, displayName: true, image: true },
+  });
+  const profilesByUserId = new Map(
+    profiles.map((profile) => [profile.userId, profile]),
+  );
+
+  return {
+    trip,
+    members: members.map((member) => ({
+      ...member,
+      profile: profilesByUserId.get(member.userId) ?? null,
+    })),
+  };
+};
+
 const getExpense = async ({
   tripId,
   expenseId,
@@ -363,6 +403,7 @@ export {
   deleteExpense,
   deleteExpenseSplit,
   getExpense,
+  getExpenseTripMembers,
   getExpenses,
   getExpenseSplits,
   updateExpense,

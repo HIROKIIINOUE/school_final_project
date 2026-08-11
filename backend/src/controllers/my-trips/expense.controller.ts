@@ -6,6 +6,7 @@ import {
   deleteExpense,
   deleteExpenseSplit,
   getExpense,
+  getExpenseTripMembers,
   getExpenses,
   getExpenseSplits,
   updateExpense,
@@ -53,6 +54,14 @@ const getExpensesController = async (req: Request, res: Response, next: NextFunc
   const tripId = getParam(req.params.tripId);
   if (!userId || !tripId) return;
   const data = await getExpenses({ tripId, userId });
+  return res.status(200).json({ data });
+};
+
+const getExpenseTripMembersController = async (req: Request, res: Response, next: NextFunction) => {
+  const userId = getRequiredUserId(req, next);
+  const tripId = getParam(req.params.tripId);
+  if (!userId || !tripId) return;
+  const data = await getExpenseTripMembers({ tripId, userId });
   return res.status(200).json({ data });
 };
 
@@ -139,6 +148,7 @@ export {
   deleteExpenseController,
   deleteExpenseSplitController,
   getExpenseController,
+  getExpenseTripMembersController,
   getExpensesController,
   getExpenseSplitsController,
   updateExpenseController,

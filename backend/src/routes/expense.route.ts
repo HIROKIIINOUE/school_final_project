@@ -5,6 +5,7 @@ import {
   deleteExpenseController,
   deleteExpenseSplitController,
   getExpenseController,
+  getExpenseTripMembersController,
   getExpensesController,
   getExpenseSplitsController,
   updateExpenseController,
@@ -16,6 +17,7 @@ const expenseRouter = Router();
 
 expenseRouter.get("/:tripId", authCheck, getExpensesController);
 expenseRouter.post("/:tripId", authCheck, createExpenseController);
+expenseRouter.get("/:tripId/members", authCheck, getExpenseTripMembersController);
 expenseRouter.get("/:tripId/:expenseId", authCheck, getExpenseController);
 expenseRouter.put("/:tripId/:expenseId", authCheck, updateExpenseController);
 expenseRouter.delete("/:tripId/:expenseId", authCheck, deleteExpenseController);
