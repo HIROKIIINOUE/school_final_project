@@ -6,6 +6,7 @@ import {
 } from "../../models/tripRoom.service";
 import {
   createTripBodySchema,
+  joinTripBodySchema,
   updateTripBodySchema,
 } from "../../schemas/trips.schema";
 import { AppError } from "../../lib/appError";
@@ -152,7 +153,22 @@ async function joinTripController(
     return;
   }
 
-  const validationResult = "";
+  const validationResult = joinTripBodySchema.safeParse(req.body);
+
+  if (!validationResult.success) {
+    return next(
+      new AppError(
+        400,
+        "VALIDATION_ERROR",
+        "Request validation failed.",
+        validationResult.error.issues.map((issue) => ({
+          path: issue.path.join("."),
+          code: issue.code,
+          message: issue.message,
+        })),
+      ),
+    );
+  }
 }
 
 export {
