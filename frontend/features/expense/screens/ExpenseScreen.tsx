@@ -137,7 +137,7 @@ const ExpenseScreen = ({ tripId }: Props) => {
     >
       <Stack.Screen options={{ title: "Expense Calculate" }} />
       <FlatList
-        className="flex-1 px-[14px] pb-6"
+        className="flex-1 px-3.5 pb-6"
         data={expenses}
         keyExtractor={(item) => item.id}
         refreshing={isLoading}
@@ -167,7 +167,7 @@ const ExpenseScreen = ({ tripId }: Props) => {
         }
         ListHeaderComponent={
           <>
-            <View className="mt-1 px-[14px] pt-4">
+            <View className="mt-1 px-3.5 pt-4">
               <Text className="text-[20px] font-bold tracking-[-0.3px] text-[#278184]">
                 {expenseData.trip.title}
               </Text>
@@ -188,7 +188,7 @@ const ExpenseScreen = ({ tripId }: Props) => {
 
             <View className="mt-3 h-px bg-[#dfe3eb]" />
 
-            <View className="mt-[14px] rounded-[8px] border border-[#c9dce2] bg-[#f4ffff] px-4 py-[10px]">
+            <View className="mt-3.5 rounded-[8px] border border-[#c9dce2] bg-[#f4ffff] px-4 py-2.5">
               <Text className="text-center text-[12px] font-bold tracking-[1.2px] text-[#687383] capitalize">
                 TOTAL TRIP COST
               </Text>
@@ -197,8 +197,8 @@ const ExpenseScreen = ({ tripId }: Props) => {
               </Text>
             </View>
 
-            <View className="mt-[10px] flex-row gap-[10px]">
-              <View className="flex-1 rounded-[8px] border border-[#f1cad0] bg-[#fff1f2] px-[10px] py-[10px]">
+            <View className="mt-2.5 flex-row gap-2.5">
+              <View className="flex-1 rounded-[8px] border border-[#f1cad0] bg-[#fff1f2] px-2.5 py-2.5">
                 <View className="flex-row items-center justify-between">
                   <Text className="text-[9px] font-bold tracking-[0.8px] text-[#7c6a70]">
                     YOU OWE
@@ -209,7 +209,7 @@ const ExpenseScreen = ({ tripId }: Props) => {
                   {formatCurrency(summary.youOwe)}
                 </Text>
               </View>
-              <View className="flex-1 rounded-[8px] border border-[#b9d7db] bg-[#dff2f3] px-[10px] py-[10px]">
+              <View className="flex-1 rounded-[8px] border border-[#b9d7db] bg-[#dff2f3] px2.5 py-2.5">
                 <View className="flex-row items-center justify-between">
                   <Text className="text-[9px] font-bold tracking-[0.8px] text-[#587175]">
                     ARE OWED
@@ -261,10 +261,10 @@ const ExpenseScreen = ({ tripId }: Props) => {
 
           return (
             <Pressable
-              className={`flex-col items-center px-[10px] py-[10px] ${cardClass}`}
+              className={`flex-col items-center px-2.5 py-2.5 ${cardClass}`}
               onPress={() => setSelectedExpense(item)}
             >
-              <View className="ml-[10px] w-full flex-row justify-between">
+              <View className="ml-2.5 w-full flex-row justify-between">
                 <Text className="text-[16px] font-bold text-[#354150]">
                   {item.title}
                 </Text>
@@ -272,8 +272,8 @@ const ExpenseScreen = ({ tripId }: Props) => {
                   {formatCurrency(item.price)}
                 </Text>
               </View>
-              <View className="ml-[10px] w-full flex-row justify-between">
-                <Text className="mt-[2px] text-[12px] text-[#647184]">
+              <View className="ml-2.5 w-full flex-row justify-between">
+                <Text className="mt-0.5 text-[12px] text-[#647184]">
                   Paid by{" "}
                   <Text className="font-bold text-[#278184]">{paidBy}</Text>
                 </Text>
