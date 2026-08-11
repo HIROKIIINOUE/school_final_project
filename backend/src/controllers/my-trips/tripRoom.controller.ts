@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import {
   createRoom,
   getMyRooms,
+  joinTrip,
   updateMyTrips,
 } from "../../models/tripRoom.service";
 import {
@@ -169,10 +170,22 @@ async function joinTripController(
       ),
     );
   }
+
+  try {
+    const result = await joinTrip({
+      inviteCode: validationResult.data.inviteCode,
+      userId,
+    });
+
+    return res.status(200).json({ data: result });
+  } catch (e) {
+    next(e);
+  }
 }
 
 export {
   getMyRoomsController,
   createMyTripsController,
   updateMyTripsController,
+  joinTripController,
 };
