@@ -10,6 +10,7 @@ import { createServer } from "node:http";
 import { createSocketServer } from "./socket/createSocketServer";
 import { registerSocketHandlers } from "./socket/registerSocketHandlers";
 
+import expenseRouter from "./routes/expense.route";
 dotenv.config();
 
 const app = express();
@@ -23,6 +24,8 @@ app.use(express.json());
 app.use("/api/trips", router);
 app.use("/api/trip", overviewRouter);
 app.use("/api/itinerary", itineraryrouter);
+
+app.use("/api/expenses", expenseRouter);
 
 app.use("/api/user", userRouter);
 

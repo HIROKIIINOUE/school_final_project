@@ -1,10 +1,8 @@
 import { Image, Text, View } from "react-native";
 
 import React from 'react'
-import { Profile } from "@/features/profile/types/profile.type";
-
 type Props = {
-  members: Profile[]
+  members: { id: number; displayName: string; image: string | null }[];
   maxDisplay: number
 }
 
@@ -43,7 +41,9 @@ const MemberAvatars = (props: Props) => {
       })}
       {members.length - maxDisplay > 0 ? (
         <View className="-ml-1 h-4 w-4 items-center justify-center rounded-full border border-white bg-[#dce2ea]">
-          <Text className="text-[9px] font-bold text-[#738093]">+{members.length - 5}</Text>
+          <Text className="text-[9px] font-bold text-[#738093]">
+            +{members.length - maxDisplay}
+          </Text>
         </View>
       ) : null}
     </View>
