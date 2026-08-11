@@ -1,5 +1,5 @@
-import { supabase } from "@/lib/supabaseClient";
-import { createMyRoomsInput } from "../types/types";
+import { grabAccessToken } from "@/lib/getAccessToken";
+import { CreateMyRoomsInput, UpdateMyRoomInput } from "../types/types";
 
 const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -9,28 +9,14 @@ if (!backendUrl) {
 
 export async function fetchMyRooms() {
   console.log("[Trips API] reading Supabase session");
-  const { data: sessionData, error } = await supabase.auth.getSession();
 
-  console.log("[Trips API] session result", {
-    hasSession: Boolean(sessionData.session),
-    hasAccessToken: Boolean(sessionData.session?.access_token),
-    userId: sessionData.session?.user.id ?? null,
-    errorMessage: error?.message ?? null,
-  });
-
-  if (error) {
-    throw new Error("Failed to gain session");
-  }
-
-  if (!sessionData.session?.access_token) {
-    throw new Error("Access token not found");
-  }
+  const accessToken = await grabAccessToken();
 
   const res = await fetch(`${backendUrl}/api/trips/my-trips`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${sessionData.session.access_token}`,
+      Authorization: `Bearer ${accessToken}`,
     },
     credentials: "include",
   });
@@ -40,9 +26,7 @@ export async function fetchMyRooms() {
   console.log("[Trips API] response received", {
     status: res.status,
     ok: res.ok,
-    tripCount: Array.isArray(data?.data?.trips)
-      ? data.data.trips.length
-      : null,
+    tripCount: Array.isArray(data?.data?.trips) ? data.data.trips.length : null,
     errorMessage: data?.error?.message ?? data?.message ?? null,
   });
 
@@ -58,11 +42,16 @@ export async function fetchMyRooms() {
 export async function createMyTrips({
   title,
   description,
-}: createMyRoomsInput) {
+}: CreateMyRoomsInput) {
+  const accessToken = await grabAccessToken();
+
   const res = await fetch(`${backendUrl}/api/trips/create-trip`, {
     method: "POST",
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
     body: JSON.stringify({ title, description }),
   });
 
@@ -70,8 +59,43 @@ export async function createMyTrips({
 
   if (!res.ok) {
     console.error("Failed to create trip");
-    throw new Error(data.error?.message ?? "Failed to create a trip");
+    throw new Error(
+      data.error?.message ?? data.message ?? "Failed to create a trip",
+    );
   }
 
   return data.data.createdTrip;
+}
+
+export async function updateMyTrips(input: UpdateMyRoomInput) {
+  const accessToken = await grabAccessToken();
+  console.log("Trip Id for update: ", input.tripId);
+
+  const res = await fetch(
+    `${backendUrl}/api/trips/update-trip/${input.tripId}`,
+    {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        title: input.title,
+        description: input.description,
+      }),
+    },
+  );
+
+  const data = await res.json();
+  console.log(data);
+
+  if (!res.ok) {
+    console.error("Failed to update trip");
+    throw new Error(
+      data.error?.message ?? data.message ?? "Failed to update a trip",
+    );
+  }
+
+  return data.data.updatedTrip;
 }

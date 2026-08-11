@@ -2,6 +2,7 @@ import { generateInviteCode } from "../lib/generateInviteCode";
 import { isInviteCodeCollision } from "../lib/isInviteCodeCollision";
 import { prisma } from "../lib/prisma";
 import { AppError } from "../lib/appError";
+import { isUniqueConstraintError } from "../lib/isPrismaConflictError";
 
 async function getMyRooms(userId: string) {
   // get all user's joined rooms
@@ -14,6 +15,7 @@ async function getMyRooms(userId: string) {
         select: {
           id: true,
           title: true,
+          description: true,
           _count: { select: { members: true } }, // It is counting how many matching trip id appear in trip_members table
         },
       },
@@ -33,6 +35,7 @@ async function getMyRooms(userId: string) {
   const myTrips = memberships.map((mem) => ({
     title: mem.trip.title,
     id: mem.trip.id,
+    description: mem.trip.description || null,
     memberCount: mem.trip._count.members,
     isOwner: mem.role === "OWNER",
   }));
@@ -76,4 +79,75 @@ async function createRoom(
   }
 }
 
-export { getMyRooms, createRoom };
+async function updateMyTrips(data: {
+  id: string;
+  userId: string;
+  title: string;
+  description: string | null;
+}) {
+  const { id, userId, title, description } = data;
+
+  const membership = await prisma.tripMember.findFirst({
+    where: { tripId: id, userId },
+    select: { id: true },
+  });
+
+  if (!membership) {
+    throw new AppError(
+      403,
+      "TRIP_ACCESS_DENIED",
+      "You do not have access to this trip.",
+    );
+  }
+
+  const result = await prisma.trip.update({
+    where: { id },
+    data: { title, description },
+  });
+
+  return result;
+}
+
+async function joinTrip({
+  inviteCode,
+  userId,
+}: {
+  inviteCode: string;
+  userId: string;
+}) {
+  const trip = await prisma.trip.findUnique({ where: { inviteCode } });
+
+  if (!trip) {
+    throw new AppError(
+      404,
+      "INVALID_INVITE_CODE",
+      "The invite code is invalid.",
+    );
+  }
+
+  // add user to the trip
+  try {
+    const createdMember = await prisma.tripMember.create({
+      data: { tripId: trip.id, userId },
+    });
+
+    return { trip, membership: createdMember, isAlreadyMember: false };
+  } catch (e) {
+    // if a user is already a member = unique constraint error
+    if (!isUniqueConstraintError(e)) {
+      throw e;
+    }
+
+    const membership = await prisma.tripMember.findUnique({
+      where: { tripId_userId: { tripId: trip.id, userId } },
+    });
+
+    if (!membership) {
+      throw e;
+    }
+
+    return { trip, membership, alreadyMember: true };
+  }
+}
+
+export { getMyRooms, createRoom, updateMyTrips, joinTrip };

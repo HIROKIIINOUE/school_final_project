@@ -26,7 +26,7 @@ model Trip {
   id          String    @id @default(uuid()) @db.Uuid
   ownerId     String    @db.Uuid // supabase user id
   title       String
-  description String?
+  description String? 
   destination String?
   startDate   DateTime?
   endDate     DateTime?
@@ -87,16 +87,20 @@ model ItineraryItem {
 }
 
 model Message {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @db.Uuid
-  tripId    String   @db.Uuid
-  content   String
+  id String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  tripId String @db.Uuid
+  content String
+  clientMessageId String @db.Uuid 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // tripId is related to Trip's id feild
   trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
 
   @@index([tripId, createdAt])
+  @@unique([userId, clientMessageId])
   @@index([userId])
 }
 

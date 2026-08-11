@@ -2,7 +2,6 @@ import { ScrollView, View, FlatList, Text, Pressable } from "react-native";
 import React from "react";
 import { ItineraryType } from "../types/types";
 import ItineraryCardItem from "./ItineraryCardItem";
-import { mockItineraries } from "../data/mockItineraryData";
 import { Timer } from "lucide-react-native";
 import { Link } from "expo-router";
 
@@ -16,12 +15,12 @@ const ItineraryCard = ({ itineraries, tripId }: Props) => {
         Up next
       </Text>
       {false ? (
-        <Text className="text-body-md text-on-surface-variant">
+        <Text className="empty-text empty-inline">
           No upcoming itinerary items yet.
         </Text>
       ) : (
         <View className="flex gap-2">
-          {mockItineraries.map((itine) => (
+          {itineraries.slice(0, 3).map((itine) => (
             <ItineraryCardItem itinerary={itine} key={itine.id} />
           ))}
         </View>

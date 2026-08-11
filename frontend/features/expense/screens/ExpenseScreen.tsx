@@ -2,7 +2,13 @@ import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { styled } from "nativewind";
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MemberAvatars from "@/components/MemberAvatars";
 import { useAuthStore } from "@/store/auth.store";
@@ -23,6 +29,8 @@ import {
   ExpenseTripData,
 } from "../types/expense.type";
 
+type Props = { tripId: string };
+
 const StyledSafeAreaView = styled(SafeAreaView);
 
 const formatCurrency = (amount: number) =>
@@ -37,34 +45,39 @@ const formatDateRange = (startDate: string | null, endDate: string | null) => {
   return `${format.format(new Date(startDate))} - ${format.format(new Date(endDate))}`;
 };
 
-const ExpenseScreen = () => {
-  const { id } = useLocalSearchParams<{ id: string }>();
+const ExpenseScreen = ({ tripId }: Props) => {
+  // const { id } = useLocalSearchParams<{ id: string }>();
   const currentUserId = useAuthStore((state) => state.user?.id);
   const [expenseData, setExpenseData] = useState<ExpenseTripData | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isAddExpenseModalVisible, setIsAddExpenseModalVisible] = useState(false);
+  const [isAddExpenseModalVisible, setIsAddExpenseModalVisible] =
+    useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
 
   const loadExpenseData = useCallback(async () => {
-    if (!id) return;
+    if (!tripId) return;
     setIsLoading(true);
     setError(null);
     try {
       const [tripData, fetchedExpenses] = await Promise.all([
-        fetchExpenseTripData(id),
-        fetchExpenses(id),
+        fetchExpenseTripData(tripId),
+        fetchExpenses(tripId),
       ]);
       setExpenseData(tripData);
       setExpenses(fetchedExpenses);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Failed to load expenses.");
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "Failed to load expenses.",
+      );
     } finally {
       setIsLoading(false);
     }
-  }, [id]);
+  }, [tripId]);
 
   useEffect(() => {
     loadExpenseData();
@@ -73,14 +86,14 @@ const ExpenseScreen = () => {
   const summary = useExpenseSummary(expenses, currentUserId);
 
   const handleCreateExpense = async (input: CreateExpenseInput) => {
-    if (!id) throw new Error("Trip ID is missing");
-    const createdExpense = await createExpense(id, input);
+    if (!tripId) throw new Error("Trip ID is missing");
+    const createdExpense = await createExpense(tripId, input);
     setExpenses((currentExpenses) => [createdExpense, ...currentExpenses]);
   };
 
   const handleDeleteExpense = async (expenseId: string) => {
-    if (!id) throw new Error("Trip ID is missing");
-    await deleteExpense(id, expenseId);
+    if (!tripId) throw new Error("Trip ID is missing");
+    await deleteExpense(tripId, expenseId);
     await loadExpenseData();
   };
 
@@ -88,8 +101,8 @@ const ExpenseScreen = () => {
     expenseId: string,
     input: CreateExpenseInput,
   ) => {
-    if (!id) throw new Error("Trip ID is missing");
-    await updateExpense(id, expenseId, input);
+    if (!tripId) throw new Error("Trip ID is missing");
+    await updateExpense(tripId, expenseId, input);
     await loadExpenseData();
   };
 
@@ -120,7 +133,7 @@ const ExpenseScreen = () => {
   return (
     <StyledSafeAreaView
       className="flex-1 bg-[#f7f8ff]"
-      edges={["left", "right", "bottom"]}
+      edges={["top", "left", "right", "bottom"]}
     >
       <Stack.Screen options={{ title: "Expense Calculate" }} />
       <FlatList
@@ -129,9 +142,7 @@ const ExpenseScreen = () => {
         keyExtractor={(item) => item.id}
         refreshing={isLoading}
         onRefresh={loadExpenseData}
-        ItemSeparatorComponent={() => (
-          <View className="h-px bg-[#d2d9e2]" />
-        )}
+        ItemSeparatorComponent={() => <View className="h-px bg-[#d2d9e2]" />}
         ListEmptyComponent={
           <Text className="mt-2 text-center text-sm text-[#647184]">
             No expenses yet.
@@ -235,16 +246,18 @@ const ExpenseScreen = () => {
               (profile): profile is NonNullable<typeof profile> =>
                 profile !== null,
             );
-          const paidBy = item.paidByMember.profile?.displayName ?? "Unknown member";
+          const paidBy =
+            item.paidByMember.profile?.displayName ?? "Unknown member";
           const isFirst = index === 0;
           const isLast = index === expenses.length - 1;
-          const cardClass = isFirst && isLast
-            ? "rounded-[8px] border border-[#d2d9e2] bg-white"
-            : isFirst
-              ? "rounded-t-[8px] border-x border-t border-[#d2d9e2] bg-white"
-              : isLast
-                ? "rounded-b-[8px] border-x border-b border-[#d2d9e2] bg-white"
-                : "border-x border-[#d2d9e2] bg-white";
+          const cardClass =
+            isFirst && isLast
+              ? "rounded-[8px] border border-[#d2d9e2] bg-white"
+              : isFirst
+                ? "rounded-t-[8px] border-x border-t border-[#d2d9e2] bg-white"
+                : isLast
+                  ? "rounded-b-[8px] border-x border-b border-[#d2d9e2] bg-white"
+                  : "border-x border-[#d2d9e2] bg-white";
 
           return (
             <Pressable
@@ -261,7 +274,8 @@ const ExpenseScreen = () => {
               </View>
               <View className="ml-[10px] w-full flex-row justify-between">
                 <Text className="mt-[2px] text-[12px] text-[#647184]">
-                  Paid by <Text className="font-bold text-[#278184]">{paidBy}</Text>
+                  Paid by{" "}
+                  <Text className="font-bold text-[#278184]">{paidBy}</Text>
                 </Text>
                 <View className="mt-[4px]">
                   <MemberAvatars members={splitProfiles} maxDisplay={5} />

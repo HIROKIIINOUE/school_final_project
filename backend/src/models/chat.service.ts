@@ -1,0 +1,251 @@
+import { Prisma } from "../generated/prisma/client";
+import { AppError } from "../lib/appError";
+import { isUniqueConstraintError } from "../lib/isPrismaConflictError";
+import {
+  decodeCursor,
+  encodeCursor,
+  MessageCursor,
+} from "../lib/messageCursor";
+import { prisma } from "../lib/prisma";
+import { PostMessageBody } from "../schemas/trips.schema";
+import { MessagePage, SavedMessage } from "../types/chat.types";
+
+const messageSelect = {
+  id: true,
+  userId: true,
+  tripId: true,
+  clientMessageId: true,
+  content: true,
+  createdAt: true,
+} as const;
+
+type MessageRecord = Prisma.MessageGetPayload<{ select: typeof messageSelect }>;
+
+type SenderProfile = {
+  userId: string;
+  displayName: string;
+  image: string | null;
+};
+
+type CreateMessageResult = { message: SavedMessage; wasCreated: boolean };
+
+function isSameMessageCommand({
+  existingMessage,
+  tripId,
+  body,
+}: {
+  existingMessage: { tripId: string; content: string };
+  tripId: string;
+  body: PostMessageBody;
+}): boolean {
+  return (
+    existingMessage.tripId === tripId &&
+    existingMessage.content === body.content
+  );
+}
+
+function toSavedMessage({
+  message,
+  profile,
+}: {
+  message: MessageRecord;
+  profile: SenderProfile;
+}): SavedMessage {
+  return {
+    id: message.id,
+    clientMessageId: message.clientMessageId,
+    tripId: message.tripId,
+    content: message.content,
+    createdAt: message.createdAt.toISOString(),
+    sender: {
+      id: profile.userId,
+      displayName: profile.displayName,
+      image: profile.image,
+    },
+  };
+}
+
+async function getMessages({
+  userId,
+  tripId,
+  limit,
+  before,
+}: {
+  userId: string;
+  tripId: string;
+  limit: number;
+  before?: string;
+}): Promise<MessagePage> {
+  const membership = await prisma.tripMember.findUnique({
+    where: { tripId_userId: { tripId, userId } },
+    select: { id: true },
+  });
+
+  if (!membership) {
+    throw new AppError(
+      403,
+      "TRIP_ACCESS_DENIED",
+      "You do not have access to this trip.",
+    );
+  }
+
+  const cursor = before ? decodeCursor(before) : null;
+  const messages = await prisma.message.findMany({
+    where: {
+      tripId,
+      ...(cursor
+        ? {
+            OR: [
+              { createdAt: { lt: new Date(cursor.createdAt) } },
+              { createdAt: new Date(cursor.createdAt), id: { lt: cursor.id } },
+            ],
+          }
+        : {}),
+    },
+    select: messageSelect,
+    take: limit + 1,
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+  });
+
+  const hasOlderMessages = messages.length > limit;
+  const pageDesc = hasOlderMessages ? messages.slice(0, limit) : messages;
+
+  const oldestMessage = pageDesc[pageDesc.length - 1];
+  const nextCursor =
+    hasOlderMessages && oldestMessage ? encodeCursor(oldestMessage) : null;
+
+  const pageAsc = [...pageDesc].reverse();
+
+  const senderIds: string[] = [];
+
+  for (const msg of pageAsc) {
+    if (!senderIds.includes(msg.userId)) {
+      senderIds.push(msg.userId);
+    }
+  }
+
+  const profiles = await prisma.profile.findMany({
+    where: { userId: { in: senderIds } },
+    select: { userId: true, displayName: true, image: true },
+  });
+
+  const profileByUserId = new Map(
+    profiles.map((profile) => [profile.userId, profile]),
+  );
+
+  const savedMessages = pageAsc.map((message) => {
+    const profile = profileByUserId.get(message.userId);
+
+    if (!profile) {
+      throw new AppError(
+        500,
+        "MESSAGE_SENDER_PROFILE_MISSING",
+        "A message sender profile could not be resolved.",
+      );
+    }
+
+    return toSavedMessage({ message, profile });
+  });
+
+  return { messages: savedMessages, olderCursor: nextCursor };
+}
+
+async function createMessage({
+  userId,
+  tripId,
+  body,
+}: {
+  userId: string;
+  tripId: string;
+  body: PostMessageBody;
+}): Promise<CreateMessageResult> {
+  // rule: only the authenticated user and the member of the trip can post messages
+
+  // 1: check if the user is the memeber of this trip
+  const membership = await prisma.tripMember.findUnique({
+    where: { tripId_userId: { userId, tripId } },
+    select: { id: true },
+  });
+
+  if (!membership) {
+    throw new AppError(
+      403,
+      "TRIP_ACCESS_DENIED",
+      "You do not have access to this trip.",
+    );
+  }
+
+  // front end needs user's profile
+  const profile = await prisma.profile.findUnique({
+    where: { userId },
+    select: { userId: true, displayName: true, image: true },
+  });
+
+  if (!profile) {
+    throw new AppError(
+      409,
+      "PROFILE_REQUIRED",
+      "A profile is required before sending messages.",
+    );
+  }
+
+  try {
+    const createdMessage = await prisma.message.create({
+      data: {
+        userId: userId,
+        tripId: tripId,
+        content: body.content,
+        clientMessageId: body.clientMessageId,
+      },
+      select: messageSelect,
+    });
+
+    return {
+      message: toSavedMessage({ message: createdMessage, profile }),
+      wasCreated: true,
+    };
+  } catch (e) {
+    if (!isUniqueConstraintError(e)) {
+      throw e;
+    }
+
+    // 実体が同じじゃないとだめ。userId, clientMessageId が一緒でも、content, tripId が違ったら、実体が違うから却下。
+    const existingMessage = await prisma.message.findUnique({
+      where: {
+        userId_clientMessageId: {
+          userId,
+          clientMessageId: body.clientMessageId,
+        },
+      },
+      select: messageSelect,
+    });
+
+    if (!existingMessage) {
+      // A P2002 occurred, but the expected idempotency row cannot be found.
+      // This means our assumption about the constraint was wrong or the data
+      // changed unexpectedly, so preserve it as an unexpected server error.
+      throw e;
+    }
+
+    const isSameMessage = isSameMessageCommand({
+      existingMessage: existingMessage,
+      tripId,
+      body: body,
+    });
+
+    if (!isSameMessage) {
+      throw new AppError(
+        409,
+        "IDEMPOTENCY_CONFLICT",
+        "This client message ID has already been used for a different message.",
+      );
+    }
+
+    return {
+      message: toSavedMessage({ message: existingMessage, profile }),
+      wasCreated: false,
+    };
+  }
+}
+
+export { getMessages, createMessage };

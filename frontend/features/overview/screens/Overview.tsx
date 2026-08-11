@@ -31,21 +31,25 @@ const OverView = ({ id }: Props) => {
   }, [id]);
 
   if (isLoading) {
-    return <Spinner />;
+    return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <Spinner />
+      </SafeAreaView>
+    );
   }
 
   console.log(overviewData);
 
   if (!overviewData?.tripDetails) {
     return (
-      <View>
-        <Text>No overview yet</Text>
+      <View className="empty-state">
+        <Text className="empty-title">No overview yet</Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView edges={["left", "right"]} style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
       <OverviewThumbnail />
       <ScrollView>
         <TripDetail tripDetails={overviewData?.tripDetails} />

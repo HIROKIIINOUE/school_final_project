@@ -1,4 +1,5 @@
-import { ItineraryInput } from "../types/types";
+import { grabAccessToken } from "@/lib/getAccessToken";
+import { SavedItineraryItem, SaveItineraryItemInput } from "../types/types";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -6,17 +7,28 @@ if (!BACKEND_URL) {
   throw new Error("EXPO_PUBLIC_BACKEND_URL is not configured");
 }
 
-export async function fetchItineraries(tripId: string) {
+export async function fetchItineraries(
+  tripId: string,
+): Promise<SavedItineraryItem[]> {
+  const accessToken = await grabAccessToken();
+
   const res = await fetch(`${BACKEND_URL}/api/itinerary/${tripId}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
     credentials: "include",
   });
 
   const data = await res.json();
+  console.log(data);
 
   if (!res.ok) {
-    console.error("res.ok failed. Failed to fetch itineraries");
+    console.error(
+      "res.ok failed. Failed to fetch itineraries",
+      data.error?.message ?? data.message,
+    );
     throw new Error(data.error?.message ?? "Failed to fetch overview data");
   }
 
@@ -28,19 +40,60 @@ export async function createItineraries({
   itineraryInputs,
 }: {
   tripId: string;
-  itineraryInputs: ItineraryInput[];
-}) {
-  const res = await fetch(`${BACKEND_URL}/api/itineray/${tripId}`, {
+  itineraryInputs: SaveItineraryItemInput[];
+}): Promise<SavedItineraryItem[]> {
+  const accessToken = await grabAccessToken();
+
+  console.log("Sending data to itinerary backend");
+  const res = await fetch(`${BACKEND_URL}/api/itinerary/${tripId}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ itineraryInputs }),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ itineraries: itineraryInputs }),
     credentials: "include",
   });
 
   const data = await res.json();
 
   if (!res.ok) {
-    console.error("Failed to create itineraries");
+    console.error(
+      "Failed to create itineraries",
+      data.error?.message ?? data.message ?? "Failed to create itineraries",
+    );
+    throw new Error(data.error?.message ?? "Failed to create itineraries");
+  }
+
+  return data.data;
+}
+
+export async function updateItineraries({
+  tripId,
+  itineraries,
+}: {
+  tripId: string;
+  itineraries: SaveItineraryItemInput[];
+}): Promise<SavedItineraryItem[]> {
+  const accessToken = await grabAccessToken();
+
+  const res = await fetch(`${BACKEND_URL}/api/itinerary/${tripId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ itineraries }),
+    credentials: "include",
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    console.error(
+      "Failed to create itineraries",
+      data.error?.message ?? data.message ?? "Failed to create itineraries",
+    );
     throw new Error(data.error?.message ?? "Failed to create itineraries");
   }
 

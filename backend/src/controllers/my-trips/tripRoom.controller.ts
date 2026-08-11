@@ -1,6 +1,13 @@
 import { NextFunction, Request, Response } from "express";
-import { createRoom, getMyRooms } from "../../models/tripRoom.service";
-import { createTripBodySchema } from "../../schemas/trips.schema";
+import {
+  createRoom,
+  getMyRooms,
+  updateMyTrips,
+} from "../../models/tripRoom.service";
+import {
+  createTripBodySchema,
+  updateTripBodySchema,
+} from "../../schemas/trips.schema";
 import { AppError } from "../../lib/appError";
 
 async function getMyRoomsController(
@@ -19,7 +26,6 @@ async function getMyRoomsController(
     return;
   }
 
-  // todo: pass req.userId
   const trips = await getMyRooms(req.userId);
 
   return res.status(200).json({ data: { trips } });
@@ -74,4 +80,83 @@ async function createMyTripsController(
   return res.status(201).json({ data: { createdTrip } });
 }
 
-export { getMyRoomsController, createMyTripsController };
+async function updateMyTripsController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.userId;
+  if (!userId) {
+    next(
+      new AppError(
+        401,
+        "AUTHENTICATION_REQUIRED",
+        "Authentication is required.",
+      ),
+    );
+    return;
+  }
+
+  const { id } = req.params;
+
+  if (!id) {
+    next(new AppError(400, "TRIPID_REQUIRED", "trip id is required."));
+  }
+
+  const validationResult = updateTripBodySchema.safeParse(req.body);
+
+  if (!validationResult.success) {
+    return next(
+      new AppError(
+        400,
+        "VALIDATION_ERROR",
+        "Request validation failed.",
+        validationResult.error.issues.map((issue) => ({
+          path: issue.path.join("."),
+          code: issue.code,
+          message: issue.message,
+        })),
+      ),
+    );
+  }
+
+  const { title, description } = validationResult.data;
+
+  const tripId = Array.isArray(id) ? id[0] : id;
+
+  const result = await updateMyTrips({
+    id: tripId,
+    userId,
+    title,
+    description: description ?? null,
+  });
+
+  return res.status(201).json({ data: { updatedTrip: result } });
+}
+
+async function joinTripController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.userId;
+
+  if (!userId) {
+    next(
+      new AppError(
+        401,
+        "AUTHENTICATION_REQUIRED",
+        "Authentication is required.",
+      ),
+    );
+    return;
+  }
+
+  const validationResult = "";
+}
+
+export {
+  getMyRoomsController,
+  createMyTripsController,
+  updateMyTripsController,
+};

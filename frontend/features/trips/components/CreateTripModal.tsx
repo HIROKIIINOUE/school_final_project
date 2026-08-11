@@ -1,12 +1,19 @@
 import { View, Text, TextInput, Modal, Pressable } from "react-native";
-import React, { useState } from "react";
-import { createMyTrips } from "../api/myRoom.api";
+import React, { useEffect, useState } from "react";
+import { createMyTrips, updateMyTrips } from "../api/myRoom.api";
 import { useRouter } from "expo-router";
 import KeyboardDissmissBtn from "@/components/KeyboardDissmissBtn";
+import Toast from "react-native-toast-message";
+import MiniSpinner from "@/components/MiniSpinner";
+import { MyRoomType } from "../types/types";
 
-type Props = { visible: boolean; onClose: () => void };
+type Props = {
+  visible: boolean;
+  onClose: () => void;
+  tripData: MyRoomType | null;
+};
 
-const CreateTripModal = ({ visible, onClose }: Props) => {
+const CreateTripModal = ({ visible, onClose, tripData }: Props) => {
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [isCreating, setIsCreating] = useState<boolean>(false);
@@ -23,15 +30,25 @@ const CreateTripModal = ({ visible, onClose }: Props) => {
     const normalizedDes = description.trim() === "" ? null : description.trim();
     try {
       setIsCreating(true);
-      console.log(normalizedTitle, normalizedDes);
-      const data = await createMyTrips({
-        title: normalizedTitle,
-        description: normalizedDes,
-      });
+
+      const data = tripData
+        ? await updateMyTrips({
+            title: normalizedTitle,
+            description: normalizedDes,
+            tripId: tripData.id,
+          })
+        : await createMyTrips({
+            title: normalizedTitle,
+            description: normalizedDes,
+          });
+
+      console.log(data);
 
       // toast successful message
+      Toast.show({ type: "success", text1: "Successfully created new trip" });
+      onClose();
       // redirect to trip room
-      router.replace(`/trips/${data.id}`);
+      router.navigate(`/trips/${data.id}`);
     } catch (e) {
       // toast error
       console.error("Failed to create trip", e);
@@ -39,6 +56,20 @@ const CreateTripModal = ({ visible, onClose }: Props) => {
       setIsCreating(false);
     }
   }
+
+  useEffect(() => {
+    function fillUpField() {
+      if (!tripData) return;
+      setTitle(tripData.title);
+      if (!tripData.description) {
+        setDescription("");
+      } else {
+        setDescription(tripData.description);
+      }
+    }
+
+    fillUpField();
+  }, [tripData]);
 
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -90,7 +121,11 @@ const CreateTripModal = ({ visible, onClose }: Props) => {
               onPress={handleSubmit}
               disabled={isCreating}
             >
-              <Text className="btn-primary-text">Create Trip</Text>
+              {isCreating ? (
+                <MiniSpinner accessibilityLabel="Creating your trip" />
+              ) : (
+                <Text className="btn-primary-text">"Create Trip"</Text>
+              )}
             </Pressable>
           </View>
         </View>
