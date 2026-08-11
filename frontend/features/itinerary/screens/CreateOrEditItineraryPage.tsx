@@ -150,15 +150,13 @@ const CreateItineraryPage = ({ tripId, mode }: Props) => {
   if (mode === "create" && createdItems.length === 0) {
     return (
       <SafeAreaView style={{ flex: 1 }} className="empty-state">
-        <Link
-          href={`/(protected)/trips/${tripId}/(tabs)/itinerary`}
-          className="self-start"
+        <Pressable
+          className="flex flex-row items-center gap-xs text-primary"
+          onPress={() => router.back()}
         >
-          <View className="flex flex-row items-center gap-xs text-primary">
-            <ArrowLeft className="text-primary" />
-            <Text className="text-primary">Go back</Text>
-          </View>
-        </Link>
+          <ArrowLeft className="text-primary" />
+          <Text className="text-primary">Go back</Text>
+        </Pressable>
         <Text className="empty-title">Tap here to add item</Text>
         <Pressable
           className="btn-primary empty-action"
@@ -181,15 +179,13 @@ const CreateItineraryPage = ({ tripId, mode }: Props) => {
   if (mode === "edit" && createdItems.length === 0) {
     return (
       <SafeAreaView style={{ flex: 1 }} className="empty-state">
-        <Link
-          href={`/(protected)/trips/${tripId}/(tabs)/itinerary`}
-          className="self-start"
+        <Pressable
+          className="flex flex-row items-center gap-xs text-primary"
+          onPress={() => router.back()}
         >
-          <View className="flex flex-row items-center gap-xs text-primary">
-            <ArrowLeft className="text-primary" />
-            <Text className="text-primary">Go back</Text>
-          </View>
-        </Link>
+          <ArrowLeft className="text-primary" />
+          <Text className="text-primary">Go back</Text>
+        </Pressable>
         <Text className="empty-title">Tap here to add item</Text>
         <Pressable
           className="btn-primary empty-action"
@@ -218,15 +214,13 @@ const CreateItineraryPage = ({ tripId, mode }: Props) => {
   return (
     <SafeAreaView style={{ flex: 1 }} className="mx-sm mt-md">
       <View className="flex flex-row justify-between items-center">
-        <Link
-          href={`/(protected)/trips/${tripId}/(tabs)/itinerary`}
-          className=" ml-7"
+        <Pressable
+          className="flex flex-row items-center text-primary"
+          onPress={() => router.back()}
         >
-          <View className="flex flex-row items-center text-primary">
-            <ArrowLeft className="" />
-            <Text className="text-primary">Go back</Text>
-          </View>
-        </Link>
+          <ArrowLeft className="" />
+          <Text className="text-primary">Go back</Text>
+        </Pressable>
         <Pressable
           className="bg-primary-container rounded-full w-15 h-15 flex items-center justify-center mb-md mx-md"
           onPress={() => setIsModalOpen(true)}
