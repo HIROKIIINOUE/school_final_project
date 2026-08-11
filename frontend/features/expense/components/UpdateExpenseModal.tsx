@@ -1,19 +1,31 @@
 import AddExpenseModal from "./AddExpenseModal";
-import { CreateExpenseInput, ExpenseTripMember } from "../types/expense.type";
+import {
+  CreateExpenseInput,
+  Expense,
+  ExpenseTripMember,
+} from "../types/expense.type";
 
 type Props = {
+  expense: Expense;
   visible: boolean;
   members: ExpenseTripMember[];
   onClose: () => void;
   onUpdate: (input: CreateExpenseInput) => Promise<void>;
 };
 
-const UpdateExpenseModal = ({ visible, members, onClose, onUpdate }: Props) => (
+const UpdateExpenseModal = ({
+  expense,
+  visible,
+  members,
+  onClose,
+  onUpdate,
+}: Props) => (
   <AddExpenseModal
     visible={visible}
     members={members}
     onClose={onClose}
     onCreate={onUpdate}
+    expense={expense}
     mode="update"
   />
 );
