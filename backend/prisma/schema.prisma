@@ -125,7 +125,7 @@ model ExpenseSplit {
   id           Int      @id @default(autoincrement())
   expenseId    String   @map("expense_id") @db.Uuid
   tripMemberId String   @map("trip_member_id") @db.Uuid
-  owedAmount   Int      @map("owed_amount")
+  owedAmount   Decimal  @map("owed_amount") @db.Decimal(12, 2)
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 

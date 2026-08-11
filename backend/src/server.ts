@@ -5,6 +5,7 @@ import router from "./routes/tripRoom.route";
 import overviewRouter from "./routes/overview.route";
 import userRouter from "./routes/user.route";
 import itineraryrouter from "./routes/itinerary.service";
+import expenseRouter from "./routes/expense.route";
 dotenv.config();
 
 const app = express();
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use("/api/trips", router);
 app.use("/api/trip", overviewRouter);
 app.use("/api/itineray", itineraryrouter);
+app.use("/api/expenses", expenseRouter);
 
 app.use("/api/user", userRouter);
 
