@@ -11,7 +11,7 @@ const router = Router();
 
 router.get("/my-trips", authCheck, getMyRoomsController);
 router.post("/create-trip", authCheck, createMyTripsController);
-router.post("/join", joinTripController);
+router.post("/join", authCheck, joinTripController);
 router.put("/update-trip/:id", authCheck, updateMyTripsController);
 
 export default router;

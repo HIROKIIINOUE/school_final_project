@@ -99,3 +99,27 @@ export async function updateMyTrips(input: UpdateMyRoomInput) {
 
   return data.data.updatedTrip;
 }
+
+export async function joinTrip({ inviteCode }: { inviteCode: string }) {
+  const accessToken = await grabAccessToken();
+
+  const res = await fetch(`${backendUrl}/api/trips/join`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ inviteCode }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    console.error("Failed to join the trip:", data.error);
+    throw new Error(
+      data.error?.message ?? data.message ?? "Failed to create a trip",
+    );
+  }
+
+  return data.data;
+}

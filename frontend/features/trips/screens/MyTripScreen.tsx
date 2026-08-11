@@ -9,11 +9,15 @@ import { fetchMyRooms } from "../api/myRoom.api";
 import Spinner from "@/components/Spinner";
 import { useAuthStore } from "@/store/auth.store";
 import { SafeAreaView } from "react-native-safe-area-context";
+import JoinTripModal from "../components/JoinTripModal";
 
 const MyTripScreen = () => {
   const [tripRooms, setTripRooms] = useState<MyRoomType[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const [isJoinTripModalOpen, setIsJoinTripModalOpen] =
+    useState<boolean>(false);
 
   const authStatus = useAuthStore((state) => state.authStatus);
   const profileStatus = useAuthStore((state) => state.profileStatus);
@@ -80,7 +84,10 @@ const MyTripScreen = () => {
         >
           <Text>Create Trip</Text>
         </Pressable>
-        <Pressable className="btn-secondary my-lg mx-md flex-1">
+        <Pressable
+          className="btn-secondary my-lg mx-md flex-1"
+          onPress={() => setIsJoinTripModalOpen(true)}
+        >
           <Text>Join Trip</Text>
         </Pressable>
       </View>
@@ -99,6 +106,10 @@ const MyTripScreen = () => {
           showsVerticalScrollIndicator={false}
           renderItem={({ item: room }) => <TripRoomCard room={room} />}
         />
+      )}
+
+      {isJoinTripModalOpen && (
+        <JoinTripModal closeModal={() => setIsJoinTripModalOpen(false)} />
       )}
     </SafeAreaView>
   );
