@@ -134,6 +134,27 @@ async function updateMyTripsController(
   return res.status(201).json({ data: { updatedTrip: result } });
 }
 
+async function joinTripController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.userId;
+
+  if (!userId) {
+    next(
+      new AppError(
+        401,
+        "AUTHENTICATION_REQUIRED",
+        "Authentication is required.",
+      ),
+    );
+    return;
+  }
+
+  const validationResult = "";
+}
+
 export {
   getMyRoomsController,
   createMyTripsController,

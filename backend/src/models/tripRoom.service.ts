@@ -2,6 +2,7 @@ import { generateInviteCode } from "../lib/generateInviteCode";
 import { isInviteCodeCollision } from "../lib/isInviteCodeCollision";
 import { prisma } from "../lib/prisma";
 import { AppError } from "../lib/appError";
+import { isUniqueConstraintError } from "../lib/isPrismaConflictError";
 
 async function getMyRooms(userId: string) {
   // get all user's joined rooms
@@ -123,6 +124,30 @@ async function joinTrip({
       "The invite code is invalid.",
     );
   }
+
+  // add user to the trip
+  try {
+    const createdMember = await prisma.tripMember.create({
+      data: { tripId: trip.id, userId },
+    });
+
+    return { trip, membership: createdMember, isAlreadyMember: false };
+  } catch (e) {
+    // if a user is already a member = unique constraint error
+    if (!isUniqueConstraintError(e)) {
+      throw e;
+    }
+
+    const membership = await prisma.tripMember.findUnique({
+      where: { tripId_userId: { tripId: trip.id, userId } },
+    });
+
+    if (!membership) {
+      throw e;
+    }
+
+    return { trip, membership, alreadyMember: true };
+  }
 }
 
-export { getMyRooms, createRoom, updateMyTrips };
+export { getMyRooms, createRoom, updateMyTrips, joinTrip };
