@@ -76,8 +76,6 @@ const TripRoomCard = ({ room }: Props) => {
             <View
               className={`${room.isOwner ? "badge-success" : "badge-secondary"} flex-row items-center gap-xs shrink-0`}
             >
-              {/* <MaterialIcons name="star" size={14} className="text-primary" /> */}
-              {/* TODO: insert ICON above */}
               <Text
                 className={
                   room.isOwner ? "badge-success-text" : "badge-secondary-text"
@@ -89,7 +87,6 @@ const TripRoomCard = ({ room }: Props) => {
           </View>
 
           <View className="flex-row items-center gap-sm pl-sm pt-sm border-t border-outline-variant/50">
-            {/* <MaterialIcons name="group" size={20} className="text-on-surface-variant" /> */}
             <Users />
             <Text className="font-sans text-[14px] font-normal leading-container text-on-surface-variant">
               {room.memberCount} members
