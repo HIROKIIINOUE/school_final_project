@@ -1,16 +1,16 @@
 import { View, Text, Pressable, FlatList } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import MytripHeader from "@/features/trips/components/MytripHeader";
 import CreateTripModal from "@/features/trips/components/CreateTripModal";
 import TripRoomCard from "@/features/trips/components/TripRoomCard";
-import { MyRoomType } from "../types/types";
 import { fetchMyRooms } from "../api/myRoom.api";
 import Spinner from "@/components/Spinner";
 import { useAuthStore } from "@/store/auth.store";
 import { SafeAreaView } from "react-native-safe-area-context";
 import JoinTripModal from "../components/JoinTripModal";
 import { useQuery } from "@tanstack/react-query";
+import { tripQueryKey } from "../lib/tripQueryKeys";
 
 const MyTripScreen = () => {
   // const [tripRooms, setTripRooms] = useState<MyRoomType[]>([]);
@@ -22,6 +22,8 @@ const MyTripScreen = () => {
   const authStatus = useAuthStore((state) => state.authStatus);
   const profileStatus = useAuthStore((state) => state.profileStatus);
 
+  const currentUserId = useAuthStore((state) => state.user?.id);
+
   const isReady = authStatus === "authenticated" && profileStatus === "exists";
 
   const {
@@ -30,7 +32,7 @@ const MyTripScreen = () => {
     error,
     isLoading,
   } = useQuery({
-    queryKey: ["myTrips"],
+    queryKey: tripQueryKey.byUser(currentUserId ?? ""),
     queryFn: fetchMyRooms,
     enabled: isReady,
   });

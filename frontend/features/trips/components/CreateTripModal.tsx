@@ -7,6 +7,7 @@ import Toast from "react-native-toast-message";
 import MiniSpinner from "@/components/MiniSpinner";
 import { MyRoomType } from "../types/types";
 import { useQueryClient } from "@tanstack/react-query";
+import { tripQueryKey } from "../lib/tripQueryKeys";
 
 type Props = {
   visible: boolean;
@@ -45,7 +46,7 @@ const CreateTripModal = ({ visible, onClose, tripData }: Props) => {
             description: normalizedDes,
           });
 
-      queryClient.invalidateQueries({ queryKey: ["myTrips"] });
+      queryClient.invalidateQueries({ queryKey: tripQueryKey.all });
       // toast successful message
       Toast.show({ type: "success", text1: "Successfully created new trip" });
       onClose();

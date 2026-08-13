@@ -16,6 +16,7 @@ import { useRouter } from "expo-router";
 import { toastConfig } from "@/config/toastConfig";
 import MiniSpinner from "@/components/MiniSpinner";
 import { useQueryClient } from "@tanstack/react-query";
+import { tripQueryKey } from "../lib/tripQueryKeys";
 
 type Props = { closeModal: () => void };
 
@@ -36,7 +37,7 @@ const JoinTripModal = ({ closeModal }: Props) => {
     try {
       setIsSending(true);
       const result = await joinTrip({ inviteCode: normalizedInviteCode });
-      queryClient.invalidateQueries({ queryKey: ["myTrips"] });
+      queryClient.invalidateQueries({ queryKey: tripQueryKey.all });
       setInviteCode("");
       Toast.show({ type: "success", text1: "Successfully joined the trip" });
       closeModal();
