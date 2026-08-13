@@ -41,16 +41,14 @@ async function createMyTripsController(
   next: NextFunction,
 ) {
   if (!req.userId) {
-    if (!req.userId) {
-      next(
-        new AppError(
-          401,
-          "AUTHENTICATION_REQUIRED",
-          "Authentication is required.",
-        ),
-      );
-      return;
-    }
+    next(
+      new AppError(
+        401,
+        "AUTHENTICATION_REQUIRED",
+        "Authentication is required.",
+      ),
+    );
+    return;
   }
 
   // validation
@@ -104,7 +102,7 @@ async function updateMyTripsController(
   const { id } = req.params;
 
   if (!id) {
-    next(new AppError(400, "TRIPID_REQUIRED", "trip id is required."));
+    return next(new AppError(400, "TRIPID_REQUIRED", "trip id is required."));
   }
 
   const validationResult = updateTripBodySchema.safeParse(req.body);

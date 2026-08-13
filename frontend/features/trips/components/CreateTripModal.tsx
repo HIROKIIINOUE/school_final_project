@@ -8,6 +8,7 @@ import MiniSpinner from "@/components/MiniSpinner";
 import { MyRoomType } from "../types/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { tripQueryKey } from "../lib/tripQueryKeys";
+import { toastConfig } from "@/config/toastConfig";
 
 type Props = {
   visible: boolean;
@@ -31,6 +32,7 @@ const CreateTripModal = ({ visible, onClose, tripData }: Props) => {
     if (!normalizedTitle) {
       // toast error
       console.log("Title is required");
+      Toast.show({ type: "error", text1: "Title is required" });
       return;
     }
     const normalizedDes = description.trim() === "" ? null : description.trim();
@@ -142,6 +144,7 @@ const CreateTripModal = ({ visible, onClose, tripData }: Props) => {
           </View>
         </View>
       </View>
+      <Toast config={toastConfig} />
     </Modal>
   );
 };

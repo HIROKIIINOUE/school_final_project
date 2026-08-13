@@ -4,15 +4,13 @@ import {
   Modal,
   Pressable,
   StyleSheet,
-  TextInput,
   ScrollView,
 } from "react-native";
 import { BlurView } from "expo-blur";
-import React, { useState } from "react";
-import { PlaneTakeoff, Trash, Trash2, X } from "lucide-react-native";
+import React, { useRef, useState } from "react";
+import { Trash, Trash2, X } from "lucide-react-native";
 import Toast from "react-native-toast-message";
-import { deleteTrip, joinTrip } from "../api/myRoom.api";
-import { useRouter } from "expo-router";
+import { deleteTrip } from "../api/myRoom.api";
 import { toastConfig } from "@/config/toastConfig";
 import MiniSpinner from "@/components/MiniSpinner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -25,21 +23,36 @@ const DeleteTripModal = ({ closeModal, trip }: Props) => {
   const queryClient = useQueryClient();
 
   const [isSending, setIsSending] = useState<boolean>(false);
+  const deleteLockRef = useRef(false);
 
   async function onPress() {
+    if (deleteLockRef.current) {
+      return;
+    }
+
+    deleteLockRef.current = true;
+    setIsSending(true);
     try {
-      setIsSending(true);
       const result = await deleteTrip({ tripId: trip.id });
       console.log(result);
-      Toast.show({ type: "success", text1: "Successfully delete the trip" });
+      Toast.show({ type: "success", text1: "Successfully deleted the trip" });
       queryClient.invalidateQueries({ queryKey: tripQueryKey.all });
       closeModal();
     } catch (e) {
-      const errorMsg = e instanceof Error ? e.message : "Failed to join trip";
+      const errorMsg = e instanceof Error ? e.message : "Failed to delete trip";
       Toast.show({ type: "error", text1: errorMsg });
     } finally {
+      deleteLockRef.current = false;
       setIsSending(false);
     }
+  }
+
+  function handleClose() {
+    if (isSending) {
+      return;
+    }
+
+    closeModal();
   }
 
   return (
@@ -48,21 +61,21 @@ const DeleteTripModal = ({ closeModal, trip }: Props) => {
       transparent
       animationType="slide"
       statusBarTranslucent
-      onRequestClose={closeModal}
+      onRequestClose={handleClose}
     >
       <View className="flex-1 justify-end bg-black/20">
         <BlurView intensity={35} tint="dark" style={StyleSheet.absoluteFill} />
         <Pressable
           style={StyleSheet.absoluteFill}
           className="bg-black/40"
-          onPress={closeModal}
+          onPress={handleClose}
         />
         <View className="h-[72%] w-full overflow-hidden rounded-t-app-xl border-x border-t border-outline-variant bg-surface-container-lowest shadow-lg">
           {/* Header */}
           <View className="flex-row items-center border-b border-border-soft bg-surface-container-lowest px-container py-md">
             <Pressable
               className="btn-ghost h-11 w-11 rounded-app-full px-0"
-              onPress={closeModal}
+              onPress={handleClose}
             >
               <X size={28} className="text-on-surface-variant" />
             </Pressable>
@@ -86,10 +99,10 @@ const DeleteTripModal = ({ closeModal, trip }: Props) => {
               <Text className="text-body flex-1 text-on-surface-variant">
                 Are you sure you want to delete{" "}
                 <Text className="font-semibold text-on-surface text-lg">
-                  '{trip.title}'
+                  {`“${trip.title}”`}
                 </Text>
                 ? This action cannot be undone and will remove all itinerary
-                items, bookings, and shared expenses for all members.
+                items, and shared expenses for all members.
               </Text>
             </View>
 
@@ -97,6 +110,7 @@ const DeleteTripModal = ({ closeModal, trip }: Props) => {
               <Pressable
                 className="btn-danger flex justify-center  flex-row items-center gap-2"
                 onPress={onPress}
+                disabled={isSending}
               >
                 <Trash2 />
                 {isSending ? (
@@ -108,7 +122,7 @@ const DeleteTripModal = ({ closeModal, trip }: Props) => {
                   <Text className="btn-danger-text">Delete</Text>
                 )}
               </Pressable>
-              <Pressable className="btn-outline btn-full" onPress={closeModal}>
+              <Pressable className="btn-outline btn-full" onPress={handleClose}>
                 <Text className="btn-outline-text">Cancel</Text>
               </Pressable>
             </View>

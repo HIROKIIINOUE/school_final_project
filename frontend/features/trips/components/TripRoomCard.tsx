@@ -20,7 +20,7 @@ const TripRoomCard = ({ room }: Props) => {
   const swipeableRef = useRef<SwipeableMethods | null>(null);
 
   function handleOnpress() {
-    router.navigate(`/(protected)/trips/${room.id}/(tabs)`);
+    router.push(`/(protected)/trips/${room.id}/(tabs)`);
   }
 
   function onEditPress() {
@@ -29,19 +29,21 @@ const TripRoomCard = ({ room }: Props) => {
 
   function renderRightAction() {
     return (
-      <View className="w-20 flex-row overflow-hidden rounded-r-lg">
+      <View className="w-40 flex-row overflow-hidden rounded-r-lg">
         <Pressable
           className="flex-1 items-center justify-center bg-primary-container w-10"
           onPress={onEditPress}
         >
           <SquarePen />
         </Pressable>
-        <Pressable
-          className="flex-1 items-center justify-center bg-error/70 w-10"
-          onPress={() => setDeleteModalOpen(true)}
-        >
-          <Trash2 />
-        </Pressable>
+        {room.isOwner && (
+          <Pressable
+            className="flex-1 items-center justify-center bg-error/70 w-10"
+            onPress={() => setDeleteModalOpen(true)}
+          >
+            <Trash2 />
+          </Pressable>
+        )}
       </View>
     );
   }

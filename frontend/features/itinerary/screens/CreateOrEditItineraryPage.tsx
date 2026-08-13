@@ -180,15 +180,15 @@ const CreateItineraryPage = ({ tripId, mode }: Props) => {
     return (
       <SafeAreaView style={{ flex: 1 }} className="empty-state">
         <Pressable
-          className="flex flex-row items-center gap-xs text-primary"
+          className="flex flex-row items-center gap-xs text-primary mx-md"
           onPress={() => router.back()}
         >
           <ArrowLeft className="text-primary" />
           <Text className="text-primary">Go back</Text>
         </Pressable>
-        <Text className="empty-title">Tap here to add item</Text>
+        <Text className="empty-title mt-md">Tap here to add item</Text>
         <Pressable
-          className="btn-primary empty-action"
+          className="btn-primary empty-action mx-md"
           onPress={() => setIsModalOpen(true)}
           disabled={isModalOpen}
         >

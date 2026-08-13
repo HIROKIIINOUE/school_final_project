@@ -1,6 +1,7 @@
 import { grabAccessToken } from "@/lib/getAccessToken";
 import {
   CreateMyRoomsInput,
+  DeleteTripResult,
   MyRoomType,
   UpdateMyRoomInput,
 } from "../types/types";
@@ -10,6 +11,8 @@ const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 if (!backendUrl) {
   throw new Error("EXPO_PUBLIC_BACKEND_URL is not configured");
 }
+
+type ApiResponse<T> = { data: T };
 
 export async function fetchMyRooms(): Promise<MyRoomType[]> {
   console.log("[Trips API] reading Supabase session");
@@ -115,13 +118,14 @@ export async function deleteTrip({ tripId }: { tripId: string }) {
     },
   });
 
-  const data = await res.json();
+  const data: ApiResponse<DeleteTripResult> = await res.json();
 
   if (!res.ok) {
-    console.error("Failed to delete the trip:", data.error);
-    throw new Error(
-      data.error?.message ?? data.message ?? "Failed to delete a trip",
+    console.error(
+      "Failed to delete the trip:",
+      (data as any).error?.message ?? "Failed to delete trip",
     );
+    throw new Error((data as any).error?.message ?? "Failed to delete a trip");
   }
 
   return data.data;

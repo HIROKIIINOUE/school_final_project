@@ -3,6 +3,7 @@ import { isInviteCodeCollision } from "../lib/isInviteCodeCollision";
 import { prisma } from "../lib/prisma";
 import { AppError } from "../lib/appError";
 import { isUniqueConstraintError } from "../lib/isPrismaConflictError";
+import { isRecordNotFoundError } from "../lib/isRecordNotFoundError";
 
 async function getMyRooms(userId: string) {
   // get all user's joined rooms
@@ -23,15 +24,6 @@ async function getMyRooms(userId: string) {
     },
     orderBy: { joinedAt: "desc" },
   });
-
-  if (!memberships) {
-    console.log("Can't find memberships");
-    throw new AppError(
-      404,
-      "TRIP_ACCESS_DENIED",
-      "You do not have access to this trip.",
-    );
-  }
 
   const myTrips = memberships.map((mem) => ({
     title: mem.trip.title,
@@ -117,20 +109,16 @@ async function deleteRoom({
   userId: string;
   tripId: string;
 }) {
-  const membership = await prisma.tripMember.findUnique({
-    where: { tripId_userId: { tripId, userId } },
-    select: { id: true, role: true },
+  const trip = await prisma.trip.findUnique({
+    where: { id: tripId },
+    select: { id: true, ownerId: true },
   });
 
-  if (!membership) {
-    throw new AppError(
-      403,
-      "TRIP_ACCESS_DENIED",
-      "You do not have access to this trip.",
-    );
+  if (!trip) {
+    throw new AppError(404, "TRIP_NOT_FOUND", "Trip was not found.");
   }
 
-  if (membership.role === "MEMBER") {
+  if (trip.ownerId !== userId) {
     throw new AppError(
       403,
       "TRIP_ACCESS_DENIED",
@@ -138,8 +126,15 @@ async function deleteRoom({
     );
   }
 
-  const deletedTrip = await prisma.trip.delete({ where: { id: tripId } });
-  return deletedTrip;
+  try {
+    await prisma.trip.delete({ where: { id: tripId } });
+  } catch (e) {
+    if (!isRecordNotFoundError(e)) {
+      throw e;
+    }
+  }
+
+  return { tripId };
 }
 
 async function joinTrip({
@@ -165,7 +160,7 @@ async function joinTrip({
       data: { tripId: trip.id, userId },
     });
 
-    return { trip, membership: createdMember, isAlreadyMember: false };
+    return { trip, membership: createdMember, alreadyMember: false };
   } catch (e) {
     // if a user is already a member = unique constraint error
     if (!isUniqueConstraintError(e)) {
@@ -180,7 +175,7 @@ async function joinTrip({
       throw e;
     }
 
-    return { trip, membership, isAlreadyMember: true };
+    return { trip, membership, alreadyMember: true };
   }
 }
 
