@@ -1,5 +1,5 @@
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { router, Stack } from "expo-router";
 import { styled } from "nativewind";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -151,8 +151,8 @@ const ExpenseScreen = ({ tripId }: Props) => {
         ListFooterComponent={
           <View className="items-center py-6">
             <Pressable
-              disabled
               className="flex-row items-center gap-2 rounded-xl border border-[#b9d7db] bg-[#dff2f3] px-5 py-3"
+              onPress={() => router.push(`/trips/${tripId}/expense/summary`)}
             >
               <MaterialCommunityIcons
                 name="text-box-search-outline"
