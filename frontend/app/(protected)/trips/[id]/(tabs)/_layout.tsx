@@ -46,10 +46,7 @@ export default function TripTabsLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="expense/summary/index"
-        options={{ href: null }}
-      />
+      <Tabs.Screen name="expense/summary/index" options={{ href: null }} />
     </Tabs>
   );
 }

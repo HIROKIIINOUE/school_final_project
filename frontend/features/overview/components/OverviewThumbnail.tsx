@@ -15,12 +15,12 @@ const OverviewThumbnail = () => {
         contentFit="cover"
       />
 
-      <Pressable
+      {/* <Pressable
         className="absolute left-sm top-sm h-15 w-15 items-center justify-center rounded-full bg-white/50"
         onPress={() => router.back()}
       >
         <ChevronLeft size={32} />
-      </Pressable>
+      </Pressable> */}
     </View>
   );
 };

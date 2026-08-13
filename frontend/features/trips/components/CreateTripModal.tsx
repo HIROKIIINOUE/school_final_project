@@ -22,6 +22,8 @@ const CreateTripModal = ({ visible, onClose, tripData }: Props) => {
   const [description, setDescription] = useState<string>("");
   const [isCreating, setIsCreating] = useState<boolean>(false);
 
+  const isEditMode = tripData !== null;
+
   const router = useRouter();
 
   async function handleSubmit() {
@@ -35,7 +37,7 @@ const CreateTripModal = ({ visible, onClose, tripData }: Props) => {
     try {
       setIsCreating(true);
 
-      const data = tripData
+      const data = isEditMode
         ? await updateMyTrips({
             title: normalizedTitle,
             description: normalizedDes,
@@ -48,7 +50,10 @@ const CreateTripModal = ({ visible, onClose, tripData }: Props) => {
 
       queryClient.invalidateQueries({ queryKey: tripQueryKey.all });
       // toast successful message
-      Toast.show({ type: "success", text1: "Successfully created new trip" });
+      const toastMsg = isEditMode
+        ? "Successfully updated a trip"
+        : "Successfully created new trip";
+      Toast.show({ type: "success", text1: toastMsg });
       onClose();
       // redirect to trip room
       router.navigate(`/trips/${data.id}`);
@@ -62,13 +67,13 @@ const CreateTripModal = ({ visible, onClose, tripData }: Props) => {
 
   useEffect(() => {
     function fillUpField() {
-      if (!tripData) return;
-      setTitle(tripData.title);
-      if (!tripData.description) {
+      if (!tripData) {
+        setTitle("");
         setDescription("");
-      } else {
-        setDescription(tripData.description);
+        return;
       }
+      setTitle(tripData.title);
+      setDescription(tripData.description ?? "");
     }
 
     fillUpField();
@@ -82,7 +87,9 @@ const CreateTripModal = ({ visible, onClose, tripData }: Props) => {
       >
         <View className="rounded-app-xl border border-outline-variant bg-surface-container-lowest p-lg">
           <View className="mb-lg flex-row items-center justify-between">
-            <Text className="headline-lg text-primary">Create Trip</Text>
+            <Text className="headline-lg text-primary">
+              {isEditMode ? "Update trip" : "Create Trip"}
+            </Text>
             <KeyboardDissmissBtn />
 
             <Pressable onPress={onClose}>
@@ -127,7 +134,9 @@ const CreateTripModal = ({ visible, onClose, tripData }: Props) => {
               {isCreating ? (
                 <MiniSpinner accessibilityLabel="Creating your trip" />
               ) : (
-                <Text className="btn-primary-text">"Create Trip"</Text>
+                <Text className="btn-primary-text">
+                  {isEditMode ? "Save Changes" : "Create Trip"}
+                </Text>
               )}
             </Pressable>
           </View>
