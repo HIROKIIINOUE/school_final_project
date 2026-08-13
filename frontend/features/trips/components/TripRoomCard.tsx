@@ -1,13 +1,14 @@
 import { View, Text, Pressable } from "react-native";
 import React, { useRef, useState } from "react";
 import { useRouter } from "expo-router";
-import { SquarePen, Trash2 } from "lucide-react-native";
+import { CalendarDays, SquarePen, Trash2, Users } from "lucide-react-native";
 import CreateTripModal from "./CreateTripModal";
 import { MyRoomType } from "../types/types";
 import ReanimatedSwipeable, {
   type SwipeableMethods,
 } from "react-native-gesture-handler/ReanimatedSwipeable";
 import DeleteTripModal from "./DeleteTripModal";
+import { formatDayLabel } from "@/lib/formatDate";
 
 type Props = { room: MyRoomType };
 
@@ -26,6 +27,8 @@ const TripRoomCard = ({ room }: Props) => {
   function onEditPress() {
     setIsModalOpen(true);
   }
+
+  console.log("start time for trip room: ", room.startAt);
 
   function renderRightAction() {
     return (
@@ -61,7 +64,7 @@ const TripRoomCard = ({ room }: Props) => {
           <View className="absolute top-0 left-0 w-1 h-full bg-primary" />
 
           <View className="flex flex-row justify-between items-start pl-sm ">
-            <View className="flex-1">
+            <View className="flex-1 gap-md">
               <Text
                 className="font-sans text-[18px] font-semibold leading-lg text-on-surface"
                 numberOfLines={1}
@@ -87,6 +90,7 @@ const TripRoomCard = ({ room }: Props) => {
 
           <View className="flex-row items-center gap-sm pl-sm pt-sm border-t border-outline-variant/50">
             {/* <MaterialIcons name="group" size={20} className="text-on-surface-variant" /> */}
+            <Users />
             <Text className="font-sans text-[14px] font-normal leading-container text-on-surface-variant">
               {room.memberCount} members
             </Text>

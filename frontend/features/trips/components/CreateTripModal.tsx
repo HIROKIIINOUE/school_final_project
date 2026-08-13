@@ -1,4 +1,11 @@
-import { View, Text, TextInput, Modal, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Modal,
+  Pressable,
+  Platform,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { createMyTrips, updateMyTrips } from "../api/myRoom.api";
 import { useRouter } from "expo-router";
@@ -9,6 +16,8 @@ import { MyRoomType } from "../types/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { tripQueryKey } from "../lib/tripQueryKeys";
 import { toastConfig } from "@/config/toastConfig";
+import { CalendarDays } from "lucide-react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 type Props = {
   visible: boolean;
@@ -21,6 +30,7 @@ const CreateTripModal = ({ visible, onClose, tripData }: Props) => {
 
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+
   const [isCreating, setIsCreating] = useState<boolean>(false);
 
   const isEditMode = tripData !== null;
@@ -36,6 +46,7 @@ const CreateTripModal = ({ visible, onClose, tripData }: Props) => {
       return;
     }
     const normalizedDes = description.trim() === "" ? null : description.trim();
+
     try {
       setIsCreating(true);
 
