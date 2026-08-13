@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import {
   createRoom,
+  deleteRoom,
   getMyRooms,
   joinTrip,
   updateMyTrips,
@@ -8,6 +9,7 @@ import {
 import {
   createTripBodySchema,
   joinTripBodySchema,
+  tripIdParamsSchema,
   updateTripBodySchema,
 } from "../../schemas/trips.schema";
 import { AppError } from "../../lib/appError";
@@ -136,6 +138,47 @@ async function updateMyTripsController(
   return res.status(201).json({ data: { updatedTrip: result } });
 }
 
+async function deleteTripController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.userId;
+  if (!userId) {
+    next(
+      new AppError(
+        401,
+        "AUTHENTICATION_REQUIRED",
+        "Authentication is required.",
+      ),
+    );
+    return;
+  }
+  const validationResult = tripIdParamsSchema.safeParse(req.params);
+
+  if (!validationResult.success) {
+    return next(
+      new AppError(
+        400,
+        "VALIDATION_ERROR",
+        "Request validation failed.",
+        validationResult.error.issues.map((issue) => ({
+          path: issue.path.join("."),
+          code: issue.code,
+          message: issue.message,
+        })),
+      ),
+    );
+  }
+
+  const result = await deleteRoom({
+    userId,
+    tripId: validationResult.data.tripId,
+  });
+
+  return res.status(200).json({ data: result });
+}
+
 async function joinTripController(
   req: Request,
   res: Response,
@@ -187,5 +230,6 @@ export {
   getMyRoomsController,
   createMyTripsController,
   updateMyTripsController,
+  deleteTripController,
   joinTripController,
 };

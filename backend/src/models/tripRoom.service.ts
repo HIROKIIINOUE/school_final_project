@@ -16,6 +16,7 @@ async function getMyRooms(userId: string) {
           id: true,
           title: true,
           description: true,
+          startDate: true,
           _count: { select: { members: true } }, // It is counting how many matching trip id appear in trip_members table
         },
       },
@@ -36,6 +37,7 @@ async function getMyRooms(userId: string) {
     title: mem.trip.title,
     id: mem.trip.id,
     description: mem.trip.description || null,
+    startAt: mem.trip.startDate,
     memberCount: mem.trip._count.members,
     isOwner: mem.role === "OWNER",
   }));
@@ -108,6 +110,38 @@ async function updateMyTrips(data: {
   return result;
 }
 
+async function deleteRoom({
+  userId,
+  tripId,
+}: {
+  userId: string;
+  tripId: string;
+}) {
+  const membership = await prisma.tripMember.findUnique({
+    where: { tripId_userId: { tripId, userId } },
+    select: { id: true, role: true },
+  });
+
+  if (!membership) {
+    throw new AppError(
+      403,
+      "TRIP_ACCESS_DENIED",
+      "You do not have access to this trip.",
+    );
+  }
+
+  if (membership.role === "MEMBER") {
+    throw new AppError(
+      403,
+      "TRIP_ACCESS_DENIED",
+      "You don't have permit to execute it",
+    );
+  }
+
+  const deletedTrip = await prisma.trip.delete({ where: { id: tripId } });
+  return deletedTrip;
+}
+
 async function joinTrip({
   inviteCode,
   userId,
@@ -150,4 +184,4 @@ async function joinTrip({
   }
 }
 
-export { getMyRooms, createRoom, updateMyTrips, joinTrip };
+export { getMyRooms, createRoom, updateMyTrips, deleteRoom, joinTrip };

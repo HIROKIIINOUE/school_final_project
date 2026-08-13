@@ -104,6 +104,28 @@ export async function updateMyTrips(input: UpdateMyRoomInput) {
   return data.data.updatedTrip;
 }
 
+export async function deleteTrip({ tripId }: { tripId: string }) {
+  const accessToken = await grabAccessToken();
+  console.log("delete trip Id: ", tripId);
+  const res = await fetch(`${backendUrl}/api/trips/delete-trip/${tripId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    console.error("Failed to delete the trip:", data.error);
+    throw new Error(
+      data.error?.message ?? data.message ?? "Failed to delete a trip",
+    );
+  }
+
+  return data.data;
+}
 export async function joinTrip({ inviteCode }: { inviteCode: string }) {
   const accessToken = await grabAccessToken();
 

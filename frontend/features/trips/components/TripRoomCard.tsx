@@ -7,6 +7,7 @@ import { MyRoomType } from "../types/types";
 import ReanimatedSwipeable, {
   type SwipeableMethods,
 } from "react-native-gesture-handler/ReanimatedSwipeable";
+import DeleteTripModal from "./DeleteTripModal";
 
 type Props = { room: MyRoomType };
 
@@ -14,6 +15,7 @@ const TripRoomCard = ({ room }: Props) => {
   const router = useRouter();
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
 
   const swipeableRef = useRef<SwipeableMethods | null>(null);
 
@@ -34,7 +36,10 @@ const TripRoomCard = ({ room }: Props) => {
         >
           <SquarePen />
         </Pressable>
-        <Pressable className="flex-1 items-center justify-center bg-error/70 w-10">
+        <Pressable
+          className="flex-1 items-center justify-center bg-error/70 w-10"
+          onPress={() => setDeleteModalOpen(true)}
+        >
           <Trash2 />
         </Pressable>
       </View>
@@ -70,9 +75,7 @@ const TripRoomCard = ({ room }: Props) => {
               {/* TODO: insert ICON above */}
               <Text
                 className={
-                  room.isOwner
-                    ? "badge-success-text"
-                    : "badge-secondary-text"
+                  room.isOwner ? "badge-success-text" : "badge-secondary-text"
                 }
               >
                 {room.isOwner ? "Owner" : "Member"}
@@ -93,6 +96,13 @@ const TripRoomCard = ({ room }: Props) => {
           visible={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           tripData={room}
+        />
+      )}
+
+      {deleteModalOpen && (
+        <DeleteTripModal
+          trip={room}
+          closeModal={() => setDeleteModalOpen(false)}
         />
       )}
     </ReanimatedSwipeable>

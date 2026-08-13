@@ -2,6 +2,7 @@ export type MyRoomType = {
   id: string;
   title: string;
   description: string | null;
+  startAt: string;
   memberCount: number;
   isOwner: boolean;
 };
