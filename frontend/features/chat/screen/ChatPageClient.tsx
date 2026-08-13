@@ -219,6 +219,7 @@ const ChatPageClient = ({ tripId }: Props) => {
       <SafeAreaView
         style={{ flex: 1 }}
         className="flex-1 items-center justify-center gap-sm bg-surface-bright px-md"
+        edges={["left", "right"]}
       >
         <Text className="text-title-md font-title-md text-on-surface">
           Failed to load messages.
@@ -234,7 +235,7 @@ const ChatPageClient = ({ tripId }: Props) => {
     <SafeAreaView
       style={{ flex: 1 }}
       className="flex-1 bg-surface-bright"
-      edges={["top", "left", "right"]}
+      edges={["left", "right"]}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}

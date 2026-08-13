@@ -1,3 +1,4 @@
+import TripHeader from "@/features/trips/components/TripHeader";
 import { Tabs } from "expo-router";
 import {
   CalendarDays,
@@ -8,7 +9,10 @@ import {
 
 export default function TripTabsLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
+    <Tabs
+      backBehavior="none"
+      screenOptions={{ headerShown: true, header: () => <TripHeader /> }}
+    >
       <Tabs.Screen
         name="index"
         options={{

@@ -133,7 +133,7 @@ const ExpenseScreen = ({ tripId }: Props) => {
   return (
     <StyledSafeAreaView
       className="flex-1 bg-[#f7f8ff]"
-      edges={["top", "left", "right", "bottom"]}
+      edges={["left", "right", "bottom"]}
     >
       <Stack.Screen options={{ title: "Expense Calculate" }} />
       <FlatList

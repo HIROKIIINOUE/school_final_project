@@ -82,9 +82,7 @@ const ItineraryClient = ({ tripId }: Props) => {
   if (itineraryItems.length === 0) {
     return (
       <SafeAreaView className="empty-state" style={{ flex: 1 }}>
-        <Text className="empty-title">
-          No Itineraries created yet
-        </Text>
+        <Text className="empty-title">No Itineraries created yet</Text>
         <Link
           href={{
             pathname: "/trips/[id]/create-itinerary",
@@ -102,8 +100,8 @@ const ItineraryClient = ({ tripId }: Props) => {
 
   // display itineararies
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
-      <View className="flex flex-row justify-between items-center mx-md">
+    <SafeAreaView style={{ flex: 1 }} edges={["left", "right"]}>
+      <View className="flex flex-row justify-between items-center px-md bg-surface">
         <View>
           <Text className="text-title text-primary">Itinerary Page</Text>
         </View>
