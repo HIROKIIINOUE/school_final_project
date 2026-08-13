@@ -63,11 +63,17 @@ const TripRoomCard = ({ room }: Props) => {
               </Text>
             </View>
 
-            <View className="px-sm py-xs rounded-app-full flex-row items-center gap-xs shrink-0">
+            <View
+              className={`${room.isOwner ? "badge-success" : "badge-secondary"} flex-row items-center gap-xs shrink-0`}
+            >
               {/* <MaterialIcons name="star" size={14} className="text-primary" /> */}
               {/* TODO: insert ICON above */}
               <Text
-                className={`font-sans font-medium uppercase leading-[16px] ${room.isOwner ? "badge-primary" : "badge-secondary"}`}
+                className={
+                  room.isOwner
+                    ? "badge-success-text"
+                    : "badge-secondary-text"
+                }
               >
                 {room.isOwner ? "Owner" : "Member"}
               </Text>
