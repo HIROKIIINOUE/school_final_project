@@ -15,6 +15,7 @@ export type TripDetailsType = {
   destination: string | null;
   startDate: Date | null;
   endDate: Date | null;
+  inviteCode: string;
   currentUserRole: "OWNER" | "MEMBER";
   planningStatus: TripPlanningStatus;
 };

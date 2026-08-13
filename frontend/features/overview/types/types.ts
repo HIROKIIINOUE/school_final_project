@@ -13,6 +13,7 @@ export type TripDetailsType = {
   title: string;
   description: string | null;
   destination: string | null;
+  inviteCode: string;
   startDate: Date | null;
   endDate: Date | null;
   currentUserRole: "OWNER" | "MEMBER";
