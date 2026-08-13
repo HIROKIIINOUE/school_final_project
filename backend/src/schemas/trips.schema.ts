@@ -131,7 +131,11 @@ export const messageCursorSchema = z.strictObject({
 });
 
 export const joinTripBodySchema = z.object({
-  inviteCode: z.string().trim().min(1, "Invite code is required"),
+  inviteCode: z
+    .string()
+    .trim()
+    .min(1, "Invite code is required")
+    .transform((code) => code.toUpperCase()),
 });
 
 export type JoinTripBody = z.infer<typeof joinTripBodySchema>;

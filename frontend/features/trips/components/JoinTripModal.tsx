@@ -15,10 +15,13 @@ import { joinTrip } from "../api/myRoom.api";
 import { useRouter } from "expo-router";
 import { toastConfig } from "@/config/toastConfig";
 import MiniSpinner from "@/components/MiniSpinner";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Props = { closeModal: () => void };
 
 const JoinTripModal = ({ closeModal }: Props) => {
+  const queryClient = useQueryClient();
+
   const [inviteCode, setInviteCode] = useState<string>("");
   const [isSending, setIsSending] = useState<boolean>(false);
 
@@ -33,6 +36,7 @@ const JoinTripModal = ({ closeModal }: Props) => {
     try {
       setIsSending(true);
       const result = await joinTrip({ inviteCode: normalizedInviteCode });
+      queryClient.invalidateQueries({ queryKey: ["myTrips"] });
       setInviteCode("");
       Toast.show({ type: "success", text1: "Successfully joined the trip" });
       closeModal();
@@ -85,7 +89,7 @@ const JoinTripModal = ({ closeModal }: Props) => {
                 <TextInput
                   className="input min-h-13 w-full border-primary-container text-[16px] uppercase tracking-[0.16em]"
                   placeholder="e.g. A8B29C"
-                  onChangeText={(code) => setInviteCode(code)}
+                  onChangeText={(code) => setInviteCode(code.toUpperCase())}
                   value={inviteCode}
                 />
               </View>

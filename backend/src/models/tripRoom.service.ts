@@ -146,7 +146,7 @@ async function joinTrip({
       throw e;
     }
 
-    return { trip, membership, alreadyMember: true };
+    return { trip, membership, isAlreadyMember: true };
   }
 }
 

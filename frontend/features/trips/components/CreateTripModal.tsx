@@ -6,6 +6,7 @@ import KeyboardDissmissBtn from "@/components/KeyboardDissmissBtn";
 import Toast from "react-native-toast-message";
 import MiniSpinner from "@/components/MiniSpinner";
 import { MyRoomType } from "../types/types";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Props = {
   visible: boolean;
@@ -14,6 +15,8 @@ type Props = {
 };
 
 const CreateTripModal = ({ visible, onClose, tripData }: Props) => {
+  const queryClient = useQueryClient();
+
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [isCreating, setIsCreating] = useState<boolean>(false);
@@ -42,8 +45,7 @@ const CreateTripModal = ({ visible, onClose, tripData }: Props) => {
             description: normalizedDes,
           });
 
-      console.log(data);
-
+      queryClient.invalidateQueries({ queryKey: ["myTrips"] });
       // toast successful message
       Toast.show({ type: "success", text1: "Successfully created new trip" });
       onClose();

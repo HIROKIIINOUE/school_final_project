@@ -1,5 +1,9 @@
 import { grabAccessToken } from "@/lib/getAccessToken";
-import { CreateMyRoomsInput, UpdateMyRoomInput } from "../types/types";
+import {
+  CreateMyRoomsInput,
+  MyRoomType,
+  UpdateMyRoomInput,
+} from "../types/types";
 
 const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -7,7 +11,7 @@ if (!backendUrl) {
   throw new Error("EXPO_PUBLIC_BACKEND_URL is not configured");
 }
 
-export async function fetchMyRooms() {
+export async function fetchMyRooms(): Promise<MyRoomType[]> {
   console.log("[Trips API] reading Supabase session");
 
   const accessToken = await grabAccessToken();

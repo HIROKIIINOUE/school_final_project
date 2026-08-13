@@ -10,11 +10,11 @@ import Spinner from "@/components/Spinner";
 import { useAuthStore } from "@/store/auth.store";
 import { SafeAreaView } from "react-native-safe-area-context";
 import JoinTripModal from "../components/JoinTripModal";
+import { useQuery } from "@tanstack/react-query";
 
 const MyTripScreen = () => {
-  const [tripRooms, setTripRooms] = useState<MyRoomType[]>([]);
+  // const [tripRooms, setTripRooms] = useState<MyRoomType[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [isJoinTripModalOpen, setIsJoinTripModalOpen] =
     useState<boolean>(false);
@@ -24,45 +24,67 @@ const MyTripScreen = () => {
 
   const isReady = authStatus === "authenticated" && profileStatus === "exists";
 
-  useEffect(() => {
-    console.log("[MyTripScreen] readiness changed", {
-      authStatus,
-      profileStatus,
-      isReady,
-    });
+  const {
+    data: tripRooms = [],
+    isError,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ["myTrips"],
+    queryFn: fetchMyRooms,
+    enabled: isReady,
+  });
 
-    if (!isReady) {
-      console.log("[MyTripScreen] trip fetch skipped; auth is not ready");
-      return;
-    }
-    async function fetchAndSetTrips() {
-      try {
-        console.log("[MyTripScreen] trip fetch started");
-        setIsLoading(true);
-        const trips = await fetchMyRooms();
-        console.log("[MyTripScreen] trip fetch succeeded", {
-          tripCount: trips.length,
-        });
-        setTripRooms(trips);
-      } catch (e) {
-        // toast message
-        console.error(
-          "Error occured: ",
-          e instanceof Error ? e.message : "Failed to fetch trips",
-        );
-      } finally {
-        setIsLoading(false);
-        console.log("[MyTripScreen] trip fetch finished");
-      }
-    }
+  // useEffect(() => {
+  //   console.log("[MyTripScreen] readiness changed", {
+  //     authStatus,
+  //     profileStatus,
+  //     isReady,
+  //   });
 
-    fetchAndSetTrips();
-  }, [isReady]);
+  //   if (!isReady) {
+  //     console.log("[MyTripScreen] trip fetch skipped; auth is not ready");
+  //     return;
+  //   }
 
-  if (isLoading) {
+  //   async function fetchAndSetTrips() {
+  //     try {
+  //       console.log("[MyTripScreen] trip fetch started");
+  //       setIsLoading(true);
+  //       const trips = await fetchMyRooms();
+  //       console.log("[MyTripScreen] trip fetch succeeded", {
+  //         tripCount: trips.length,
+  //       });
+  //       setTripRooms(trips);
+  //     } catch (e) {
+  //       // toast message
+  //       console.error(
+  //         "Error occured: ",
+  //         e instanceof Error ? e.message : "Failed to fetch trips",
+  //       );
+  //     } finally {
+  //       setIsLoading(false);
+  //       console.log("[MyTripScreen] trip fetch finished");
+  //     }
+  //   }
+
+  //   fetchAndSetTrips();
+  // }, [isReady]);
+
+  if (isLoading || !isReady) {
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <Spinner />
+      </SafeAreaView>
+    );
+  }
+
+  if (isError) {
+    return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <Text>
+          {error instanceof Error ? error.message : "Failed to fetch trips"}
+        </Text>
       </SafeAreaView>
     );
   }
