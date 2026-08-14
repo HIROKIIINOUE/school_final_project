@@ -1,75 +1,193 @@
-import { View, Text, ScrollView, Pressable } from "react-native";
-import React, { useCallback, useEffect, useState } from "react";
-import { SavedItineraryItem } from "../types/types";
-import { fetchItineraries } from "../api/itinerary.api";
-import { getDateKey } from "@/lib/formatDate";
-import IndivisualItinerary from "../components/IndivisualItinerary";
-import { Plus, SquarePen, Trash2 } from "lucide-react-native";
-import { Link, useFocusEffect } from "expo-router";
+import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+import { useCallback, useMemo, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { Plus } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Spinner from "@/components/Spinner";
 import Toast from "react-native-toast-message";
+import Spinner from "@/components/Spinner";
+import { getDateKey } from "@/lib/formatDate";
+import {
+  createItineraryItem,
+  deleteItineraryItem,
+  fetchItineraries,
+  ItineraryApiError,
+  updateItineraryItem,
+} from "../api/itinerary.api";
+import CreateOrEditItineraryModal from "../components/CreateOrEditItineraryModal";
+import IndivisualItinerary from "../components/IndivisualItinerary";
+import { SavedItineraryItem, SaveItineraryItemInput } from "../types/types";
 
 type Props = { tripId: string };
+
+const sortChronologically = (items: SavedItineraryItem[]) =>
+  [...items].sort(
+    (first, second) =>
+      new Date(first.startTime).getTime() -
+      new Date(second.startTime).getTime(),
+  );
 
 const ItineraryClient = ({ tripId }: Props) => {
   const [itineraryItems, setItineraryItems] = useState<SavedItineraryItem[]>(
     [],
   );
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [editingItem, setEditingItem] = useState<SavedItineraryItem | null>(
+    null,
+  );
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
 
-  // get the itineraries for this trip on load
+  const loadItineraries = useCallback(async () => {
+    const items = await fetchItineraries(tripId);
+    const sortedItems = sortChronologically(items);
+    setItineraryItems(sortedItems);
+    return sortedItems;
+  }, [tripId]);
+
   useFocusEffect(
     useCallback(() => {
-      if (!tripId) return;
       let isActive = true;
 
-      async function loadItineraries() {
+      const load = async () => {
         try {
           setIsLoading(true);
-
-          const itineraries = await fetchItineraries(tripId);
-
-          if (!isActive) {
-            return;
-          }
-
-          setItineraryItems(itineraries);
-        } catch {
-          if (!isActive) {
-            return;
-          }
-
+          const items = await fetchItineraries(tripId);
+          if (isActive) setItineraryItems(sortChronologically(items));
+        } catch (error) {
+          if (!isActive) return;
           Toast.show({
             type: "error",
-            text1: "Failed to fetch your itinerary. Try again",
+            text1:
+              error instanceof Error
+                ? error.message
+                : "Failed to load the itinerary",
           });
         } finally {
-          if (isActive) {
-            setIsLoading(false);
-          }
+          if (isActive) setIsLoading(false);
         }
-      }
+      };
 
-      void loadItineraries();
-
+      void load();
       return () => {
         isActive = false;
       };
     }, [tripId]),
   );
 
-  // set Itineraries by date:
-  // goal output : [ { "Aug 3": [itinerariItems] }, { "Aug 4": [itineraryItems] }... ]
-  const dateMap = new Map();
+  const itineraryGroups = useMemo(() => {
+    const groups = new Map<string, SavedItineraryItem[]>();
 
-  for (const item of itineraryItems) {
-    const formattedDate = getDateKey(new Date(item.startTime));
-    const currentItems = dateMap.get(formattedDate) ?? [];
+    for (const item of itineraryItems) {
+      const dateKey = getDateKey(new Date(item.startTime));
+      groups.set(dateKey, [...(groups.get(dateKey) ?? []), item]);
+    }
 
-    currentItems.push(item);
-    dateMap.set(formattedDate, currentItems);
-  }
+    return [...groups.values()];
+  }, [itineraryItems]);
+
+  const openCreateEditor = () => {
+    setEditingItem(null);
+    setIsEditorOpen(true);
+  };
+
+  const openEditEditor = (item: SavedItineraryItem) => {
+    setEditingItem(item);
+    setIsEditorOpen(true);
+  };
+
+  const closeEditor = () => {
+    setIsEditorOpen(false);
+    setEditingItem(null);
+  };
+
+  const handleSave = async (input: SaveItineraryItemInput) => {
+    if (!editingItem) {
+      const createdItem = await createItineraryItem({ tripId, input });
+      setItineraryItems((currentItems) =>
+        sortChronologically([...currentItems, createdItem]),
+      );
+      return;
+    }
+
+    try {
+      const updatedItem = await updateItineraryItem({
+        tripId,
+        item: editingItem,
+        input,
+      });
+      setItineraryItems((currentItems) =>
+        sortChronologically(
+          currentItems.map((item) =>
+            item.id === updatedItem.id ? updatedItem : item,
+          ),
+        ),
+      );
+      setEditingItem(updatedItem);
+    } catch (error) {
+      if (
+        error instanceof ItineraryApiError &&
+        error.code === "ITINERARY_CONFLICT"
+      ) {
+        const refreshedItems = await loadItineraries();
+        const refreshedItem = refreshedItems.find(
+          (item) => item.id === editingItem.id,
+        );
+
+        if (refreshedItem) {
+          setEditingItem(refreshedItem);
+        } else {
+          closeEditor();
+        }
+      }
+      throw error;
+    }
+  };
+
+  const confirmDelete = (item: SavedItineraryItem) => {
+    Alert.alert(
+      "Delete activity?",
+      `“${item.title}” will be removed from the shared itinerary.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            void handleDelete(item);
+          },
+        },
+      ],
+    );
+  };
+
+  const handleDelete = async (item: SavedItineraryItem) => {
+    if (deletingItemId) return;
+
+    setDeletingItemId(item.id);
+    try {
+      await deleteItineraryItem({ tripId, item });
+      setItineraryItems((currentItems) =>
+        currentItems.filter((currentItem) => currentItem.id !== item.id),
+      );
+      Toast.show({ type: "success", text1: "Activity deleted" });
+    } catch (error) {
+      if (
+        error instanceof ItineraryApiError &&
+        error.code === "ITINERARY_CONFLICT"
+      ) {
+        await loadItineraries();
+      }
+      Toast.show({
+        type: "error",
+        text1:
+          error instanceof Error
+            ? error.message
+            : "Failed to delete the activity",
+      });
+    } finally {
+      setDeletingItemId(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -79,68 +197,52 @@ const ItineraryClient = ({ tripId }: Props) => {
     );
   }
 
-  if (itineraryItems.length === 0) {
-    return (
-      <SafeAreaView className="empty-state" style={{ flex: 1 }}>
-        <Text className="empty-title">No Itineraries created yet</Text>
-        <Link
-          href={{
-            pathname: "/trips/[id]/create-itinerary",
-            params: { id: tripId, mode: "create" },
-          }}
-          asChild
-        >
-          <Pressable className="btn-primary empty-action">
-            <Text className="btn-primary-text">Create Itinerary here</Text>
-          </Pressable>
-        </Link>
-      </SafeAreaView>
-    );
-  }
-
-  // display itineararies
   return (
     <SafeAreaView style={{ flex: 1 }} edges={["left", "right"]}>
-      <View className="flex flex-row justify-between items-center px-md bg-surface">
-        <View>
-          <Text className="text-title text-primary">Itinerary Page</Text>
-        </View>
-        <View className="flex flex-row gap-sm items-center my-sm justify-end">
-          <Link
-            href={{
-              pathname: "/trips/[id]/create-itinerary",
-              params: { id: tripId, mode: "create" },
-            }}
-            asChild
-          >
-            <Pressable className="bg-primary-container h-11 w-11 rounded-full flex items-center justify-center mt-md">
-              <Plus className="material-symbols-outlined" size={20} />
-            </Pressable>
-          </Link>
-          <Link
-            href={{
-              pathname: "/trips/[id]/create-itinerary",
-              params: { id: tripId, mode: "edit" },
-            }}
-            asChild
-          >
-            <Pressable className=" bg-secondary-container h-11 w-11 rounded-full flex items-center justify-center mt-md">
-              <View className="flex flex-row gap-2">
-                <SquarePen size={16} />
-                {/* <Text>{isEditMode ? "Cancel" : "Edit"}</Text> */}
-              </View>
-            </Pressable>
-          </Link>
-        </View>
+      <View className="flex-row items-center justify-between bg-surface px-md py-sm">
+        <Text className="text-title text-primary">Itinerary Page</Text>
+        <Pressable
+          accessibilityLabel="Add itinerary activity"
+          accessibilityRole="button"
+          className="h-11 w-11 items-center justify-center rounded-full bg-primary-container"
+          onPress={openCreateEditor}
+        >
+          <Plus size={20} />
+        </Pressable>
       </View>
 
-      <ScrollView className="screen">
-        {Array.from(dateMap.entries()).map(([key, value]) => (
-          <View className="flex flex-row items-center" key={key}>
-            <IndivisualItinerary date={key} itineraries={value} />
-          </View>
-        ))}
-      </ScrollView>
+      {itineraryItems.length === 0 ? (
+        <View className="empty-state flex-1">
+          <Text className="empty-title">No itinerary activities yet</Text>
+          <Pressable
+            accessibilityRole="button"
+            className="btn-primary empty-action"
+            onPress={openCreateEditor}
+          >
+            <Text className="btn-primary-text">Add an activity</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <ScrollView className="screen" showsVerticalScrollIndicator={false}>
+          {itineraryGroups.map((items) => (
+            <IndivisualItinerary
+              key={getDateKey(new Date(items[0].startTime))}
+              deletingItemId={deletingItemId}
+              itineraries={items}
+              onDelete={confirmDelete}
+              onEdit={openEditEditor}
+            />
+          ))}
+        </ScrollView>
+      )}
+
+      {isEditorOpen ? (
+        <CreateOrEditItineraryModal
+          closeModal={closeEditor}
+          item={editingItem}
+          onSubmit={handleSave}
+        />
+      ) : null}
     </SafeAreaView>
   );
 };

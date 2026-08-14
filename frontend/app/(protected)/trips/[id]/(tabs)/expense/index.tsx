@@ -2,7 +2,7 @@ import ExpenseScreen from "@/features/expense/screens/ExpenseScreen";
 import { useGlobalSearchParams } from "expo-router";
 import { Text } from "react-native";
 
-const index = () => {
+const ExpenseRoute = () => {
   const { id } = useGlobalSearchParams();
 
   const tripId = Array.isArray(id) ? id[0] : id;
@@ -14,4 +14,4 @@ const index = () => {
   return <ExpenseScreen tripId={tripId} />;
 };
 
-export default index;
+export default ExpenseRoute;

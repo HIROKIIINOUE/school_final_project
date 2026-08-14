@@ -33,7 +33,7 @@ export const updateTripBodySchema = z.strictObject({
     .optional(),
 });
 
-export const itineraryItemSchema = z.object({
+export const itineraryItemSchema = z.strictObject({
   title: z
     .string({ error: "Title must be a string." })
     .trim()
@@ -48,46 +48,18 @@ export const itineraryItemSchema = z.object({
     .optional()
     .nullable(),
   startTime: z.iso.datetime(),
-});
-
-// The input must be an array, and every element inside the array must pass itineraryItemSchema.
-export const createItinerariesBodySchema = z.object({
-  itineraries: z
-    .array(itineraryItemSchema)
-    .min(1, "At least one itinerary item is required.")
-    .max(20, "You can create at most 20 itinerary items at once."),
 });
 
 export type ItineraryItemInput = z.infer<typeof itineraryItemSchema>;
 
-export type CreateItinerariesBody = z.infer<typeof createItinerariesBodySchema>;
-
-export const updateItineraryItemSchema = z.object({
-  id: z.string().uuid().trim().min(1).optional(),
-  title: z
-    .string({ error: "Title must be a string." })
-    .trim()
-    .min(1, { error: "Title is required." })
-    .max(100, { error: "Title must be 100 characters or fewer." }),
-
-  detail: z.string().trim().max(200).optional().nullable(),
-  location: z
-    .string({ error: "Location must be a string" })
-    .trim()
-    .max(300)
-    .optional()
-    .nullable(),
-  startTime: z.iso.datetime(),
+export const itineraryItemParamsSchema = z.strictObject({
+  tripId: z.uuid({ error: "Trip ID must be a valid UUID." }),
+  itemId: z.uuid({ error: "Itinerary item ID must be a valid UUID." }),
 });
 
-export const updatItinerariesBodySchema = z.object({
-  itineraries: z
-    .array(updateItineraryItemSchema)
-    .max(30, "You can create at most 30 items at once."),
+export const itineraryVersionSchema = z.iso.datetime({
+  error: "If-Match must contain a valid itinerary version.",
 });
-
-export type UpdateItineraryInput = z.infer<typeof updateItineraryItemSchema>;
-export type UpdateItinerariesBody = z.infer<typeof updatItinerariesBodySchema>;
 
 export const postMessageBodySchema = z.strictObject({
   clientMessageId: z.uuid({ error: "Client message ID must be a valid UUID." }),

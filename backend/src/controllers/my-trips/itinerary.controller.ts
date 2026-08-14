@@ -1,191 +1,226 @@
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../../lib/appError";
 import {
-  createItinerary,
+  createItineraryItem,
+  deleteItineraryItem,
   getItinerary,
-  updateItinerary,
+  updateItineraryItem,
 } from "../../models/itinerary.service";
 import {
-  createItinerariesBodySchema,
+  itineraryItemParamsSchema,
+  itineraryItemSchema,
+  itineraryVersionSchema,
   tripIdParamsSchema,
-  updatItinerariesBodySchema,
 } from "../../schemas/trips.schema";
+
+function getRequiredUserId(req: Request, next: NextFunction) {
+  if (req.userId) return req.userId;
+
+  next(
+    new AppError(
+      401,
+      "AUTHENTICATION_REQUIRED",
+      "Authentication is required.",
+    ),
+  );
+  return null;
+}
+
+function validationDetails(issues: Array<{
+  path: PropertyKey[];
+  code: string;
+  message: string;
+}>) {
+  return issues.map((issue) => ({
+    path: issue.path.join("."),
+    code: issue.code,
+    message: issue.message,
+  }));
+}
+
+function getExpectedUpdatedAt(req: Request, next: NextFunction) {
+  const ifMatchHeader = req.headers["if-match"];
+
+  if (!ifMatchHeader || Array.isArray(ifMatchHeader)) {
+    next(
+      new AppError(
+        428,
+        "PRECONDITION_REQUIRED",
+        "If-Match is required when changing an itinerary item.",
+      ),
+    );
+    return null;
+  }
+
+  const normalizedVersion = ifMatchHeader.trim().replace(/^"|"$/g, "");
+  const result = itineraryVersionSchema.safeParse(normalizedVersion);
+
+  if (!result.success) {
+    next(
+      new AppError(
+        400,
+        "VALIDATION_ERROR",
+        "The itinerary item version is invalid.",
+        validationDetails(result.error.issues),
+      ),
+    );
+    return null;
+  }
+
+  return result.data;
+}
 
 async function getItinerariesController(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
-  const userId = req.userId;
-
-  if (!userId) {
-    next(
-      new AppError(
-        401,
-        "AUTHENTICATION_REQUIRED",
-        "Authentication is required.",
-      ),
-    );
-    return;
-  }
+  const userId = getRequiredUserId(req, next);
+  if (!userId) return;
 
   const paramsResult = tripIdParamsSchema.safeParse(req.params);
-
   if (!paramsResult.success) {
     return next(
       new AppError(
         400,
         "VALIDATION_ERROR",
         "Invalid trip ID.",
-        paramsResult.error.issues.map((issue) => ({
-          path: issue.path.join("."),
-          code: issue.code,
-          message: issue.message,
-        })),
+        validationDetails(paramsResult.error.issues),
       ),
     );
   }
 
-  const { tripId } = paramsResult.data;
-
-  const id = Array.isArray(tripId) ? tripId[0] : tripId;
-
-  const data = await getItinerary({ tripId: id, userId });
+  const data = await getItinerary({
+    tripId: paramsResult.data.tripId,
+    userId,
+  });
 
   return res.status(200).json({ data });
 }
 
-async function createItineraryController(
+async function createItineraryItemController(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
-  const userId = req.userId;
-
-  if (!userId) {
-    next(
-      new AppError(
-        401,
-        "AUTHENTICATION_REQUIRED",
-        "Authentication is required.",
-      ),
-    );
-    return;
-  }
+  const userId = getRequiredUserId(req, next);
+  if (!userId) return;
 
   const paramsResult = tripIdParamsSchema.safeParse(req.params);
-
   if (!paramsResult.success) {
     return next(
       new AppError(
         400,
         "VALIDATION_ERROR",
         "Invalid trip ID.",
-        paramsResult.error.issues.map((issue) => ({
-          path: issue.path.join("."),
-          code: issue.code,
-          message: issue.message,
-        })),
+        validationDetails(paramsResult.error.issues),
       ),
     );
   }
 
-  const { tripId } = paramsResult.data;
-
-  // validation
-
-  const validatedResult = createItinerariesBodySchema.safeParse(req.body);
-
-  if (!validatedResult.success) {
+  const bodyResult = itineraryItemSchema.safeParse(req.body);
+  if (!bodyResult.success) {
     return next(
       new AppError(
         400,
         "VALIDATION_ERROR",
         "Request validation failed.",
-        validatedResult.error.issues.map((issue) => ({
-          path: issue.path.join("."),
-          code: issue.code,
-          message: issue.message,
-        })),
+        validationDetails(bodyResult.error.issues),
       ),
     );
   }
 
-  const { itineraries } = validatedResult.data;
-
-  const data = await createItinerary({
-    tripId: Array.isArray(tripId) ? tripId[0] : tripId,
+  const data = await createItineraryItem({
+    tripId: paramsResult.data.tripId,
     userId,
-    itineraries: itineraries,
+    input: bodyResult.data,
   });
 
+  res.setHeader("ETag", `"${data.updatedAt.toISOString()}"`);
   return res.status(201).json({ data });
 }
 
-async function updateItineraryController(
+async function updateItineraryItemController(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
-  const userId = req.userId;
+  const userId = getRequiredUserId(req, next);
+  if (!userId) return;
 
-  if (!userId) {
-    next(
-      new AppError(
-        401,
-        "AUTHENTICATION_REQUIRED",
-        "Authentication is required.",
-      ),
-    );
-    return;
-  }
-
-  const paramsResult = tripIdParamsSchema.safeParse(req.params);
-
+  const paramsResult = itineraryItemParamsSchema.safeParse(req.params);
   if (!paramsResult.success) {
     return next(
       new AppError(
         400,
         "VALIDATION_ERROR",
-        "Invalid trip ID.",
-        paramsResult.error.issues.map((issue) => ({
-          path: issue.path.join("."),
-          code: issue.code,
-          message: issue.message,
-        })),
+        "Invalid itinerary route parameters.",
+        validationDetails(paramsResult.error.issues),
       ),
     );
   }
 
-  const { tripId } = paramsResult.data;
-
-  // validate body
-  const validatedResult = updatItinerariesBodySchema.safeParse(req.body);
-  if (!validatedResult.success) {
+  const bodyResult = itineraryItemSchema.safeParse(req.body);
+  if (!bodyResult.success) {
     return next(
       new AppError(
         400,
         "VALIDATION_ERROR",
         "Request validation failed.",
-        validatedResult.error.issues.map((issue) => ({
-          path: issue.path.join("."),
-          code: issue.code,
-          message: issue.message,
-        })),
+        validationDetails(bodyResult.error.issues),
       ),
     );
   }
 
-  const data = await updateItinerary({
-    tripId: Array.isArray(tripId) ? tripId[0] : tripId,
+  const expectedUpdatedAt = getExpectedUpdatedAt(req, next);
+  if (!expectedUpdatedAt) return;
+
+  const data = await updateItineraryItem({
+    ...paramsResult.data,
     userId,
-    itineraries: validatedResult.data.itineraries,
+    expectedUpdatedAt,
+    input: bodyResult.data,
   });
+
+  res.setHeader("ETag", `"${data.updatedAt.toISOString()}"`);
   return res.status(200).json({ data });
 }
 
+async function deleteItineraryItemController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = getRequiredUserId(req, next);
+  if (!userId) return;
+
+  const paramsResult = itineraryItemParamsSchema.safeParse(req.params);
+  if (!paramsResult.success) {
+    return next(
+      new AppError(
+        400,
+        "VALIDATION_ERROR",
+        "Invalid itinerary route parameters.",
+        validationDetails(paramsResult.error.issues),
+      ),
+    );
+  }
+
+  const expectedUpdatedAt = getExpectedUpdatedAt(req, next);
+  if (!expectedUpdatedAt) return;
+
+  await deleteItineraryItem({
+    ...paramsResult.data,
+    userId,
+    expectedUpdatedAt,
+  });
+
+  return res.status(204).send();
+}
+
 export {
+  createItineraryItemController,
+  deleteItineraryItemController,
   getItinerariesController,
-  createItineraryController,
-  updateItineraryController,
+  updateItineraryItemController,
 };

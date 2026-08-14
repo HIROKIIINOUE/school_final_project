@@ -23,7 +23,7 @@ app.use(express.json());
 
 app.use("/api/trips", router);
 app.use("/api/trip", overviewRouter);
-app.use("/api/itinerary", itineraryrouter);
+app.use("/api/trips", itineraryrouter);
 
 app.use("/api/expenses", expenseRouter);
 

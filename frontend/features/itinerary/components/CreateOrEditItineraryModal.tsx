@@ -11,34 +11,38 @@ import {
 import { BlurView } from "expo-blur";
 import { CalendarDays, Clock, MapPin, X } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { ItineraryDraftItem } from "../types/types";
+import { SavedItineraryItem, SaveItineraryItemInput } from "../types/types";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Toast from "react-native-toast-message";
 import { toastConfig } from "@/config/toastConfig";
-import { createClientId } from "@/lib/createClientId";
 
 type Props = {
-  addItems: (item: ItineraryDraftItem) => void;
+  onSubmit: (input: SaveItineraryItemInput) => Promise<void>;
   closeModal: () => void;
-  item: ItineraryDraftItem | null;
+  item: SavedItineraryItem | null;
+};
+
+type ItineraryFormState = {
+  title: string;
+  detail: string;
+  location: string;
 };
 
 export default function CreateOrEditItineraryModal({
-  addItems,
+  onSubmit,
   closeModal,
   item,
 }: Props) {
-  const [itineraryInputs, setItineraryInputs] = useState<ItineraryDraftItem>({
-    clientId: createClientId(),
+  const [itineraryInputs, setItineraryInputs] = useState<ItineraryFormState>({
     title: "",
     detail: "",
     location: "",
-    startTime: new Date(),
   });
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formattedDate = new Intl.DateTimeFormat("en-CA", {
     year: "numeric",
@@ -64,7 +68,7 @@ export default function CreateOrEditItineraryModal({
     return combined;
   }
 
-  function onPress() {
+  async function handleSave() {
     const title = itineraryInputs.title.trim();
 
     if (!title) {
@@ -73,24 +77,30 @@ export default function CreateOrEditItineraryModal({
     }
 
     const startTime = combineDateAndTime(date, time);
-    addItems({ ...itineraryInputs, title, startTime: startTime });
-    resetInputs();
-
-    Toast.show({ type: "success", text1: "Successfully added item" });
-  }
-
-  function resetInputs() {
-    setItineraryInputs({
-      clientId: createClientId(),
-      title: "",
-      detail: "",
-      location: "",
-      startTime: new Date(),
-    });
-    setDate(new Date());
-    setTime(new Date());
-    setShowPicker(false);
-    setShowTimePicker(false);
+    setIsSubmitting(true);
+    try {
+      await onSubmit({
+        title,
+        detail: itineraryInputs.detail.trim() || null,
+        location: itineraryInputs.location.trim() || null,
+        startTime: startTime.toISOString(),
+      });
+      Toast.show({
+        type: "success",
+        text1: item ? "Activity updated" : "Activity added",
+      });
+      closeModal();
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1:
+          error instanceof Error
+            ? error.message
+            : "Unable to save this activity",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   useEffect(() => {
@@ -99,11 +109,9 @@ export default function CreateOrEditItineraryModal({
         const now = new Date();
 
         setItineraryInputs({
-          clientId: createClientId(),
           title: "",
           detail: "",
           location: "",
-          startTime: now,
         });
 
         setDate(now);
@@ -113,10 +121,9 @@ export default function CreateOrEditItineraryModal({
 
       const existingStartTime = new Date(item.startTime);
       setItineraryInputs({
-        ...item,
+        title: item.title,
         detail: item.detail ?? "",
         location: item.location ?? "",
-        startTime: existingStartTime,
       });
 
       setDate(existingStartTime);
@@ -132,14 +139,18 @@ export default function CreateOrEditItineraryModal({
       transparent
       animationType="slide"
       statusBarTranslucent
-      onRequestClose={closeModal}
+      onRequestClose={() => {
+        if (!isSubmitting) closeModal();
+      }}
     >
       <View className="flex-1 justify-end">
         <BlurView intensity={35} tint="dark" style={StyleSheet.absoluteFill} />
         <Pressable
           style={StyleSheet.absoluteFill}
           className="bg-black/40"
-          onPress={closeModal}
+          onPress={() => {
+            if (!isSubmitting) closeModal();
+          }}
         />
         <View className="h-[90%] w-full overflow-hidden rounded-t-3xl bg-surface">
           <View className="max-h-[90%] w-full overflow-hidden rounded-t-3xl bg-surface">
@@ -147,21 +158,26 @@ export default function CreateOrEditItineraryModal({
             <View className="flex-row items-center justify-between border-b border-outline-variant bg-surface px-container-margin py-md px-sm">
               <Pressable
                 className="h-11 w-11 items-start justify-center"
+                accessibilityLabel="Close activity editor"
+                accessibilityRole="button"
+                disabled={isSubmitting}
                 onPress={closeModal}
               >
                 <X size={28} className="text-on-surface-variant" />
               </Pressable>
 
               <Text className="text-headline-lg-mobile font-headline-lg-mobile text-on-surface">
-                Add Activity
+                {item ? "Edit Activity" : "Add Activity"}
               </Text>
 
               <Pressable
                 className="rounded-full bg-secondary-container px-md py-sm"
-                onPress={onPress}
+                accessibilityRole="button"
+                disabled={isSubmitting}
+                onPress={handleSave}
               >
                 <Text className="text-label-md font-label-md text-primary">
-                  Save
+                  {isSubmitting ? "Saving..." : "Save"}
                 </Text>
               </Pressable>
             </View>
@@ -177,8 +193,7 @@ export default function CreateOrEditItineraryModal({
             >
               <View className="mb-lg items-center">
                 <Text className="text-center font-body-md italic text-on-surface-variant">
-                  Planning your next adventure in Kyoto
-                  {/* Change this title dynamically */}
+                  Plan the next activity with your trip members
                 </Text>
               </View>
 
@@ -196,6 +211,7 @@ export default function CreateOrEditItineraryModal({
                     onChangeText={(title) => {
                       setItineraryInputs((prev) => ({ ...prev, title: title }));
                     }}
+                    maxLength={100}
                     value={itineraryInputs.title}
                   />
                 </View>
@@ -219,6 +235,7 @@ export default function CreateOrEditItineraryModal({
                       onChangeText={(location) =>
                         setItineraryInputs((prev) => ({ ...prev, location }))
                       }
+                      maxLength={300}
                       value={itineraryInputs.location}
                     />
                   </View>
@@ -314,6 +331,7 @@ export default function CreateOrEditItineraryModal({
                     textAlignVertical="top"
                     placeholder="What are the plans? e.g., Dress code is smart casual."
                     value={itineraryInputs.detail}
+                    maxLength={200}
                     className="min-h-28 rounded-xl border border-outline-variant bg-surface-container p-md text-body-lg text-on-surface"
                     onChangeText={(details) =>
                       setItineraryInputs((prev) => ({
