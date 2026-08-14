@@ -169,7 +169,7 @@ const getExpenseTripMembers = async ({
   const members = await prisma.tripMember.findMany({
     where: { tripId },
     select: { id: true, userId: true, role: true, joinedAt: true },
-    orderBy: { joinedAt: "asc" },
+    orderBy: [{ joinedAt: "asc" }, { id: "asc" }],
   });
   const profiles = await prisma.profile.findMany({
     where: { userId: { in: members.map((member) => member.userId) } },
