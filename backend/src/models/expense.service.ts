@@ -1,10 +1,6 @@
 import { AppError } from "../lib/appError";
 import { prisma } from "../lib/prisma";
-import {
-  ExpenseInput,
-  ExpenseSplitInput,
-  ExpenseSplitUpdateInput,
-} from "../schemas/expenses.schema";
+import { ExpenseInput } from "../schemas/expenses.schema";
 
 type ExpenseWithRelations = {
   id: string;
@@ -17,11 +13,7 @@ type ExpenseWithRelations = {
   note: string | null;
   createdAt: Date;
   updatedAt: Date;
-  paidByMember: {
-    id: string;
-    userId: string;
-    role: "OWNER" | "MEMBER";
-  };
+  paidByMember: { id: string; userId: string; role: "OWNER" | "MEMBER" };
   splits: Array<{
     id: number;
     tripMemberId: string;
@@ -305,107 +297,12 @@ const getExpenseSplits = async ({
   return expense.splits;
 };
 
-const createExpenseSplit = async ({
-  tripId,
-  expenseId,
-  userId,
-  input,
-}: {
-  tripId: string;
-  expenseId: string;
-  userId: string;
-  input: ExpenseSplitInput;
-}) => {
-  await assertTripAccess(tripId, userId);
-  await findExpense(tripId, expenseId);
-  await assertTripMembers(tripId, [input.tripMemberId]);
-
-  try {
-    const split = await prisma.expenseSplit.create({
-      data: { expenseId, ...input },
-    });
-    return { ...split, owedAmount: Number(split.owedAmount) };
-  } catch (error: unknown) {
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "code" in error &&
-      error.code === "P2002"
-    ) {
-      throw new AppError(
-        409,
-        "EXPENSE_SPLIT_ALREADY_EXISTS",
-        "This member already has a split for the expense.",
-      );
-    }
-    throw error;
-  }
-};
-
-const updateExpenseSplit = async ({
-  tripId,
-  expenseId,
-  splitId,
-  userId,
-  input,
-}: {
-  tripId: string;
-  expenseId: string;
-  splitId: number;
-  userId: string;
-  input: ExpenseSplitUpdateInput;
-}) => {
-  await assertTripAccess(tripId, userId);
-  const split = await prisma.expenseSplit.findFirst({
-    where: { id: splitId, expenseId },
-  });
-  if (!split)
-    throw new AppError(
-      404,
-      "EXPENSE_SPLIT_NOT_FOUND",
-      "Expense split was not found.",
-    );
-  const updatedSplit = await prisma.expenseSplit.update({
-    where: { id: splitId },
-    data: input,
-  });
-  return { ...updatedSplit, owedAmount: Number(updatedSplit.owedAmount) };
-};
-
-const deleteExpenseSplit = async ({
-  tripId,
-  expenseId,
-  splitId,
-  userId,
-}: {
-  tripId: string;
-  expenseId: string;
-  splitId: number;
-  userId: string;
-}) => {
-  await assertTripAccess(tripId, userId);
-  const split = await prisma.expenseSplit.findFirst({
-    where: { id: splitId, expenseId },
-    select: { id: true },
-  });
-  if (!split)
-    throw new AppError(
-      404,
-      "EXPENSE_SPLIT_NOT_FOUND",
-      "Expense split was not found.",
-    );
-  await prisma.expenseSplit.delete({ where: { id: splitId } });
-};
-
 export {
   createExpense,
-  createExpenseSplit,
   deleteExpense,
-  deleteExpenseSplit,
   getExpense,
   getExpenseTripMembers,
   getExpenses,
   getExpenseSplits,
   updateExpense,
-  updateExpenseSplit,
 };
