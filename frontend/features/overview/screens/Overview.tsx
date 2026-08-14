@@ -18,19 +18,18 @@ const OverView = ({ id }: Props) => {
 
   const [inviteModalOpen, setInviteModalOpen] = useState<boolean>(false);
 
-  useEffect(() => {
-    async function fetchOverview() {
-      try {
-        setIsLoading(true);
-        const overview = await getOverviewData({ id });
-        setOverviewData(overview);
-      } catch (e) {
-        console.error("Failed to fetch overview data", e);
-      } finally {
-        setIsLoading(false);
-      }
+  async function fetchOverview() {
+    try {
+      setIsLoading(true);
+      const overview = await getOverviewData({ id });
+      setOverviewData(overview);
+    } catch (e) {
+      console.error("Failed to fetch overview data", e);
+    } finally {
+      setIsLoading(false);
     }
-
+  }
+  useEffect(() => {
     fetchOverview();
   }, [id]);
 
@@ -65,7 +64,10 @@ const OverView = ({ id }: Props) => {
             Invite your friends
           </Text>
         </Pressable>
-        <TripDetail tripDetails={overviewData?.tripDetails} />
+        <TripDetail
+          tripDetails={overviewData?.tripDetails}
+          onTripUpdate={fetchOverview}
+        />
         <ItineraryCard itineraries={overviewData.itineraries} tripId={id} />
       </ScrollView>
 

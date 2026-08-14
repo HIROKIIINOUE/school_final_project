@@ -32,3 +32,11 @@ export type OverviewDataType = {
   tripDetails: TripDetailsType;
   itineraries: ItineraryType[];
 };
+
+export type TripRoomFormType = {
+  title: string;
+  description: string;
+  destination: string;
+  startDate: Date;
+  endDate: Date;
+};

@@ -13,6 +13,9 @@ export type UpdateMyRoomInput = {
   title: string;
   description?: string | null;
   tripId: string;
+  destination: string | null;
+  startTime: Date | null;
+  endTime: Date | null;
 };
 
 export type DeleteTripResult = { tripId: string };

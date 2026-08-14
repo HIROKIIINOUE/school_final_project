@@ -122,7 +122,8 @@ async function updateMyTripsController(
     );
   }
 
-  const { title, description } = validationResult.data;
+  const { title, description, destination, startTime, endTime } =
+    validationResult.data;
 
   const tripId = Array.isArray(id) ? id[0] : id;
 
@@ -131,6 +132,9 @@ async function updateMyTripsController(
     userId,
     title,
     description: description ?? null,
+    destination: destination ?? null,
+    startTime: startTime ?? null,
+    endTime: endTime ?? null,
   });
 
   return res.status(201).json({ data: { updatedTrip: result } });

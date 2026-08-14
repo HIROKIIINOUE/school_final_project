@@ -1,12 +1,15 @@
-import { View, Text } from "react-native";
-import React from "react";
+import { View, Text, Pressable } from "react-native";
+import React, { useState } from "react";
 import { TripDetailsType } from "../types/types";
-import { CalendarDays, MapPin } from "lucide-react-native";
+import { CalendarDays, MapPin, SquarePen } from "lucide-react-native";
 import { calculateDuration, calculatePeriod } from "@/lib/calculatePeriod";
+import TripRoomEditModal from "./TripRoomEditModal";
 
-type Props = { tripDetails: TripDetailsType };
+type Props = { tripDetails: TripDetailsType; onTripUpdate: () => void };
 
-const TripDetail = ({ tripDetails }: Props) => {
+const TripDetail = ({ tripDetails, onTripUpdate }: Props) => {
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
   const status =
     tripDetails.planningStatus.status === "UPCOMING"
       ? "Upcoming"
@@ -24,6 +27,13 @@ const TripDetail = ({ tripDetails }: Props) => {
 
   return (
     <View className="relative card mx-sm">
+      {editModalOpen && (
+        <TripRoomEditModal
+          trip={tripDetails}
+          closeModal={() => setEditModalOpen(false)}
+          onTripUpdate={onTripUpdate}
+        />
+      )}
       <View className="flex items-center gap-sm flex-wrap flex-row">
         <View className="px-sm py-xs bg-primary-container text-on-primary-container rounded-md label-md font-bold badge badge-text">
           <Text>{status}</Text>
@@ -34,6 +44,11 @@ const TripDetail = ({ tripDetails }: Props) => {
           <Text>
             {tripDetails.currentUserRole === "OWNER" ? "Owner" : "Member"}
           </Text>
+        </View>
+        <View className="">
+          <Pressable onPress={() => setEditModalOpen(true)}>
+            <SquarePen />
+          </Pressable>
         </View>
       </View>
       <Text className="headline-lg-mobile md:headline-lg text-on-surface font-bold tracking-tight headline-lg py-md">
@@ -62,8 +77,7 @@ const TripDetail = ({ tripDetails }: Props) => {
       {true && (
         <View className="mt-sm p-sm bg-surface-container rounded-lg border border-primary/20">
           <Text className="title-md text-primary text-center">
-            {/* {tripDetails.planningStatus.daysUntilStart} */}
-            10 days until departure!
+            {tripDetails.planningStatus.daysUntilStart ?? " - "}
           </Text>
         </View>
       )}

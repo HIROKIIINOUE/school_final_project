@@ -31,6 +31,17 @@ export const updateTripBodySchema = z.strictObject({
     .max(500, { error: "Description must be 500 characters or fewer." })
     .nullable()
     .optional(),
+
+  destination: z
+    .string({ error: "Description must be a string." })
+    .trim()
+    .max(500, { error: "Description must be 500 characters or fewer." })
+    .nullable()
+    .optional(),
+
+  startTime: z.iso.datetime().nullable().optional(),
+
+  endTime: z.iso.datetime().nullable().optional(),
 });
 
 export const itineraryItemSchema = z.strictObject({

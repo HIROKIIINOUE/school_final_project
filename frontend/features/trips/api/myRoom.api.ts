@@ -89,7 +89,10 @@ export async function updateMyTrips(input: UpdateMyRoomInput) {
       },
       body: JSON.stringify({
         title: input.title,
-        description: input.description,
+        description: input.description ?? null,
+        destination: input.destination ?? null,
+        startTime: input.startTime ?? null,
+        endTime: input.endTime ?? null,
       }),
     },
   );
