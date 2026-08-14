@@ -46,10 +46,6 @@ export type CreateExpenseInput = {
 };
 
 export type ExpenseTripData = {
-  trip: {
-    title: string;
-    startDate: string | null;
-    endDate: string | null;
-  };
+  trip: { title: string; startDate: string | null; endDate: string | null };
   members: ExpenseTripMember[];
 };
