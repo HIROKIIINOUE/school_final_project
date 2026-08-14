@@ -3,7 +3,7 @@ import { useGlobalSearchParams } from "expo-router";
 import ItineraryClient from "@/features/itinerary/screens/ItineraryClient";
 import { Text } from "react-native";
 
-const index = () => {
+const ItineraryRoute = () => {
   const { id } = useGlobalSearchParams();
 
   const tripId = Array.isArray(id) ? id[0] : id;
@@ -15,4 +15,4 @@ const index = () => {
   return <ItineraryClient tripId={tripId} />;
 };
 
-export default index;
+export default ItineraryRoute;

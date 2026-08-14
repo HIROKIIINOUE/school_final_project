@@ -4,10 +4,19 @@ import { SavedItineraryItem } from "../types/types";
 import ItineraryCardItem from "./ItineraryCardItem";
 import { formatDayLabel, formatDayNumber } from "@/lib/formatDate";
 
-type Props = { date: string; itineraries: SavedItineraryItem[] };
+type Props = {
+  deletingItemId: string | null;
+  itineraries: SavedItineraryItem[];
+  onDelete: (item: SavedItineraryItem) => void;
+  onEdit: (item: SavedItineraryItem) => void;
+};
 
-const IndivisualItinerary = ({ date, itineraries }: Props) => {
-  console.log(date);
+const IndivisualItinerary = ({
+  deletingItemId,
+  itineraries,
+  onDelete,
+  onEdit,
+}: Props) => {
   const firstDate = new Date(itineraries[0].startTime);
 
   const dayNumber = formatDayNumber(firstDate);
@@ -23,7 +32,13 @@ const IndivisualItinerary = ({ date, itineraries }: Props) => {
       </View>
       <View className="gap-md pl-11">
         {itineraries.map((item) => (
-          <ItineraryCardItem key={item.title} itineraryItem={item} />
+          <ItineraryCardItem
+            key={item.id}
+            itineraryItem={item}
+            isDeleting={deletingItemId === item.id}
+            onDelete={onDelete}
+            onEdit={onEdit}
+          />
         ))}
       </View>
     </View>

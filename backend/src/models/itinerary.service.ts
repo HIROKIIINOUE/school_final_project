@@ -1,10 +1,69 @@
 import { AppError } from "../lib/appError";
 import { prisma } from "../lib/prisma";
-import {
-  ItineraryItemInput,
-  UpdateItineraryInput,
-} from "../schemas/trips.schema";
-import { SaveItineraryItemInput } from "../types/itinerary.types";
+import { ItineraryItemInput } from "../schemas/trips.schema";
+
+const itineraryItemSelect = {
+  id: true,
+  createdById: true,
+  title: true,
+  detail: true,
+  location: true,
+  startTime: true,
+  updatedAt: true,
+} as const;
+
+async function assertTripAccess({
+  tripId,
+  userId,
+}: {
+  tripId: string;
+  userId: string;
+}) {
+  const membership = await prisma.tripMember.findUnique({
+    where: { tripId_userId: { tripId, userId } },
+    select: { id: true },
+  });
+
+  if (!membership) {
+    throw new AppError(
+      403,
+      "TRIP_ACCESS_DENIED",
+      "You do not have access to this trip.",
+    );
+  }
+}
+
+function serializeItineraryItem(
+  item: {
+    id: string;
+    createdById: string;
+    title: string;
+    detail: string | null;
+    location: string | null;
+    startTime: Date;
+    updatedAt: Date;
+  },
+  currentUserId: string,
+) {
+  return {
+    id: item.id,
+    title: item.title,
+    detail: item.detail,
+    location: item.location,
+    startTime: item.startTime,
+    updatedAt: item.updatedAt,
+    isCreatedByCurrentUser: item.createdById === currentUserId,
+  };
+}
+
+function itineraryData(input: ItineraryItemInput) {
+  return {
+    title: input.title,
+    detail: input.detail ?? null,
+    location: input.location ?? null,
+    startTime: new Date(input.startTime),
+  };
+}
 
 async function getItinerary({
   tripId,
@@ -13,208 +72,151 @@ async function getItinerary({
   tripId: string;
   userId: string;
 }) {
-  // check if the user belongs in this trip
-  const membership = await prisma.tripMember.findFirst({
-    where: { userId, tripId },
-    select: { id: true },
-  });
-  if (!membership) {
-    throw new AppError(
-      403,
-      "TRIP_ACCESS_DENIED",
-      "You do not have access to this trip.",
-    );
-  }
+  await assertTripAccess({ tripId, userId });
 
   const itineraryItems = await prisma.itineraryItem.findMany({
     where: { tripId },
-    select: {
-      id: true,
-      createdById: true,
-      title: true,
-      detail: true,
-      location: true,
-      startTime: true,
-    },
+    select: itineraryItemSelect,
     orderBy: { startTime: "asc" },
   });
 
-  return itineraryItems.map((itinerary) => {
-    return {
-      id: itinerary.id,
-      title: itinerary.title,
-      detail: itinerary.detail ?? null,
-      location: itinerary.location ?? null,
-      startTime: new Date(itinerary.startTime),
-      isCreatedByCurrentUser: itinerary.createdById === userId,
-    };
-  });
+  return itineraryItems.map((item) => serializeItineraryItem(item, userId));
 }
 
-async function createItinerary({
+async function createItineraryItem({
   tripId,
   userId,
-  itineraries,
+  input,
 }: {
   tripId: string;
   userId: string;
-  itineraries: ItineraryItemInput[];
+  input: ItineraryItemInput;
 }) {
-  // check if the user belongs in this trip
-  const membership = await prisma.tripMember.findFirst({
-    where: { userId, tripId },
-    select: { id: true },
+  await assertTripAccess({ tripId, userId });
+
+  const item = await prisma.itineraryItem.create({
+    data: {
+      tripId,
+      createdById: userId,
+      ...itineraryData(input),
+    },
+    select: itineraryItemSelect,
   });
-  if (!membership) {
+
+  return serializeItineraryItem(item, userId);
+}
+
+async function updateItineraryItem({
+  tripId,
+  itemId,
+  userId,
+  expectedUpdatedAt,
+  input,
+}: {
+  tripId: string;
+  itemId: string;
+  userId: string;
+  expectedUpdatedAt: string;
+  input: ItineraryItemInput;
+}) {
+  await assertTripAccess({ tripId, userId });
+
+  const item = await prisma.$transaction(async (tx) => {
+    const result = await tx.itineraryItem.updateMany({
+      where: {
+        id: itemId,
+        tripId,
+        updatedAt: new Date(expectedUpdatedAt),
+      },
+      data: itineraryData(input),
+    });
+
+    if (result.count === 0) {
+      const itemExists = await tx.itineraryItem.findFirst({
+        where: { id: itemId, tripId },
+        select: { id: true },
+      });
+
+      if (!itemExists) {
+        throw new AppError(
+          404,
+          "ITINERARY_ITEM_NOT_FOUND",
+          "The itinerary item was not found.",
+        );
+      }
+
+      throw new AppError(
+        409,
+        "ITINERARY_CONFLICT",
+        "This itinerary item was changed by another member. Refresh and try again.",
+      );
+    }
+
+    return tx.itineraryItem.findUnique({
+      where: { id: itemId },
+      select: itineraryItemSelect,
+    });
+  });
+
+  if (!item) {
     throw new AppError(
-      403,
-      "TRIP_ACCESS_DENIED",
-      "You do not have access to this trip.",
+      404,
+      "ITINERARY_ITEM_NOT_FOUND",
+      "The itinerary item was not found.",
     );
   }
 
-  // accept arrays of itineraries items
-  const passingData = itineraries.map((itinerary) => {
-    return {
-      tripId,
-      createdById: userId,
-      title: itinerary.title,
-      detail: itinerary.detail ?? null,
-      location: itinerary.location ?? null,
-      startTime: new Date(itinerary.startTime ?? ""),
-    };
-  });
-
-  const result = await prisma.itineraryItem.createManyAndReturn({
-    data: passingData,
-    select: {
-      id: true,
-      title: true,
-      detail: true,
-      location: true,
-      startTime: true,
-    },
-  });
-
-  return result;
+  return serializeItineraryItem(item, userId);
 }
 
-async function updateItinerary({
+async function deleteItineraryItem({
   tripId,
+  itemId,
   userId,
-  itineraries,
+  expectedUpdatedAt,
 }: {
   tripId: string;
+  itemId: string;
   userId: string;
-  itineraries: UpdateItineraryInput[];
+  expectedUpdatedAt: string;
 }) {
-  // if id is provied, it's the data to update
-  type ExistingItineraryItemInput = SaveItineraryItemInput & { id: string };
+  await assertTripAccess({ tripId, userId });
 
-  const itemsToUpdate = itineraries.filter(
-    (item): item is ExistingItineraryItemInput => typeof item.id === "string",
-  );
-
-  // if id is not provied, that's the data to add newly
-  const itemsToAdd = itineraries.filter((item) => !item.id);
-
-  const submittedIds = itemsToUpdate.map((item) => item.id);
-
-  const submittedExistingIds = itineraries
-    .map((item) => item.id)
-    .filter((id) => id !== undefined);
-
-  const upsertedResults = await prisma.$transaction(async (tx) => {
-    // check if the user belongs to this trip
-    const membership = await tx.tripMember.findFirst({
-      where: { tripId, userId },
-      select: { id: true },
-    });
-
-    if (!membership) {
-      throw new AppError(
-        403,
-        "TRIP_ACCESS_DENIED",
-        "You do not have access to this trip.",
-      );
-    }
-
-    // check if the passed id is valid = try to find and can't find === invalid id
-    const existingItems =
-      submittedIds.length === 0
-        ? []
-        : await tx.itineraryItem.findMany({
-            where: { tripId, id: { in: submittedIds } },
-            select: { id: true },
-          });
-
-    const existingIds = new Set(existingItems.map((item) => item.id));
-
-    const invalidIds = submittedIds.filter((id) => !existingIds.has(id));
-
-    if (invalidIds.length > 0) {
-      throw new AppError(
-        400,
-        "INVALID_ITINERARY_ITEM_IDS",
-        "One or more itinerary items do not belong to this trip.",
-      );
-    }
-
-    const allExistingItems = await tx.itineraryItem.findMany({
-      where: { tripId },
-      select: { id: true },
-    });
-    const submittedIdSet = new Set(submittedIds);
-    const omittedIds = allExistingItems
-      .map((item) => item.id)
-      .filter((id) => !submittedIdSet.has(id));
-
-    await tx.itineraryItem.deleteMany({
-      where: { tripId, id: { in: omittedIds } },
-    });
-
-    const updateOperations = itemsToUpdate.map((item) =>
-      tx.itineraryItem.update({
-        where: { id: item.id },
-        data: {
-          title: item.title,
-          detail: item.detail ?? null,
-          location: item.location ?? null,
-          startTime: new Date(item.startTime),
-        },
-      }),
-    );
-
-    const createOperations = itemsToAdd.map((item) =>
-      tx.itineraryItem.create({
-        data: {
-          tripId,
-          createdById: userId,
-          title: item.title,
-          detail: item.detail ?? null,
-          location: item.location ?? null,
-          startTime: new Date(item.startTime),
-        },
-      }),
-    );
-
-    await Promise.all([...updateOperations, ...createOperations]);
-
-    return tx.itineraryItem.findMany({
-      where: { tripId },
-      select: {
-        id: true,
-        createdById: true,
-        title: true,
-        detail: true,
-        location: true,
-        startTime: true,
+  await prisma.$transaction(async (tx) => {
+    const result = await tx.itineraryItem.deleteMany({
+      where: {
+        id: itemId,
+        tripId,
+        updatedAt: new Date(expectedUpdatedAt),
       },
-      orderBy: { startTime: "asc" },
     });
-  });
 
-  return upsertedResults;
+    if (result.count > 0) return;
+
+    const itemExists = await tx.itineraryItem.findFirst({
+      where: { id: itemId, tripId },
+      select: { id: true },
+    });
+
+    if (!itemExists) {
+      throw new AppError(
+        404,
+        "ITINERARY_ITEM_NOT_FOUND",
+        "The itinerary item was not found.",
+      );
+    }
+
+    throw new AppError(
+      409,
+      "ITINERARY_CONFLICT",
+      "This itinerary item was changed by another member. Refresh and try again.",
+    );
+  });
 }
 
-export { getItinerary, createItinerary, updateItinerary };
+export {
+  createItineraryItem,
+  deleteItineraryItem,
+  getItinerary,
+  updateItineraryItem,
+};

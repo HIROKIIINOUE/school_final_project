@@ -4,7 +4,7 @@
   "description": "- Each group can have **up to 2 members**, depending on project size, to ensure effective workload distribution. - Discuss and assign roles and responsibilities within the team.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "tsx --test src/**/*.test.ts",
     "dev": "concurrently \"npx tsc -w\" \"nodemon dist/server.js\""
   },
   "repository": {
