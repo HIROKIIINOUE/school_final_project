@@ -77,10 +77,10 @@ async function updateMyTrips(data: {
   id: string;
   userId: string;
   title: string;
-  description: string | null;
-  destination: string | null;
-  startTime: string | null;
-  endTime: string | null;
+  description?: string | null;
+  destination?: string | null;
+  startTime?: string | null;
+  endTime?: string | null;
 }) {
   const { id, userId, title, description, destination, startTime, endTime } =
     data;
@@ -102,10 +102,13 @@ async function updateMyTrips(data: {
     where: { id },
     data: {
       title,
-      description,
-      destination,
-      startDate: startTime,
-      endDate: endTime,
+      ...(description !== undefined && { description }),
+
+      ...(destination !== undefined && { destination }),
+
+      ...(startTime !== undefined && { startDate: startTime }),
+
+      ...(endTime !== undefined && { endDate: endTime }),
     },
   });
 

@@ -131,13 +131,13 @@ async function updateMyTripsController(
     id: tripId,
     userId,
     title,
-    description: description ?? null,
-    destination: destination ?? null,
-    startTime: startTime ?? null,
-    endTime: endTime ?? null,
+    description: description,
+    destination: destination,
+    startTime: startTime,
+    endTime: endTime,
   });
 
-  return res.status(201).json({ data: { updatedTrip: result } });
+  return res.status(200).json({ data: { updatedTrip: result } });
 }
 
 async function deleteTripController(
