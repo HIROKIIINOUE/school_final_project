@@ -25,6 +25,8 @@ const TripDetail = ({ tripDetails, onTripUpdate }: Props) => {
     ? calculateDuration(tripDetails.startDate, tripDetails.endDate)
     : "-";
 
+  console.log("Days until start: ", tripDetails.planningStatus.daysUntilStart);
+
   return (
     <View className="relative card mx-sm">
       {editModalOpen && (
@@ -34,20 +36,22 @@ const TripDetail = ({ tripDetails, onTripUpdate }: Props) => {
           onTripUpdate={onTripUpdate}
         />
       )}
-      <View className="flex items-center gap-sm flex-wrap flex-row">
-        <View className="px-sm py-xs bg-primary-container text-on-primary-container rounded-md label-md font-bold badge badge-text">
-          <Text>{status}</Text>
+      <View className="flex items-center gap-sm flex-wrap flex-row justify-between">
+        <View className="flex flex-row items-center gap-sm ">
+          <View className="px-sm py-xs bg-primary-container text-on-primary-container rounded-md label-md font-bold badge badge-text">
+            <Text>{status}</Text>
+          </View>
+          <View
+            className={`${tripDetails.currentUserRole === "OWNER" ? "badge-primary badge-primary-text" : "badge-secondary"} px-sm py-xs bg-surface-variant text-on-surface-variant rounded-md label-md`}
+          >
+            <Text>
+              {tripDetails.currentUserRole === "OWNER" ? "Owner" : "Member"}
+            </Text>
+          </View>
         </View>
-        <View
-          className={`${tripDetails.currentUserRole === "OWNER" ? "badge-primary badge-primary-text" : "badge-secondary"} px-sm py-xs bg-surface-variant text-on-surface-variant rounded-md label-md`}
-        >
-          <Text>
-            {tripDetails.currentUserRole === "OWNER" ? "Owner" : "Member"}
-          </Text>
-        </View>
-        <View className="">
+        <View className=" bg-primary-fixed rounded-full p-sm">
           <Pressable onPress={() => setEditModalOpen(true)}>
-            <SquarePen />
+            <SquarePen color="white" />
           </Pressable>
         </View>
       </View>
@@ -69,7 +73,7 @@ const TripDetail = ({ tripDetails, onTripUpdate }: Props) => {
           </View>
           <Text className="text-muted">
             {tripDetails.startDate
-              ? `${calculatePeriod(tripDetails.startDate, tripDetails.endDate)}, ${new Date(tripDetails.startDate).getFullYear()} • ${duration}`
+              ? `${calculatePeriod(tripDetails.startDate, tripDetails.endDate)}, ${new Date(tripDetails.startDate).getFullYear()}`
               : "Unprovided"}
           </Text>
         </View>
@@ -77,7 +81,9 @@ const TripDetail = ({ tripDetails, onTripUpdate }: Props) => {
       {true && (
         <View className="mt-sm p-sm bg-surface-container rounded-lg border border-primary/20">
           <Text className="title-md text-primary text-center">
-            {tripDetails.planningStatus.daysUntilStart ?? " - "}
+            {tripDetails.planningStatus.daysUntilStart
+              ? `${tripDetails.planningStatus.daysUntilStart} days untill departure!`
+              : tripDetails.planningStatus.status}
           </Text>
         </View>
       )}
