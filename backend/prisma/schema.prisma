@@ -38,6 +38,7 @@ model Trip {
   itineraryItems ItineraryItem[]
   messages       Message[]
   expenses       Expense[]
+  bookings Booking[]
 
   @@index([ownerId])
 }
@@ -139,4 +140,36 @@ model ExpenseSplit {
   @@unique([expenseId, tripMemberId])
   @@index([tripMemberId])
   @@map("expense_splits")
+}
+
+enum BookingType {
+  FLIGHT
+  HOTEL
+  ACTIVITY
+  TRANSPORT
+  OTHER
+}
+
+model Booking {
+  id String @id @default(uuid()) @db.Uuid
+  tripId String @db.Uuid @map("trip_id")
+  createdById String @map("created_by_id") @db.Uuid
+
+  type BookingType
+  title String 
+  provider String? 
+  confirmationCode String? @map("confirmation_code")
+  startTime DateTime? @map("start_time")
+  endTime DateTime? @map("end_time")
+  note String? 
+  details Json
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([tripId, startTime])
+  @@index([createdById])
+  @@map("bookings")
 }
