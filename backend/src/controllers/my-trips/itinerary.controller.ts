@@ -17,20 +17,14 @@ function getRequiredUserId(req: Request, next: NextFunction) {
   if (req.userId) return req.userId;
 
   next(
-    new AppError(
-      401,
-      "AUTHENTICATION_REQUIRED",
-      "Authentication is required.",
-    ),
+    new AppError(401, "AUTHENTICATION_REQUIRED", "Authentication is required."),
   );
   return null;
 }
 
-function validationDetails(issues: Array<{
-  path: PropertyKey[];
-  code: string;
-  message: string;
-}>) {
+function validationDetails(
+  issues: Array<{ path: PropertyKey[]; code: string; message: string }>,
+) {
   return issues.map((issue) => ({
     path: issue.path.join("."),
     code: issue.code,
@@ -90,10 +84,7 @@ async function getItinerariesController(
     );
   }
 
-  const data = await getItinerary({
-    tripId: paramsResult.data.tripId,
-    userId,
-  });
+  const data = await getItinerary({ tripId: paramsResult.data.tripId, userId });
 
   return res.status(200).json({ data });
 }

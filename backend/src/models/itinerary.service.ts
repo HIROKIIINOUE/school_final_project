@@ -1,4 +1,5 @@
 import { AppError } from "../lib/appError";
+import { assertTripAccess } from "../lib/assertTripAccess";
 import { prisma } from "../lib/prisma";
 import { ItineraryItemInput } from "../schemas/trips.schema";
 
@@ -11,27 +12,6 @@ const itineraryItemSelect = {
   startTime: true,
   updatedAt: true,
 } as const;
-
-async function assertTripAccess({
-  tripId,
-  userId,
-}: {
-  tripId: string;
-  userId: string;
-}) {
-  const membership = await prisma.tripMember.findUnique({
-    where: { tripId_userId: { tripId, userId } },
-    select: { id: true },
-  });
-
-  if (!membership) {
-    throw new AppError(
-      403,
-      "TRIP_ACCESS_DENIED",
-      "You do not have access to this trip.",
-    );
-  }
-}
 
 function serializeItineraryItem(
   item: {
@@ -95,11 +75,7 @@ async function createItineraryItem({
   await assertTripAccess({ tripId, userId });
 
   const item = await prisma.itineraryItem.create({
-    data: {
-      tripId,
-      createdById: userId,
-      ...itineraryData(input),
-    },
+    data: { tripId, createdById: userId, ...itineraryData(input) },
     select: itineraryItemSelect,
   });
 
@@ -123,11 +99,7 @@ async function updateItineraryItem({
 
   const item = await prisma.$transaction(async (tx) => {
     const result = await tx.itineraryItem.updateMany({
-      where: {
-        id: itemId,
-        tripId,
-        updatedAt: new Date(expectedUpdatedAt),
-      },
+      where: { id: itemId, tripId, updatedAt: new Date(expectedUpdatedAt) },
       data: itineraryData(input),
     });
 
@@ -184,11 +156,7 @@ async function deleteItineraryItem({
 
   await prisma.$transaction(async (tx) => {
     const result = await tx.itineraryItem.deleteMany({
-      where: {
-        id: itemId,
-        tripId,
-        updatedAt: new Date(expectedUpdatedAt),
-      },
+      where: { id: itemId, tripId, updatedAt: new Date(expectedUpdatedAt) },
     });
 
     if (result.count > 0) return;

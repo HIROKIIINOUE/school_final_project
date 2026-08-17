@@ -45,3 +45,5 @@ export const createBookingBodySchema = z.discriminatedUnion("type", [
   createFlightBookingBodySchema,
   createHotelBookingBodySchema,
 ]);
+
+export type CreateBookingBody = z.infer<typeof createBookingBodySchema>;
