@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { AppError } from "../../lib/appError";
 import { tripIdParamsSchema } from "../../schemas/trips.schema";
 import { createBookingBodySchema } from "../../schemas/bookings.schema";
-import { createBooking } from "../../models/booking.service";
+import { createBooking, getBookings } from "../../models/booking.service";
 
 function getRequiredUserId(req: Request, next: NextFunction) {
   if (req.userId) return req.userId;
@@ -11,6 +11,26 @@ function getRequiredUserId(req: Request, next: NextFunction) {
     new AppError(401, "AUTHENTICATION_REQUIRED", "Authentication is required."),
   );
   return null;
+}
+
+async function getBookingsController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = getRequiredUserId(req, next);
+  if (!userId) return;
+
+  const tripIdValidation = tripIdParamsSchema.safeParse(req.params);
+  if (!tripIdValidation.success) {
+    return next(new AppError(400, "VALIDATION_ERROR", "Invalid trip ID."));
+  }
+
+  const bookings = await getBookings({
+    userId,
+    tripId: tripIdValidation.data.tripId,
+  });
+  return res.status(200).json({ data: { bookings } });
 }
 
 async function createBookingController(
@@ -38,5 +58,7 @@ async function createBookingController(
     body: bodyValidation.data,
   });
 
-  return { data };
+  return res.status(201).json({ data: { booking: data } });
 }
+
+export { getBookingsController, createBookingController };

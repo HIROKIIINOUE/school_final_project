@@ -47,3 +47,19 @@ export const createBookingBodySchema = z.discriminatedUnion("type", [
 ]);
 
 export type CreateBookingBody = z.infer<typeof createBookingBodySchema>;
+
+// Create a validator called bookingSubtypeSchema.
+// There are two valid possibilities:
+// 1. FLIGHT
+//    - type must equal "FLIGHT"
+//    - details must be FlightDetails
+// OR
+// 2. HOTEL
+//    - type must equal "HOTEL"
+//    - details must be HotelDetails
+// Use the `type` property to decide which one.
+export const bookingSubtypeSchema = z.discriminatedUnion("type", [
+  z.strictObject({ type: z.literal("FLIGHT"), details: flightDetailsSchema }),
+
+  z.strictObject({ type: z.literal("HOTEL"), details: hotelDetailsSchema }),
+]);

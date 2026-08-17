@@ -6,6 +6,7 @@ import overviewRouter from "./routes/overview.route";
 import userRouter from "./routes/user.route";
 import itineraryrouter from "./routes/itinerary.routes";
 import chatRouter from "./routes/chat.routes";
+import bookingRouter from "./routes/booking.routes";
 import { createServer } from "node:http";
 import { createSocketServer } from "./socket/createSocketServer";
 import { registerSocketHandlers } from "./socket/registerSocketHandlers";
@@ -30,6 +31,8 @@ app.use("/api/expenses", expenseRouter);
 app.use("/api/user", userRouter);
 
 app.use("/api/trips", chatRouter);
+
+app.use("/api/trips", bookingRouter);
 
 app.get("/api/health", (req: Request, res: Response) => {
   res.status(200).json({ message: "API is working" });
