@@ -1,12 +1,15 @@
-import { View, Text } from "react-native";
-import React from "react";
+import { View, Text, Pressable } from "react-native";
+import React, { useState } from "react";
 import { TripDetailsType } from "../types/types";
-import { CalendarDays, MapPin } from "lucide-react-native";
+import { CalendarDays, MapPin, SquarePen } from "lucide-react-native";
 import { calculateDuration, calculatePeriod } from "@/lib/calculatePeriod";
+import TripRoomEditModal from "./TripRoomEditModal";
 
-type Props = { tripDetails: TripDetailsType };
+type Props = { tripDetails: TripDetailsType; onTripUpdate: () => void };
 
-const TripDetail = ({ tripDetails }: Props) => {
+const TripDetail = ({ tripDetails, onTripUpdate }: Props) => {
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
   const status =
     tripDetails.planningStatus.status === "UPCOMING"
       ? "Upcoming"
@@ -22,18 +25,34 @@ const TripDetail = ({ tripDetails }: Props) => {
     ? calculateDuration(tripDetails.startDate, tripDetails.endDate)
     : "-";
 
+  console.log("Days until start: ", tripDetails.planningStatus.daysUntilStart);
+
   return (
     <View className="relative card mx-sm">
-      <View className="flex items-center gap-sm flex-wrap flex-row">
-        <View className="px-sm py-xs bg-primary-container text-on-primary-container rounded-md label-md font-bold badge badge-text">
-          <Text>{status}</Text>
+      {editModalOpen && (
+        <TripRoomEditModal
+          trip={tripDetails}
+          closeModal={() => setEditModalOpen(false)}
+          onTripUpdate={onTripUpdate}
+        />
+      )}
+      <View className="flex items-center gap-sm flex-wrap flex-row justify-between">
+        <View className="flex flex-row items-center gap-sm ">
+          <View className="px-sm py-xs bg-primary-container text-on-primary-container rounded-md label-md font-bold badge badge-text">
+            <Text>{status}</Text>
+          </View>
+          <View
+            className={`${tripDetails.currentUserRole === "OWNER" ? "badge-primary badge-primary-text" : "badge-secondary"} px-sm py-xs bg-surface-variant text-on-surface-variant rounded-md label-md`}
+          >
+            <Text>
+              {tripDetails.currentUserRole === "OWNER" ? "Owner" : "Member"}
+            </Text>
+          </View>
         </View>
-        <View
-          className={`${tripDetails.currentUserRole === "OWNER" ? "badge-primary badge-primary-text" : "badge-secondary"} px-sm py-xs bg-surface-variant text-on-surface-variant rounded-md label-md`}
-        >
-          <Text>
-            {tripDetails.currentUserRole === "OWNER" ? "Owner" : "Member"}
-          </Text>
+        <View className=" bg-primary-fixed rounded-full p-sm">
+          <Pressable onPress={() => setEditModalOpen(true)}>
+            <SquarePen color="white" />
+          </Pressable>
         </View>
       </View>
       <Text className="headline-lg-mobile md:headline-lg text-on-surface font-bold tracking-tight headline-lg py-md">
@@ -54,7 +73,7 @@ const TripDetail = ({ tripDetails }: Props) => {
           </View>
           <Text className="text-muted">
             {tripDetails.startDate
-              ? `${calculatePeriod(tripDetails.startDate, tripDetails.endDate)}, ${new Date(tripDetails.startDate).getFullYear()} • ${duration}`
+              ? `${calculatePeriod(tripDetails.startDate, tripDetails.endDate)}, ${new Date(tripDetails.startDate).getFullYear()}`
               : "Unprovided"}
           </Text>
         </View>
@@ -62,8 +81,9 @@ const TripDetail = ({ tripDetails }: Props) => {
       {true && (
         <View className="mt-sm p-sm bg-surface-container rounded-lg border border-primary/20">
           <Text className="title-md text-primary text-center">
-            {/* {tripDetails.planningStatus.daysUntilStart} */}
-            10 days until departure!
+            {tripDetails.planningStatus.daysUntilStart
+              ? `${tripDetails.planningStatus.daysUntilStart} days untill departure!`
+              : tripDetails.planningStatus.status}
           </Text>
         </View>
       )}

@@ -19,17 +19,8 @@ export default (): ExpoConfig => ({
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
   ios: { supportsTablet: true, bundleIdentifier: "com.gowbie.app" },
-  android: {
-    adaptiveIcon: {
-      backgroundColor: "#E6F4FE",
-      foregroundImage: "./assets/images/android-icon-foreground.png",
-      backgroundImage: "./assets/images/android-icon-background.png",
-      monochromeImage: "./assets/images/android-icon-monochrome.png",
-    },
-    edgeToEdgeEnabled: true,
-    predictiveBackGestureEnabled: false,
-  },
-  web: { output: "static", favicon: "./assets/images/favicon.png" },
+  android: { edgeToEdgeEnabled: true, predictiveBackGestureEnabled: false },
+  web: { output: "static" },
   plugins: [
     "expo-router",
     "@react-native-community/datetimepicker",
@@ -37,7 +28,7 @@ export default (): ExpoConfig => ({
     [
       "expo-splash-screen",
       {
-        image: "./assets/images/splash-icon.png",
+        image: "./assets/images/icon.png",
         imageWidth: 200,
         resizeMode: "contain",
         backgroundColor: "#ffffff",

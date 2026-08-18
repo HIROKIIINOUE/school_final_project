@@ -28,6 +28,7 @@ import {
   Expense,
   ExpenseTripData,
 } from "../types/expense.type";
+import Spinner from "@/components/Spinner";
 
 type Props = { tripId: string };
 
@@ -108,8 +109,8 @@ const ExpenseScreen = ({ tripId }: Props) => {
 
   if (isLoading) {
     return (
-      <StyledSafeAreaView className="flex-1 items-center justify-center bg-[#f7f8ff]">
-        <ActivityIndicator color="#238688" />
+      <StyledSafeAreaView className="flex-1 items-center justify-center bg-[#f7f8ff] px-md">
+        <Spinner message="Loading your expenses" />
       </StyledSafeAreaView>
     );
   }

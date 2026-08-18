@@ -11,30 +11,29 @@ import { Share2 } from "lucide-react-native";
 import InviteCodeModal from "../components/InviteCodeModal";
 
 type Props = { id: string };
+type OverviewStatus = "loading" | "success" | "error";
 
 const OverView = ({ id }: Props) => {
   const [overviewData, setOverviewData] = useState<OverviewDataType>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [status, setStatus] = useState<OverviewStatus>("loading");
 
   const [inviteModalOpen, setInviteModalOpen] = useState<boolean>(false);
 
-  useEffect(() => {
-    async function fetchOverview() {
-      try {
-        setIsLoading(true);
-        const overview = await getOverviewData({ id });
-        setOverviewData(overview);
-      } catch (e) {
-        console.error("Failed to fetch overview data", e);
-      } finally {
-        setIsLoading(false);
-      }
+  async function fetchOverview() {
+    try {
+      setStatus("loading");
+      const overview = await getOverviewData({ id });
+      setOverviewData(overview);
+      setStatus("success");
+    } catch (e) {
+      setStatus("error");
     }
-
+  }
+  useEffect(() => {
     fetchOverview();
   }, [id]);
 
-  if (isLoading) {
+  if (status === "loading") {
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <Spinner />
@@ -42,7 +41,24 @@ const OverView = ({ id }: Props) => {
     );
   }
 
-  console.log(overviewData);
+  if (status === "error") {
+    return (
+      <SafeAreaView
+        style={{ flex: 1 }}
+        className="items-center justify-center px-lg"
+      >
+        <Text className="headline-lg-mobile">Unable to load trip</Text>
+
+        <Text className="mt-sm text-center text-on-surface-variant">
+          Something went wrong while loading this trip.
+        </Text>
+
+        <Pressable className="btn-primary mt-lg" onPress={fetchOverview}>
+          <Text className="btn-primary-text">Retry</Text>
+        </Pressable>
+      </SafeAreaView>
+    );
+  }
 
   if (!overviewData?.tripDetails) {
     return (
@@ -65,7 +81,10 @@ const OverView = ({ id }: Props) => {
             Invite your friends
           </Text>
         </Pressable>
-        <TripDetail tripDetails={overviewData?.tripDetails} />
+        <TripDetail
+          tripDetails={overviewData?.tripDetails}
+          onTripUpdate={fetchOverview}
+        />
         <ItineraryCard itineraries={overviewData.itineraries} tripId={id} />
       </ScrollView>
 

@@ -77,9 +77,13 @@ async function updateMyTrips(data: {
   id: string;
   userId: string;
   title: string;
-  description: string | null;
+  description?: string | null;
+  destination?: string | null;
+  startTime?: string | null;
+  endTime?: string | null;
 }) {
-  const { id, userId, title, description } = data;
+  const { id, userId, title, description, destination, startTime, endTime } =
+    data;
 
   const membership = await prisma.tripMember.findFirst({
     where: { tripId: id, userId },
@@ -96,7 +100,16 @@ async function updateMyTrips(data: {
 
   const result = await prisma.trip.update({
     where: { id },
-    data: { title, description },
+    data: {
+      title,
+      ...(description !== undefined && { description }),
+
+      ...(destination !== undefined && { destination }),
+
+      ...(startTime !== undefined && { startDate: startTime }),
+
+      ...(endTime !== undefined && { endDate: endTime }),
+    },
   });
 
   return result;

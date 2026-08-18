@@ -11,6 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import JoinTripModal from "../components/JoinTripModal";
 import { useQuery } from "@tanstack/react-query";
 import { tripQueryKey } from "../lib/tripQueryKeys";
+import { Redirect } from "expo-router";
 
 const MyTripScreen = () => {
   // const [tripRooms, setTripRooms] = useState<MyRoomType[]>([]);
@@ -37,12 +38,24 @@ const MyTripScreen = () => {
     enabled: isReady,
   });
 
-  if (isLoading || !isReady) {
+  if (authStatus === "unauthenticated") {
+    return <Redirect href="/auth" />;
+  }
+
+  if (
+    authStatus === "initializing" ||
+    profileStatus === "loading" ||
+    isLoading
+  ) {
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <Spinner />
       </SafeAreaView>
     );
+  }
+
+  if (!isReady) {
+    return null;
   }
 
   if (isError) {
