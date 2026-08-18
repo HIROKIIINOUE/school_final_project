@@ -5,6 +5,7 @@ import { prisma } from "../lib/prisma";
 import {
   bookingSubtypeSchema,
   CreateBookingBody,
+  UpdateBookingBody,
 } from "../schemas/bookings.schema";
 
 type CreateBookingParams = {
@@ -27,6 +28,7 @@ const bookingSelect = {
   details: true,
 
   createdAt: true,
+  updatedAt: true,
 } satisfies Prisma.BookingSelect;
 
 async function getBookings({
@@ -90,11 +92,115 @@ async function createBooking({ userId, tripId, body }: CreateBookingParams) {
 async function updateBooking({
   userId,
   tripId,
+  bookingId,
   body,
 }: {
   userId: string;
   tripId: string;
-  body: "";
-}) {}
+  bookingId: string;
+  body: UpdateBookingBody;
+}) {
+  await assertTripAccess({ userId, tripId });
+
+  // fetch existing booking
+  const existingBooking = await prisma.booking.findFirst({
+    where: { tripId, id: bookingId },
+    select: bookingSelect,
+  });
+
+  if (!existingBooking) {
+    throw new AppError(404, "BOOKING_NOT_FOUND", "Booking was not found");
+  }
+
+  // validation:
+  // if requested body changes type, then details must be required
+  if (
+    body.type !== undefined &&
+    body.type !== existingBooking.type &&
+    body.details === undefined
+  ) {
+    throw new AppError(
+      400,
+      "INVALID_BOOKING_UPDATE",
+      "Changing booking type requires details.",
+    );
+  }
+
+  // if type was provided, set the next type to it, if not provided, set the already-existing type
+  const nextType = body.type !== undefined ? body.type : existingBooking.type;
+  const nextDetails =
+    body.details !== undefined ? body.details : existingBooking.details;
+
+  // we validate against this newly set type and details: if type === "FLIGHT", details must be flightDetails...
+  const validationResult = bookingSubtypeSchema.safeParse({
+    type: nextType,
+    details: nextDetails,
+  });
+
+  const subtypeStateChangedByRequest =
+    body.details !== undefined ||
+    (body.type !== undefined && body.type !== existingBooking.type);
+
+  if (!validationResult.success) {
+    if (subtypeStateChangedByRequest) {
+      throw new AppError(400, "INVALID_BOOKING_UPDATE", "Invalid update body");
+    }
+
+    throw new AppError(
+      500,
+      "INVALID_BOOKING_DATA",
+      "Stored booking data is invalid",
+    );
+  }
+
+  const updateData: Prisma.BookingUpdateInput = {};
+
+  // if each field was provided
+  if (body.title !== undefined) {
+    updateData.title = body.title;
+  }
+  if (body.provider !== undefined) {
+    updateData.provider = body.provider;
+  }
+  if (body.confirmationCode !== undefined) {
+    updateData.confirmationCode = body.confirmationCode;
+  }
+  if (body.startTime !== undefined) {
+    updateData.startTime = body.startTime;
+  }
+  if (body.endTime !== undefined) {
+    updateData.endTime = body.endTime;
+  }
+  if (body.note !== undefined) {
+    updateData.note = body.note;
+  }
+  if (body.type !== undefined) {
+    updateData.type = validationResult.data.type;
+  }
+  if (body.details !== undefined) {
+    updateData.details = validationResult.data.details;
+  }
+
+  const updatedBooking = await prisma.booking.update({
+    where: { id: existingBooking.id },
+    data: updateData,
+    select: bookingSelect,
+  });
+
+  const updatedSubtypeValidation = bookingSubtypeSchema.safeParse({
+    type: updatedBooking.type,
+    details: updatedBooking.details,
+  });
+
+  if (!updatedSubtypeValidation.success) {
+    throw new AppError(
+      500,
+      "INVALID_BOOKING_DATA",
+      "Stored booking data is invalid",
+    );
+  }
+
+  return { ...updatedBooking, ...updatedSubtypeValidation.data };
+}
 
 export { getBookings, createBooking, updateBooking };

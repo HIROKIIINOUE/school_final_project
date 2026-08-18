@@ -63,3 +63,25 @@ export const bookingSubtypeSchema = z.discriminatedUnion("type", [
 
   z.strictObject({ type: z.literal("HOTEL"), details: hotelDetailsSchema }),
 ]);
+
+export const updateBookingBodySchema = z
+  .strictObject({
+    type: z.enum(["FLIGHT", "HOTEL"]).optional(),
+    title: z.string().trim().min(1).max(100).optional(),
+    provider: z.string().trim().min(1).max(100).nullable().optional(),
+    confirmationCode: z.string().trim().max(100).nullable().optional(),
+    startTime: z.iso.datetime().nullable().optional(),
+    endTime: z.iso.datetime().nullable().optional(),
+    note: z.string().trim().max(400).nullable().optional(),
+    details: z.unknown().optional(),
+  })
+  .refine((body) => Object.keys(body).length > 0, {
+    message: "At least one field must be provided.",
+  });
+
+export type UpdateBookingBody = z.infer<typeof updateBookingBodySchema>;
+
+export const updateBookingParamsSchema = z.strictObject({
+  tripId: z.uuid(),
+  bookingId: z.uuid(),
+});
