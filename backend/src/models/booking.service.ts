@@ -87,4 +87,14 @@ async function createBooking({ userId, tripId, body }: CreateBookingParams) {
   return createdBooking;
 }
 
-export { getBookings, createBooking };
+async function updateBooking({
+  userId,
+  tripId,
+  body,
+}: {
+  userId: string;
+  tripId: string;
+  body: "";
+}) {}
+
+export { getBookings, createBooking, updateBooking };
