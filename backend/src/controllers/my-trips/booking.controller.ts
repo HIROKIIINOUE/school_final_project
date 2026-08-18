@@ -8,6 +8,7 @@ import {
 } from "../../schemas/bookings.schema";
 import {
   createBooking,
+  deleteBooking,
   getBookings,
   updateBooking,
 } from "../../models/booking.service";
@@ -102,8 +103,33 @@ async function updateBookingController(
 
   return res.status(200).json({ data: { updatedBooking: result } });
 }
+
+async function deleteBookingController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = getRequiredUserId(req, next);
+  if (!userId) return;
+
+  const paramsValidation = updateBookingParamsSchema.safeParse(req.params);
+  if (!paramsValidation.success) {
+    return next(
+      new AppError(400, "VALIDATION_ERROR", "Invalid trip ID or booking ID."),
+    );
+  }
+
+  const tripId = paramsValidation.data.tripId;
+  const bookingId = paramsValidation.data.bookingId;
+
+  const result = await deleteBooking({ userId, tripId, bookingId });
+
+  return res.status(200).json({ data: { deletedBooking: result } });
+}
+
 export {
   getBookingsController,
   createBookingController,
   updateBookingController,
+  deleteBookingController,
 };

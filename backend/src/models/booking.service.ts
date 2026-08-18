@@ -203,4 +203,26 @@ async function updateBooking({
   return { ...updatedBooking, ...updatedSubtypeValidation.data };
 }
 
-export { getBookings, createBooking, updateBooking };
+async function deleteBooking({
+  userId,
+  tripId,
+  bookingId,
+}: {
+  userId: string;
+  tripId: string;
+  bookingId: string;
+}) {
+  await assertTripAccess({ userId, tripId });
+
+  const result = await prisma.booking.deleteMany({
+    where: { id: bookingId, tripId },
+  });
+
+  if (result.count === 0) {
+    throw new AppError(404, "BOOKING_NOT_FOUND", "Booking was not found.");
+  }
+
+  return { bookingId };
+}
+
+export { getBookings, createBooking, updateBooking, deleteBooking };
