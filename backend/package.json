@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "tsx --test src/**/*.test.ts",
-    "dev": "concurrently \"npx tsc -w\" \"nodemon dist/server.js\""
+    "dev": "concurrently \"npx tsc -w\" \"nodemon dist/server.js\"",
+    "build": "prisma generate && tsc",
+    "start": "node dist/server.js",
+    "db:migrate:deploy": "prisma migrate deploy"
   },
   "repository": {
     "type": "git",
