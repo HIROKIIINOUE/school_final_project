@@ -10,15 +10,25 @@ export type HotelDetailsType = {
   checkInInstructions?: string | null;
 };
 
+export type ActivityDetailsType = {
+  activityType?: string | null;
+  location?: string | null;
+  meetingPoint?: string | null;
+};
+
 export type UpdateBookingBody = {
-  type?: "FLIGHT" | "HOTEL" | "TRANSPORT";
+  type?: "FLIGHT" | "HOTEL" | "TRANSPORT" | "ACTIVITY";
   title?: string;
   provider?: string | null;
   confirmationCode?: string | null;
   startTime?: string | null;
   endTime?: string | null;
   note?: string | null;
-  details?: FlightDetailsType | HotelDetailsType | TransportDetailsType;
+  details?:
+    | FlightDetailsType
+    | HotelDetailsType
+    | TransportDetailsType
+    | ActivityDetailsType;
 };
 
 export type BookingBase = {
@@ -44,7 +54,11 @@ export type HotelBooking = BookingBase & {
   details: HotelDetailsType;
 };
 
-export type Booking = FlightBooking | HotelBooking | TransportBooking;
+export type Booking =
+  | FlightBooking
+  | HotelBooking
+  | TransportBooking
+  | ActivityBooking;
 export type GetBookings = { bookings: Booking[] };
 
 export type CreatedBooking = { booking: Booking };
@@ -71,9 +85,15 @@ type CreateBookingBase = {
 export type CreateBookingBody =
   | (CreateBookingBase & { type: "FLIGHT"; details: FlightDetailsType })
   | (CreateBookingBase & { type: "HOTEL"; details: HotelDetailsType })
-  | (CreateBookingBase & { type: "TRANSPORT"; details: TransportDetailsType });
+  | (CreateBookingBase & { type: "TRANSPORT"; details: TransportDetailsType })
+  | (CreateBookingBase & { type: "ACTIVITY"; details: ActivityDetailsType });
 
 export type TransportBooking = BookingBase & {
   type: "TRANSPORT";
   details: TransportDetailsType;
+};
+
+export type ActivityBooking = BookingBase & {
+  type: "ACTIVITY";
+  details: ActivityDetailsType;
 };

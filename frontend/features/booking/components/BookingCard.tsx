@@ -5,6 +5,7 @@ import {
   PlaneTakeoff,
   CalendarDays,
   Pencil,
+  Ticket,
   Trash2,
 } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
@@ -311,6 +312,92 @@ function TransportCard({
   );
 }
 
+function ActivityCard({
+  booking,
+  onEdit,
+  onDelete,
+}: {
+  booking: Extract<Booking, { type: "ACTIVITY" }>;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <View className="card">
+      <View className="card-row items-start">
+        <View className="min-w-0 flex-1 flex-row items-start gap-sm">
+          <View className="h-10 w-10 flex-none items-center justify-center rounded-app-full bg-surface-container-high">
+            <Ticket color="#006a6a" size={22} />
+          </View>
+          <View className="min-w-0 flex-1">
+            <Text className="card-title">{booking.title}</Text>
+            {booking.details.activityType ? (
+              <Text className="card-subtitle">
+                {booking.details.activityType}
+              </Text>
+            ) : null}
+            {booking.details.location ? (
+              <Text className="card-meta mt-xs">
+                {booking.details.location}
+              </Text>
+            ) : null}
+            {booking.provider ? (
+              <Text className="card-meta mt-xs">{booking.provider}</Text>
+            ) : null}
+          </View>
+          <View className="flex flex-row gap-sm items-center">
+            <Pressable
+              accessibilityRole="button"
+              className="h-11 w-11 items-center justify-center rounded-app-full bg-secondary-container"
+              onPress={onEdit}
+            >
+              <Pencil size={18} className="text-primary" />
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              className="h-11 w-11 items-center justify-center rounded-app-full bg-error-container"
+              onPress={onDelete}
+            >
+              <Trash2 size={18} className="text-error" />
+            </Pressable>
+          </View>
+        </View>
+      </View>
+
+      <View className="ml-12 flex-row flex-wrap gap-md">
+        <MetaField
+          label="Date"
+          value={formatDate(booking.startTime)}
+          icon={CalendarDays}
+        />
+        <MetaField
+          label="Time"
+          value={formatTime(booking.startTime)}
+          icon={Clock}
+        />
+        {booking.confirmationCode ? (
+          <MetaField label="Confirmation" value={booking.confirmationCode} />
+        ) : null}
+      </View>
+
+      {booking.details.meetingPoint ? (
+        <View className="card-muted ml-12">
+          <Text className="label">Meeting point</Text>
+          <Text className="text-body mt-xs">
+            {booking.details.meetingPoint}
+          </Text>
+        </View>
+      ) : null}
+
+      {booking.note ? (
+        <View className="card-muted ml-12">
+          <Text className="label">Note</Text>
+          <Text className="text-body mt-xs">{booking.note}</Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 export default function BookingCard({
   booking,
   onEdit,
@@ -328,6 +415,10 @@ export default function BookingCard({
     case "TRANSPORT":
       return (
         <TransportCard booking={booking} onEdit={onEdit} onDelete={onDelete} />
+      );
+    case "ACTIVITY":
+      return (
+        <ActivityCard booking={booking} onEdit={onEdit} onDelete={onDelete} />
       );
   }
 }

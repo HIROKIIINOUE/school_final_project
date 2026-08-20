@@ -18,6 +18,12 @@ export const transportDetailsSchema = z.strictObject({
   arrivalLocation: z.string().trim().max(200).nullable().optional(),
 });
 
+export const activityDetailsSchema = z.strictObject({
+  activityType: z.string().trim().max(100).nullable().optional(),
+  location: z.string().trim().max(200).nullable().optional(),
+  meetingPoint: z.string().trim().max(200).nullable().optional(),
+});
+
 export const createFlightBookingBodySchema = z.strictObject({
   type: z.literal("FLIGHT"),
   title: z.string().trim().min(1).max(100),
@@ -51,6 +57,17 @@ export const createTransportBookingBodySchema = z.strictObject({
   details: transportDetailsSchema,
 });
 
+export const createActivityBookingBodySchema = z.strictObject({
+  type: z.literal("ACTIVITY"),
+  title: z.string().trim().min(1).max(100),
+  provider: z.string().trim().min(1).max(100).nullable().optional(),
+  confirmationCode: z.string().trim().max(100).nullable().optional(),
+  startTime: z.iso.datetime().nullable().optional(),
+  endTime: z.iso.datetime().nullable().optional(),
+  note: z.string().trim().max(400).nullable().optional(),
+  details: activityDetailsSchema,
+});
+
 // you refer to "type" in each body shema and zod decides which schema to use.
 // req.body.type === "FLIGHT"
 // → choose createFlightBookingBodySchema
@@ -62,6 +79,7 @@ export const createBookingBodySchema = z.discriminatedUnion("type", [
   createFlightBookingBodySchema,
   createHotelBookingBodySchema,
   createTransportBookingBodySchema,
+  createActivityBookingBodySchema,
 ]);
 
 export type CreateBookingBody = z.infer<typeof createBookingBodySchema>;
@@ -79,6 +97,9 @@ export type CreateBookingBody = z.infer<typeof createBookingBodySchema>;
 // 3. TRANSPORT
 //    - type must be "TRANSPORT"
 //    - details must be TransportDetails
+// 4. ACTIVITY
+//    - type must be "ACTIVITY"
+//    - details must be ActivityDetails
 export const bookingSubtypeSchema = z.discriminatedUnion("type", [
   z.strictObject({ type: z.literal("FLIGHT"), details: flightDetailsSchema }),
 
@@ -87,11 +108,15 @@ export const bookingSubtypeSchema = z.discriminatedUnion("type", [
     type: z.literal("TRANSPORT"),
     details: transportDetailsSchema,
   }),
+  z.strictObject({
+    type: z.literal("ACTIVITY"),
+    details: activityDetailsSchema,
+  }),
 ]);
 
 export const updateBookingBodySchema = z
   .strictObject({
-    type: z.enum(["FLIGHT", "HOTEL", "TRANSPORT"]).optional(),
+    type: z.enum(["FLIGHT", "HOTEL", "TRANSPORT", "ACTIVITY"]).optional(),
     title: z.string().trim().min(1).max(100).optional(),
     provider: z.string().trim().min(1).max(100).nullable().optional(),
     confirmationCode: z.string().trim().max(100).nullable().optional(),

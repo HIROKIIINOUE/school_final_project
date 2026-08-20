@@ -4,6 +4,7 @@ import {
   BusFront,
   CalendarDays,
   Plane,
+  Ticket,
   X,
 } from "lucide-react-native";
 import { styled } from "nativewind";
@@ -21,6 +22,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
+  ActivityDetailsType,
   CreateBookingBody,
   HotelDetailsType,
   TransportDetailsType,
@@ -218,6 +220,11 @@ export default function CreateOrUpdateBookingModal({
     departureLocation: "",
     arrivalLocation: "",
   });
+  const [activityInfo, setActivityInfo] = useState<ActivityDetailsType>({
+    activityType: "",
+    location: "",
+    meetingPoint: "",
+  });
 
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
@@ -357,6 +364,31 @@ export default function CreateOrUpdateBookingModal({
         }
       }
 
+      if (booking.type === "ACTIVITY") {
+        const originalActivityDetails = {
+          activityType: booking.details.activityType ?? null,
+          location: booking.details.location ?? null,
+          meetingPoint: booking.details.meetingPoint ?? null,
+        };
+
+        const currentActivityDetails: ActivityDetailsType = {
+          activityType: activityInfo.activityType?.trim() || null,
+          location: activityInfo.location?.trim() || null,
+          meetingPoint: activityInfo.meetingPoint?.trim() || null,
+        };
+
+        const activityDetailsChanged =
+          originalActivityDetails.activityType !==
+            currentActivityDetails.activityType ||
+          originalActivityDetails.location !== currentActivityDetails.location ||
+          originalActivityDetails.meetingPoint !==
+            currentActivityDetails.meetingPoint;
+
+        if (activityDetailsChanged) {
+          updateBody.details = currentActivityDetails;
+        }
+      }
+
       const hasChanges = Object.keys(updateBody).length > 0;
       if (!hasChanges) {
         return;
@@ -439,6 +471,18 @@ export default function CreateOrUpdateBookingModal({
           },
         };
         break;
+
+      case "ACTIVITY":
+        createBody = {
+          ...basicInfo,
+          type: "ACTIVITY",
+          details: {
+            activityType: activityInfo.activityType?.trim() || null,
+            location: activityInfo.location?.trim() || null,
+            meetingPoint: activityInfo.meetingPoint?.trim() || null,
+          },
+        };
+        break;
     }
 
     setIsSubmitting(true);
@@ -480,6 +524,9 @@ export default function CreateOrUpdateBookingModal({
     }
     if (booking.type === "TRANSPORT") {
       setTransportInfo(booking.details);
+    }
+    if (booking.type === "ACTIVITY") {
+      setActivityInfo(booking.details);
     }
   }, [booking]);
 
@@ -557,6 +604,14 @@ export default function CreateOrUpdateBookingModal({
                   label="Transport"
                   onPress={
                     isUpdating ? undefined : () => onTypeChange?.("TRANSPORT")
+                  }
+                />
+                <TypeOption
+                  active={type === "ACTIVITY"}
+                  icon={Ticket}
+                  label="Activity"
+                  onPress={
+                    isUpdating ? undefined : () => onTypeChange?.("ACTIVITY")
                   }
                 />
               </View>
@@ -710,6 +765,43 @@ export default function CreateOrUpdateBookingModal({
                     setTransportInfo((prev) => ({
                       ...prev,
                       arrivalLocation: value,
+                    }))
+                  }
+                />
+              </View>
+            )}
+            {type === "ACTIVITY" && (
+              <View className="form">
+                <InputField
+                  label="Activity Type"
+                  placeholder="Food tour"
+                  value={activityInfo.activityType ?? ""}
+                  onTextChange={(value) =>
+                    setActivityInfo((prev) => ({
+                      ...prev,
+                      activityType: value,
+                    }))
+                  }
+                />
+                <InputField
+                  label="Location"
+                  placeholder="Shinjuku"
+                  value={activityInfo.location ?? ""}
+                  onTextChange={(value) =>
+                    setActivityInfo((prev) => ({
+                      ...prev,
+                      location: value,
+                    }))
+                  }
+                />
+                <InputField
+                  label="Meeting Point"
+                  placeholder="Shinjuku Station East Exit"
+                  value={activityInfo.meetingPoint ?? ""}
+                  onTextChange={(value) =>
+                    setActivityInfo((prev) => ({
+                      ...prev,
+                      meetingPoint: value,
                     }))
                   }
                 />

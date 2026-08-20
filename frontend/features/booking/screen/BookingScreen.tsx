@@ -1,4 +1,4 @@
-import { BedDouble, Plane, BusFront } from "lucide-react-native";
+import { BedDouble, Plane, BusFront, Ticket } from "lucide-react-native";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -94,6 +94,7 @@ export default function BookingScreen({ tripId }: Props) {
   const flights = bookings.filter((booking) => booking.type === "FLIGHT");
   const hotels = bookings.filter((booking) => booking.type === "HOTEL");
   const transports = bookings.filter((booking) => booking.type === "TRANSPORT");
+  const activities = bookings.filter((booking) => booking.type === "ACTIVITY");
 
   return (
     <SafeAreaView
@@ -143,6 +144,16 @@ export default function BookingScreen({ tripId }: Props) {
               emptyMessage="No transports have been added."
               icon={BusFront}
               title="Transports"
+              wide
+              onEdit={openEditModal}
+              onDelete={openDeleteModal}
+            />
+
+            <BookingSection
+              bookings={activities}
+              emptyMessage="No activities have been added."
+              icon={Ticket}
+              title="Activities"
               wide
               onEdit={openEditModal}
               onDelete={openDeleteModal}
