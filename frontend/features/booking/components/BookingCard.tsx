@@ -5,6 +5,7 @@ import {
   PlaneTakeoff,
   CalendarDays,
   Pencil,
+  Trash2,
 } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
@@ -12,7 +13,11 @@ import type { Booking } from "@/features/booking/types/types";
 import type { ComponentType } from "react";
 import type { LucideProps } from "lucide-react-native";
 
-type BookingCardProps = { booking: Booking; onEdit: () => void };
+type BookingCardProps = {
+  booking: Booking;
+  onEdit: () => void;
+  onDelete: () => void;
+};
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -83,9 +88,11 @@ function MetaField({
 function FlightCard({
   booking,
   onEdit,
+  onDelete,
 }: {
   booking: Extract<Booking, { type: "FLIGHT" }>;
   onEdit: () => void;
+  onDelete: () => void;
 }) {
   const subtitle = `${booking.details.departureAirport} → ${booking.details.arrivalAirport}`;
 
@@ -105,13 +112,20 @@ function FlightCard({
               <Text className="card-meta mt-xs">{booking.provider}</Text>
             ) : null}
           </View>
-          <View>
+          <View className="flex flex-row gap-sm items-center">
             <Pressable
               accessibilityRole="button"
               className="h-11 w-11 items-center justify-center rounded-app-full bg-secondary-container"
               onPress={onEdit}
             >
               <Pencil size={18} className="text-primary" />
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              className="h-11 w-11 items-center justify-center rounded-app-full bg-error-container"
+              onPress={onDelete}
+            >
+              <Trash2 size={18} className="text-error" />
             </Pressable>
           </View>
         </View>
@@ -145,8 +159,12 @@ function FlightCard({
 
 function HotelCard({
   booking,
+  onEdit,
+  onDelete,
 }: {
   booking: Extract<Booking, { type: "HOTEL" }>;
+  onEdit: () => void;
+  onDelete: () => void;
 }) {
   return (
     <View className="card">
@@ -170,6 +188,22 @@ function HotelCard({
               </Text>
             ) : null}
           </View>
+          <View className="flex flex-row gap-sm items-center">
+            <Pressable
+              accessibilityRole="button"
+              className="h-11 w-11 items-center justify-center rounded-app-full bg-secondary-container"
+              onPress={onEdit}
+            >
+              <Pencil size={18} className="text-primary" />
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              className="h-11 w-11 items-center justify-center rounded-app-full bg-error-container"
+              onPress={onDelete}
+            >
+              <Trash2 size={18} className="text-error" />
+            </Pressable>
+          </View>
         </View>
       </View>
 
@@ -186,7 +220,7 @@ function HotelCard({
       {booking.details.checkInInstructions ? (
         <View className="card-muted ml-12">
           <Text className="label">Check-in instructions</Text>
-          <Text className="text-body mt-xs">
+          <Text className="text-body mt-xs truncate">
             {booking.details.checkInInstructions}
           </Text>
         </View>
@@ -202,10 +236,14 @@ function HotelCard({
   );
 }
 
-export default function BookingCard({ booking, onEdit }: BookingCardProps) {
+export default function BookingCard({
+  booking,
+  onEdit,
+  onDelete,
+}: BookingCardProps) {
   return booking.type === "FLIGHT" ? (
-    <FlightCard booking={booking} onEdit={onEdit} />
+    <FlightCard booking={booking} onEdit={onEdit} onDelete={onDelete} />
   ) : (
-    <HotelCard booking={booking} />
+    <HotelCard booking={booking} onEdit={onEdit} onDelete={onDelete} />
   );
 }

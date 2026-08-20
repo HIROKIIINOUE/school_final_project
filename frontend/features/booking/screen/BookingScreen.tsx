@@ -9,6 +9,11 @@ import { useTripBookings } from "../hooks/useTripBookings";
 import { useState } from "react";
 import CreateOrUpdateBookingModal from "../components/CreateOrUpdateBookingModal";
 import { Booking } from "../types/types";
+import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
+import { deleteBooking } from "../api/booking.api";
+import Toast from "react-native-toast-message";
+import { useQueryClient } from "@tanstack/react-query";
+import { bookingQueryKeys } from "../lib/bookingQueryKey";
 
 type Props = { tripId: string };
 
@@ -17,9 +22,15 @@ type BookingModalState =
   | { mode: "edit"; booking: Booking };
 
 export default function BookingScreen({ tripId }: Props) {
+  const queryClient = useQueryClient();
+
   const { data, isError, error, isLoading } = useTripBookings(tripId);
 
   const [modalState, setModalState] = useState<BookingModalState | null>(null);
+
+  const [bookingToDelete, setBookingToDelete] = useState<Booking | null>(null);
+
+  const [isDeleting, setIsDeleting] = useState(false);
 
   function openCreateModal() {
     setModalState({ mode: "create", type: "FLIGHT" });
@@ -31,6 +42,34 @@ export default function BookingScreen({ tripId }: Props) {
 
   function closeModal() {
     setModalState(null);
+  }
+
+  function closeDeleteModal() {
+    setBookingToDelete(null);
+  }
+
+  function openDeleteModal(booking: Booking) {
+    setBookingToDelete(booking);
+  }
+
+  async function onDeletePressed() {
+    if (isDeleting) return;
+    if (!bookingToDelete) return;
+    setIsDeleting(true);
+    try {
+      await deleteBooking({ tripId, bookingId: bookingToDelete.id });
+      await queryClient.invalidateQueries({
+        queryKey: bookingQueryKeys.byTrip(tripId),
+      });
+
+      closeDeleteModal();
+      Toast.show({ type: "success", text1: "Successfully deleted booking" });
+    } catch (e) {
+      console.error("Failed to delete the booking", e);
+      Toast.show({ type: "error", text1: "Failed to delete the booking" });
+    } finally {
+      setIsDeleting(false);
+    }
   }
 
   if (isLoading) {
@@ -85,6 +124,7 @@ export default function BookingScreen({ tripId }: Props) {
               title="Flights"
               wide
               onEdit={openEditModal}
+              onDelete={openDeleteModal}
             />
 
             <View className="w-full flex-row flex-wrap gap-md">
@@ -94,6 +134,7 @@ export default function BookingScreen({ tripId }: Props) {
                 icon={BedDouble}
                 title="Accommodation"
                 onEdit={openEditModal}
+                onDelete={openDeleteModal}
               />
             </View>
           </View>
@@ -122,6 +163,16 @@ export default function BookingScreen({ tripId }: Props) {
             });
           }}
           tripId={tripId}
+        />
+      )}
+
+      {bookingToDelete && (
+        <DeleteConfirmationModal
+          handleClose={closeDeleteModal}
+          label={bookingToDelete.title}
+          onPress={onDeletePressed}
+          isSending={isDeleting}
+          title="booking"
         />
       )}
     </SafeAreaView>

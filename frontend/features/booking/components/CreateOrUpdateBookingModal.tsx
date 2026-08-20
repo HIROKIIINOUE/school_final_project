@@ -27,6 +27,7 @@ import { createBooking, updateBooking } from "../api/booking.api";
 import { useQueryClient } from "@tanstack/react-query";
 import { bookingQueryKeys } from "../lib/bookingQueryKey";
 import Toast from "react-native-toast-message";
+import MiniSpinner from "@/components/MiniSpinner";
 
 const StyledSafeAreaView = styled(SafeAreaView);
 
@@ -182,8 +183,6 @@ export default function CreateOrUpdateBookingModal({
   visible,
   tripId,
 }: CreateOrUpdateBookingModalProps) {
-  const flightDetails = booking?.type === "FLIGHT" ? booking.details : null;
-  const hotelDetails = booking?.type === "HOTEL" ? booking.details : null;
   const isUpdating = Boolean(booking);
 
   const queryClient = useQueryClient();
@@ -226,15 +225,17 @@ export default function CreateOrUpdateBookingModal({
       }).format(baseBookingInfo.endTime)
     : "";
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   // handling submit
   async function handleSubmit() {
+    if (isSubmitting) return;
     if (booking) {
       const originalTitle = booking.title;
       const currentTitle = baseBookingInfo.title.trim();
       const titleChanged = originalTitle !== currentTitle;
 
       const originalProvider = booking.provider; // this one is either some string or null
-      const currentProvider = baseBookingInfo.provider?.trim() || null; // empty string === null because user didn't type anything
+      const currentProvider = baseBookingInfo.provider?.trim() || null; // normalize an empty form string to domain null
       const providerChanged = originalProvider !== currentProvider;
 
       const originalConfirmationCode = booking.confirmationCode;
@@ -325,12 +326,28 @@ export default function CreateOrUpdateBookingModal({
         return;
       }
 
-      await updateBooking({ tripId, bookingId: booking.id, body: updateBody });
-      await queryClient.invalidateQueries({
-        queryKey: bookingQueryKeys.byTrip(tripId),
-      });
-      onClose?.();
-      Toast.show({ type: "success", text1: "Successfully updated booking" });
+      setIsSubmitting(true);
+      try {
+        await updateBooking({
+          tripId,
+          bookingId: booking.id,
+          body: updateBody,
+        });
+        await queryClient.invalidateQueries({
+          queryKey: bookingQueryKeys.byTrip(tripId),
+        });
+        onClose?.();
+        Toast.show({ type: "success", text1: "Successfully updated booking" });
+      } catch (e) {
+        console.error("Failed to update booking: ", e);
+        Toast.show({
+          type: "error",
+          text1: "Failed to update booking. Try again",
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+
       return;
     }
 
@@ -374,12 +391,20 @@ export default function CreateOrUpdateBookingModal({
             },
           };
 
-    await createBooking({ tripId, body: createBody });
-    await queryClient.invalidateQueries({
-      queryKey: bookingQueryKeys.byTrip(tripId),
-    });
-    onClose?.();
-    Toast.show({ type: "success", text1: "Successfully added booking" });
+    setIsSubmitting(true);
+    try {
+      await createBooking({ tripId, body: createBody });
+      await queryClient.invalidateQueries({
+        queryKey: bookingQueryKeys.byTrip(tripId),
+      });
+      onClose?.();
+      Toast.show({ type: "success", text1: "Successfully added booking" });
+    } catch (e) {
+      console.error("Failed to add booking. ", e);
+      Toast.show({ type: "error", text1: "Failed to add booking. Try again" });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   useEffect(() => {
@@ -609,10 +634,21 @@ export default function CreateOrUpdateBookingModal({
             <Pressable className="btn-ghost md:px-lg" onPress={onClose}>
               <Text className="btn-ghost-text">Cancel</Text>
             </Pressable>
-            <Pressable className="btn-primary md:px-lg" onPress={handleSubmit}>
-              <Text className="btn-primary-text">
-                {isUpdating ? "Save Changes" : "Add to Trip"}
-              </Text>
+            <Pressable
+              className="btn-primary md:px-lg"
+              onPress={handleSubmit}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <View className="flex flex-row items-center gap-2">
+                  <Text>{isUpdating ? "Updating..." : "Adding..."}</Text>
+                  <MiniSpinner />
+                </View>
+              ) : (
+                <Text className="btn-danger-text">
+                  {isUpdating ? "Update" : "Add"}
+                </Text>
+              )}
             </Pressable>
           </View>
         </StyledSafeAreaView>

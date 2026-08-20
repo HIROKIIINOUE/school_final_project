@@ -13,6 +13,7 @@ type BookingSectionProps = {
   title: string;
   wide?: boolean;
   onEdit: (booking: Booking) => void;
+  onDelete: (booking: Booking) => void;
 };
 
 export default function BookingSection({
@@ -22,6 +23,7 @@ export default function BookingSection({
   title,
   wide = false,
   onEdit,
+  onDelete,
 }: BookingSectionProps) {
   return (
     <View className={wide ? "w-full gap-md" : "w-full gap-md md:flex-1"}>
@@ -36,6 +38,7 @@ export default function BookingSection({
             booking={booking}
             key={booking.id}
             onEdit={() => onEdit(booking)}
+            onDelete={() => onDelete(booking)}
           />
         ))
       ) : (
