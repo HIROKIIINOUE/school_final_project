@@ -1,6 +1,6 @@
 import {
-  AlertTriangle,
   BedDouble,
+  BusFront,
   Clock,
   PlaneTakeoff,
   CalendarDays,
@@ -236,14 +236,98 @@ function HotelCard({
   );
 }
 
+function TransportCard({
+  booking,
+  onEdit,
+  onDelete,
+}: {
+  booking: Extract<Booking, { type: "TRANSPORT" }>;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const departureLocation =
+    booking.details.departureLocation ?? "Departure not set";
+  const arrivalLocation = booking.details.arrivalLocation ?? "Arrival not set";
+  const route = `${departureLocation} → ${arrivalLocation}`;
+
+  return (
+    <View className="card">
+      <View className="card-row items-start">
+        <View className="min-w-0 flex-1 flex-row items-start gap-sm">
+          <View className="h-10 w-10 flex-none items-center justify-center rounded-app-full bg-surface-container-high">
+            <BusFront color="#006a6a" size={22} />
+          </View>
+          <View className="min-w-0 flex-1">
+            <Text className="card-title">{booking.title}</Text>
+            <Text className="card-subtitle">
+              {booking.details.transportType} · {route}
+            </Text>
+            {booking.provider ? (
+              <Text className="card-meta mt-xs">{booking.provider}</Text>
+            ) : null}
+          </View>
+          <View className="flex flex-row gap-sm items-center">
+            <Pressable
+              accessibilityRole="button"
+              className="h-11 w-11 items-center justify-center rounded-app-full bg-secondary-container"
+              onPress={onEdit}
+            >
+              <Pencil size={18} className="text-primary" />
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              className="h-11 w-11 items-center justify-center rounded-app-full bg-error-container"
+              onPress={onDelete}
+            >
+              <Trash2 size={18} className="text-error" />
+            </Pressable>
+          </View>
+        </View>
+      </View>
+
+      <View className="ml-12 flex-row flex-wrap gap-md">
+        <MetaField
+          label="Date"
+          value={formatDate(booking.startTime)}
+          icon={CalendarDays}
+        />
+        <MetaField
+          label="Time"
+          value={formatTime(booking.startTime)}
+          icon={Clock}
+        />
+        {booking.confirmationCode ? (
+          <MetaField label="Confirmation" value={booking.confirmationCode} />
+        ) : null}
+      </View>
+
+      {booking.note ? (
+        <View className="card-muted ml-12">
+          <Text className="label">Note</Text>
+          <Text className="text-body mt-xs">{booking.note}</Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 export default function BookingCard({
   booking,
   onEdit,
   onDelete,
 }: BookingCardProps) {
-  return booking.type === "FLIGHT" ? (
-    <FlightCard booking={booking} onEdit={onEdit} onDelete={onDelete} />
-  ) : (
-    <HotelCard booking={booking} onEdit={onEdit} onDelete={onDelete} />
-  );
+  switch (booking.type) {
+    case "FLIGHT":
+      return (
+        <FlightCard booking={booking} onEdit={onEdit} onDelete={onDelete} />
+      );
+    case "HOTEL":
+      return (
+        <HotelCard booking={booking} onEdit={onEdit} onDelete={onDelete} />
+      );
+    case "TRANSPORT":
+      return (
+        <TransportCard booking={booking} onEdit={onEdit} onDelete={onDelete} />
+      );
+  }
 }

@@ -10,26 +10,15 @@ export type HotelDetailsType = {
   checkInInstructions?: string | null;
 };
 
-export type CreateBookingBody = {
-  type: "HOTEL" | "FLIGHT";
-  title: string;
-  provider?: string | null;
-  confirmationCode?: string | null;
-  startTime?: string | null;
-  endTime?: string | null;
-  note?: string | null;
-  details: FlightDetailsType | HotelDetailsType;
-};
-
 export type UpdateBookingBody = {
-  type?: "FLIGHT" | "HOTEL";
+  type?: "FLIGHT" | "HOTEL" | "TRANSPORT";
   title?: string;
   provider?: string | null;
   confirmationCode?: string | null;
   startTime?: string | null;
   endTime?: string | null;
   note?: string | null;
-  details?: FlightDetailsType | HotelDetailsType;
+  details?: FlightDetailsType | HotelDetailsType | TransportDetailsType;
 };
 
 export type BookingBase = {
@@ -55,7 +44,7 @@ export type HotelBooking = BookingBase & {
   details: HotelDetailsType;
 };
 
-export type Booking = FlightBooking | HotelBooking;
+export type Booking = FlightBooking | HotelBooking | TransportBooking;
 export type GetBookings = { bookings: Booking[] };
 
 export type CreatedBooking = { booking: Booking };
@@ -63,3 +52,28 @@ export type CreatedBooking = { booking: Booking };
 export type UpdatedBooking = { updatedBooking: Booking };
 
 export type DeletedBooking = { deletedBooking: { bookingId: string } };
+
+export type TransportDetailsType = {
+  transportType: string;
+  departureLocation?: string | null;
+  arrivalLocation?: string | null;
+};
+
+type CreateBookingBase = {
+  title: string;
+  provider?: string | null;
+  confirmationCode?: string | null;
+  startTime?: string | null;
+  endTime?: string | null;
+  note?: string | null;
+};
+
+export type CreateBookingBody =
+  | (CreateBookingBase & { type: "FLIGHT"; details: FlightDetailsType })
+  | (CreateBookingBase & { type: "HOTEL"; details: HotelDetailsType })
+  | (CreateBookingBase & { type: "TRANSPORT"; details: TransportDetailsType });
+
+export type TransportBooking = BookingBase & {
+  type: "TRANSPORT";
+  details: TransportDetailsType;
+};

@@ -1,5 +1,11 @@
 import { BlurView } from "expo-blur";
-import { BedDouble, CalendarDays, Plane, X } from "lucide-react-native";
+import {
+  BedDouble,
+  BusFront,
+  CalendarDays,
+  Plane,
+  X,
+} from "lucide-react-native";
 import { styled } from "nativewind";
 import {
   KeyboardAvoidingView,
@@ -17,6 +23,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import {
   CreateBookingBody,
   HotelDetailsType,
+  TransportDetailsType,
   UpdateBookingBody,
   type Booking,
   type FlightDetailsType,
@@ -206,6 +213,11 @@ export default function CreateOrUpdateBookingModal({
     roomType: "",
     checkInInstructions: "",
   });
+  const [transportInfo, setTransportInfo] = useState<TransportDetailsType>({
+    transportType: "",
+    departureLocation: "",
+    arrivalLocation: "",
+  });
 
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
@@ -321,6 +333,30 @@ export default function CreateOrUpdateBookingModal({
         }
       }
 
+      if (booking.type === "TRANSPORT") {
+        const originalTransportDetails = {
+          transportType: booking.details.transportType,
+          departureLocation: booking.details.departureLocation ?? null,
+          arrivalLocation: booking.details.arrivalLocation ?? null,
+        };
+
+        const currentTransportDetails: TransportDetailsType = {
+          transportType: transportInfo.transportType.trim(),
+          departureLocation: transportInfo.departureLocation?.trim() || null,
+          arrivalLocation: transportInfo.arrivalLocation?.trim() || null,
+        };
+        const transportDetailsChanged =
+          originalTransportDetails.arrivalLocation !==
+            currentTransportDetails.arrivalLocation ||
+          originalTransportDetails.departureLocation !==
+            currentTransportDetails.departureLocation ||
+          originalTransportDetails.transportType !==
+            currentTransportDetails.transportType;
+        if (transportDetailsChanged) {
+          updateBody.details = currentTransportDetails;
+        }
+      }
+
       const hasChanges = Object.keys(updateBody).length > 0;
       if (!hasChanges) {
         return;
@@ -365,31 +401,45 @@ export default function CreateOrUpdateBookingModal({
       note: baseBookingInfo.note?.trim() || null,
     };
 
-    const createBody: CreateBookingBody =
-      type === "FLIGHT"
-        ? {
-            ...basicInfo,
+    let createBody: CreateBookingBody;
 
-            type: "FLIGHT",
+    switch (type) {
+      case "FLIGHT":
+        createBody = {
+          ...basicInfo,
+          type: "FLIGHT",
+          details: {
+            flightNumber: flightInfo.flightNumber.trim(),
+            departureAirport: flightInfo.departureAirport.trim(),
+            arrivalAirport: flightInfo.arrivalAirport.trim(),
+          },
+        };
+        break;
 
-            details: {
-              flightNumber: flightInfo.flightNumber.trim(),
-              departureAirport: flightInfo.departureAirport.trim(),
-              arrivalAirport: flightInfo.arrivalAirport.trim(),
-            },
-          }
-        : {
-            ...basicInfo,
+      case "HOTEL":
+        createBody = {
+          ...basicInfo,
+          type: "HOTEL",
+          details: {
+            address: hotelInfo.address?.trim() || null,
+            roomType: hotelInfo.roomType?.trim() || null,
+            checkInInstructions: hotelInfo.checkInInstructions?.trim() || null,
+          },
+        };
+        break;
 
-            type: "HOTEL",
-
-            details: {
-              address: hotelInfo.address?.trim() || null,
-              roomType: hotelInfo.roomType?.trim() || null,
-              checkInInstructions:
-                hotelInfo.checkInInstructions?.trim() || null,
-            },
-          };
+      case "TRANSPORT":
+        createBody = {
+          ...basicInfo,
+          type: "TRANSPORT",
+          details: {
+            transportType: transportInfo.transportType.trim(),
+            departureLocation: transportInfo.departureLocation?.trim() || null,
+            arrivalLocation: transportInfo.arrivalLocation?.trim() || null,
+          },
+        };
+        break;
+    }
 
     setIsSubmitting(true);
     try {
@@ -407,6 +457,7 @@ export default function CreateOrUpdateBookingModal({
     }
   }
 
+  // fill up fields if updating
   useEffect(() => {
     if (!booking) return;
 
@@ -426,6 +477,9 @@ export default function CreateOrUpdateBookingModal({
 
     if (booking.type === "HOTEL") {
       setHotelInfo(booking.details);
+    }
+    if (booking.type === "TRANSPORT") {
+      setTransportInfo(booking.details);
     }
   }, [booking]);
 
@@ -497,9 +551,16 @@ export default function CreateOrUpdateBookingModal({
                     isUpdating ? undefined : () => onTypeChange?.("HOTEL")
                   }
                 />
+                <TypeOption
+                  active={type === "TRANSPORT"}
+                  icon={BusFront}
+                  label="Transport"
+                  onPress={
+                    isUpdating ? undefined : () => onTypeChange?.("TRANSPORT")
+                  }
+                />
               </View>
             </View>
-
             <InputField
               label="Title"
               placeholder={type === "FLIGHT" ? "Flight to Tokyo" : "Hotel stay"}
@@ -527,7 +588,6 @@ export default function CreateOrUpdateBookingModal({
                 }))
               }
             />
-
             <View className="flex-row gap-md">
               <DateTimeField
                 label="Start Time"
@@ -552,8 +612,7 @@ export default function CreateOrUpdateBookingModal({
                 }
               />
             </View>
-
-            {type === "FLIGHT" ? (
+            {type === "FLIGHT" && (
               <View className="form">
                 <InputField
                   label="Flight Number"
@@ -586,7 +645,8 @@ export default function CreateOrUpdateBookingModal({
                   }
                 />
               </View>
-            ) : (
+            )}
+            {type === "HOTEL" && (
               <View className="form">
                 <InputField
                   label="Address"
@@ -618,7 +678,43 @@ export default function CreateOrUpdateBookingModal({
                 />
               </View>
             )}
-
+            {type === "TRANSPORT" && (
+              <View className="form">
+                <InputField
+                  label="Transport Type"
+                  placeholder="Train"
+                  value={transportInfo.transportType ?? ""}
+                  onTextChange={(value) =>
+                    setTransportInfo((prev) => ({
+                      ...prev,
+                      transportType: value,
+                    }))
+                  }
+                />
+                <InputField
+                  label="Departure Location"
+                  placeholder="Tokyo station"
+                  value={transportInfo.departureLocation ?? ""}
+                  onTextChange={(value) =>
+                    setTransportInfo((prev) => ({
+                      ...prev,
+                      departureLocation: value,
+                    }))
+                  }
+                />
+                <InputField
+                  label="Arrival Location"
+                  placeholder="Osaka Station"
+                  value={transportInfo.arrivalLocation ?? ""}
+                  onTextChange={(value) =>
+                    setTransportInfo((prev) => ({
+                      ...prev,
+                      arrivalLocation: value,
+                    }))
+                  }
+                />
+              </View>
+            )}
             <InputField
               label="Note"
               multiline
