@@ -53,6 +53,7 @@ function formatStay(startTime: string | null, endTime: string | null) {
   const nights = Math.max(
     0,
     Math.round((end.getTime() - start.getTime()) / 86_400_000),
+    // 86_400_000 = milliseconds in one day, .getTime() returns in milliseconds, so if you divide it by one day milliseconds, it gives you days in normal day count: 3, 4 ... etc
   );
   const nightLabel = nights === 1 ? "night" : "nights";
 

@@ -15,13 +15,18 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
+  CreateBookingBody,
   HotelDetailsType,
+  UpdateBookingBody,
   type Booking,
   type FlightDetailsType,
 } from "../types/types";
 import React, { useEffect, useState } from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { createBooking, updateBooking } from "../api/booking.api";
+import { useQueryClient } from "@tanstack/react-query";
+import { bookingQueryKeys } from "../lib/bookingQueryKey";
+import Toast from "react-native-toast-message";
 
 const StyledSafeAreaView = styled(SafeAreaView);
 
@@ -181,12 +186,14 @@ export default function CreateOrUpdateBookingModal({
   const hotelDetails = booking?.type === "HOTEL" ? booking.details : null;
   const isUpdating = Boolean(booking);
 
+  const queryClient = useQueryClient();
+
   const [baseBookingInfo, setBaseBookingInfo] = useState<BaseBookingInfo>({
     title: "",
     provider: "",
     confirmationCode: "",
-    startTime: new Date(),
-    endTime: new Date(),
+    startTime: null,
+    endTime: null,
     note: "",
   });
 
@@ -203,31 +210,176 @@ export default function CreateOrUpdateBookingModal({
 
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
-  const formattedStartDate = new Intl.DateTimeFormat("en-CA", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-  }).format(baseBookingInfo?.startTime);
+  const formattedStartDate = baseBookingInfo.startTime
+    ? new Intl.DateTimeFormat("en-CA", {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+      }).format(baseBookingInfo.startTime)
+    : "";
 
-  const formattedEndDate = new Intl.DateTimeFormat("en-CA", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-  }).format(baseBookingInfo?.endTime);
+  const formattedEndDate = baseBookingInfo.endTime
+    ? new Intl.DateTimeFormat("en-CA", {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+      }).format(baseBookingInfo.endTime)
+    : "";
 
+  // handling submit
   async function handleSubmit() {
-    const datatoSend =
-      selectedType === "FLIGHT"
-        ? { ...baseBookingInfo, ...flightInfo }
-        : { ...baseBookingInfo, ...hotelInfo };
+    if (booking) {
+      const originalTitle = booking.title;
+      const currentTitle = baseBookingInfo.title.trim();
+      const titleChanged = originalTitle !== currentTitle;
 
-    isUpdating
-      ? await updateBooking({
-          tripId,
-          bookingId: booking?.id,
-          body: datatoSend,
-        })
-      : await createBooking({ tripId, body: datatoSend });
+      const originalProvider = booking.provider; // this one is either some string or null
+      const currentProvider = baseBookingInfo.provider?.trim() || null; // empty string === null because user didn't type anything
+      const providerChanged = originalProvider !== currentProvider;
+
+      const originalConfirmationCode = booking.confirmationCode;
+      const currentConfirmationCode =
+        baseBookingInfo.confirmationCode?.trim() || null;
+      const confirmationCodeChanged =
+        originalConfirmationCode !== currentConfirmationCode;
+
+      const originalNote = booking.note;
+      const currentNote = baseBookingInfo.note?.trim() || null;
+      const noteChanged = originalNote !== currentNote;
+
+      const originalStartTime = booking.startTime; // original startTime is string or null and that's what API wants
+      const currentStartTime = baseBookingInfo.startTime?.toISOString() ?? null; // convert it to string or null
+      const startTimeChanged = originalStartTime !== currentStartTime;
+
+      const originalEndTime = booking.endTime;
+      const currentEndTime = baseBookingInfo.endTime?.toISOString() ?? null;
+      const endTimeChanged = originalEndTime !== currentEndTime;
+
+      const updateBody: UpdateBookingBody = {};
+
+      if (titleChanged) {
+        updateBody.title = currentTitle;
+      }
+      if (providerChanged) {
+        updateBody.provider = currentProvider;
+      }
+      if (confirmationCodeChanged) {
+        updateBody.confirmationCode = currentConfirmationCode;
+      }
+      if (noteChanged) {
+        updateBody.note = currentNote;
+      }
+      if (startTimeChanged) {
+        updateBody.startTime = currentStartTime;
+      }
+      if (endTimeChanged) {
+        updateBody.endTime = currentEndTime;
+      }
+      if (booking.type === "FLIGHT") {
+        const originalFlightDetails = booking.details;
+
+        const currentFlightDetails: FlightDetailsType = {
+          flightNumber: flightInfo.flightNumber.trim(),
+          departureAirport: flightInfo.departureAirport.trim(),
+          arrivalAirport: flightInfo.arrivalAirport.trim(),
+        };
+
+        const flightDetailsChanged =
+          originalFlightDetails.flightNumber !==
+            currentFlightDetails.flightNumber ||
+          originalFlightDetails.departureAirport !==
+            currentFlightDetails.departureAirport ||
+          originalFlightDetails.arrivalAirport !==
+            currentFlightDetails.arrivalAirport;
+
+        if (flightDetailsChanged) {
+          updateBody.details = currentFlightDetails;
+        }
+      }
+
+      if (booking.type === "HOTEL") {
+        const originalHotelDetails = {
+          address: booking.details.address ?? null,
+          roomType: booking.details.roomType ?? null,
+          checkInInstructions: booking.details.checkInInstructions ?? null,
+        };
+        const currentHotelDetails: HotelDetailsType = {
+          address: hotelInfo.address?.trim() || null,
+          roomType: hotelInfo.roomType?.trim() || null,
+          checkInInstructions: hotelInfo.checkInInstructions?.trim() || null,
+        };
+
+        const hotelDetailsChanged =
+          originalHotelDetails.address !== currentHotelDetails.address ||
+          originalHotelDetails.checkInInstructions !==
+            currentHotelDetails.checkInInstructions ||
+          originalHotelDetails.roomType !== currentHotelDetails.roomType;
+
+        if (hotelDetailsChanged) {
+          updateBody.details = currentHotelDetails;
+        }
+      }
+
+      const hasChanges = Object.keys(updateBody).length > 0;
+      if (!hasChanges) {
+        return;
+      }
+
+      await updateBooking({ tripId, bookingId: booking.id, body: updateBody });
+      await queryClient.invalidateQueries({
+        queryKey: bookingQueryKeys.byTrip(tripId),
+      });
+      onClose?.();
+      Toast.show({ type: "success", text1: "Successfully updated booking" });
+      return;
+    }
+
+    const basicInfo = {
+      title: baseBookingInfo.title.trim(),
+
+      provider: baseBookingInfo.provider?.trim() || null,
+
+      confirmationCode: baseBookingInfo.confirmationCode?.trim() || null,
+
+      startTime: baseBookingInfo.startTime?.toISOString() ?? null,
+
+      endTime: baseBookingInfo.endTime?.toISOString() ?? null,
+
+      note: baseBookingInfo.note?.trim() || null,
+    };
+
+    const createBody: CreateBookingBody =
+      type === "FLIGHT"
+        ? {
+            ...basicInfo,
+
+            type: "FLIGHT",
+
+            details: {
+              flightNumber: flightInfo.flightNumber.trim(),
+              departureAirport: flightInfo.departureAirport.trim(),
+              arrivalAirport: flightInfo.arrivalAirport.trim(),
+            },
+          }
+        : {
+            ...basicInfo,
+
+            type: "HOTEL",
+
+            details: {
+              address: hotelInfo.address?.trim() || null,
+              roomType: hotelInfo.roomType?.trim() || null,
+              checkInInstructions:
+                hotelInfo.checkInInstructions?.trim() || null,
+            },
+          };
+
+    await createBooking({ tripId, body: createBody });
+    await queryClient.invalidateQueries({
+      queryKey: bookingQueryKeys.byTrip(tripId),
+    });
+    onClose?.();
+    Toast.show({ type: "success", text1: "Successfully added booking" });
   }
 
   useEffect(() => {
@@ -238,8 +390,9 @@ export default function CreateOrUpdateBookingModal({
       provider: booking.provider ?? "",
       confirmationCode: booking.confirmationCode ?? "",
       note: booking.note ?? "",
-      startTime: booking.startTime ? new Date(booking.startTime) : new Date(),
-      endTime: booking.endTime ? new Date(booking.endTime) : new Date(),
+      startTime: booking.startTime ? new Date(booking.startTime) : null,
+
+      endTime: booking.endTime ? new Date(booking.endTime) : null,
     });
 
     if (booking.type === "FLIGHT") {
