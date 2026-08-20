@@ -33,12 +33,10 @@ type CreateOrUpdateBookingModalProps = {
   booking?: Booking | null;
   onClose?: () => void;
   onTypeChange?: (type: BookingType) => void;
-  handleSubmit: () => void;
   tripId: string;
 };
 
 type InputFieldProps = {
-  defaultValue?: string | null;
   label: string;
   multiline?: boolean;
   placeholder: string;
@@ -46,8 +44,17 @@ type InputFieldProps = {
   onTextChange: (value: string) => void;
 };
 
+type BaseBookingInfo = {
+  title: string;
+  provider?: string | null;
+  confirmationCode?: string | null;
+  startTime?: Date | null;
+  endTime?: Date | null;
+  note?: string | null;
+};
+
+// input field
 function InputField({
-  defaultValue,
   label,
   multiline = false,
   placeholder,
@@ -59,7 +66,6 @@ function InputField({
       <Text className="label">{label}</Text>
       <TextInput
         className={multiline ? "textarea" : "input"}
-        defaultValue={defaultValue ?? undefined}
         multiline={multiline}
         placeholder={placeholder}
         placeholderTextColor="#6d7979"
@@ -70,7 +76,7 @@ function InputField({
     </View>
   );
 }
-
+// date time field
 function DateTimeField({
   label,
   formattedDate,
@@ -127,7 +133,7 @@ function DateTimeField({
     </View>
   );
 }
-
+// type field
 function TypeOption({
   active,
   icon: Icon,
@@ -162,15 +168,6 @@ function TypeOption({
     </Pressable>
   );
 }
-
-type BaseBookingInfo = {
-  title: string;
-  provider?: string | null;
-  confirmationCode?: string | null;
-  startTime?: Date | null;
-  endTime?: Date | null;
-  note?: string | null;
-};
 
 export default function CreateOrUpdateBookingModal({
   booking,
@@ -218,10 +215,6 @@ export default function CreateOrUpdateBookingModal({
     day: "2-digit",
   }).format(baseBookingInfo?.endTime);
 
-  const [selectedType, setSelectedType] = useState<"FLIGHT" | "HOTEL">(
-    "FLIGHT",
-  );
-
   async function handleSubmit() {
     const datatoSend =
       selectedType === "FLIGHT"
@@ -248,6 +241,14 @@ export default function CreateOrUpdateBookingModal({
       startTime: booking.startTime ? new Date(booking.startTime) : new Date(),
       endTime: booking.endTime ? new Date(booking.endTime) : new Date(),
     });
+
+    if (booking.type === "FLIGHT") {
+      setFlightInfo(booking.details);
+    }
+
+    if (booking.type === "HOTEL") {
+      setHotelInfo(booking.details);
+    }
   }, [booking]);
 
   return (
@@ -303,22 +304,25 @@ export default function CreateOrUpdateBookingModal({
               <Text className="label">Type</Text>
               <View className="flex-row flex-wrap gap-sm">
                 <TypeOption
-                  active={selectedType === "FLIGHT"}
+                  active={type === "FLIGHT"}
                   icon={Plane}
                   label="Flight"
-                  onPress={() => setSelectedType("FLIGHT")}
+                  onPress={
+                    isUpdating ? undefined : () => onTypeChange?.("FLIGHT")
+                  }
                 />
                 <TypeOption
-                  active={selectedType === "HOTEL"}
+                  active={type === "HOTEL"}
                   icon={BedDouble}
                   label="Hotel"
-                  onPress={() => setSelectedType("FLIGHT")}
+                  onPress={
+                    isUpdating ? undefined : () => onTypeChange?.("HOTEL")
+                  }
                 />
               </View>
             </View>
 
             <InputField
-              defaultValue={booking?.title}
               label="Title"
               placeholder={type === "FLIGHT" ? "Flight to Tokyo" : "Hotel stay"}
               value={baseBookingInfo?.title ?? ""}
@@ -327,7 +331,6 @@ export default function CreateOrUpdateBookingModal({
               }
             />
             <InputField
-              defaultValue={booking?.provider}
               label="Provider"
               placeholder="e.g. Air Canada or Hilton"
               value={baseBookingInfo?.provider ?? ""}
@@ -336,7 +339,6 @@ export default function CreateOrUpdateBookingModal({
               }
             />
             <InputField
-              defaultValue={booking?.confirmationCode}
               label="Confirmation Code"
               placeholder="Optional"
               value={baseBookingInfo?.confirmationCode ?? ""}
@@ -368,7 +370,7 @@ export default function CreateOrUpdateBookingModal({
                 value={baseBookingInfo.endTime ?? new Date()}
                 setShowDatePicker={setShowEndDatePicker}
                 setInput={(value) =>
-                  setBaseBookingInfo((prev) => ({ ...prev, end: value }))
+                  setBaseBookingInfo((prev) => ({ ...prev, endTime: value }))
                 }
               />
             </View>
@@ -376,19 +378,17 @@ export default function CreateOrUpdateBookingModal({
             {type === "FLIGHT" ? (
               <View className="form">
                 <InputField
-                  defaultValue={flightInfo?.flightNumber}
                   label="Flight Number"
                   placeholder="e.g. AC001"
-                  value={flightDetails?.flightNumber ?? ""}
+                  value={flightInfo?.flightNumber ?? ""}
                   onTextChange={(value) =>
                     setFlightInfo((prev) => ({ ...prev, flightNumber: value }))
                   }
                 />
                 <InputField
-                  defaultValue={flightDetails?.departureAirport}
                   label="Departure Airport"
                   placeholder="e.g. YVR"
-                  value={flightDetails?.departureAirport ?? ""}
+                  value={flightInfo?.departureAirport ?? ""}
                   onTextChange={(value) =>
                     setFlightInfo((prev) => ({
                       ...prev,
@@ -397,10 +397,9 @@ export default function CreateOrUpdateBookingModal({
                   }
                 />
                 <InputField
-                  defaultValue={flightDetails?.arrivalAirport}
                   label="Arrival Airport"
                   placeholder="e.g. HND"
-                  value={flightDetails?.arrivalAirport ?? ""}
+                  value={flightInfo?.arrivalAirport ?? ""}
                   onTextChange={(value) =>
                     setFlightInfo((prev) => ({
                       ...prev,
@@ -412,7 +411,6 @@ export default function CreateOrUpdateBookingModal({
             ) : (
               <View className="form">
                 <InputField
-                  defaultValue={hotelDetails?.address}
                   label="Address"
                   placeholder="Hotel address"
                   value={hotelInfo.address ?? ""}
@@ -421,7 +419,6 @@ export default function CreateOrUpdateBookingModal({
                   }
                 />
                 <InputField
-                  defaultValue={hotelDetails?.roomType}
                   label="Room Type"
                   placeholder="e.g. King room"
                   value={hotelInfo.roomType ?? ""}
@@ -430,7 +427,6 @@ export default function CreateOrUpdateBookingModal({
                   }
                 />
                 <InputField
-                  defaultValue={hotelDetails?.checkInInstructions}
                   label="Check-in Instructions"
                   multiline
                   placeholder="Optional check-in details"
@@ -446,7 +442,6 @@ export default function CreateOrUpdateBookingModal({
             )}
 
             <InputField
-              defaultValue={booking?.note}
               label="Note"
               multiline
               placeholder="Optional notes"

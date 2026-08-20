@@ -69,7 +69,7 @@ function MetaField({
   icon?: ComponentType<LucideProps>;
 }) {
   return (
-    <View className="min-w-[96px] flex-1 gap-xs">
+    <View className="min-w-24 flex-1 gap-xs">
       <View className="flex flex-row items-center gap-sm">
         {Icon && <Icon color="#6d7979" size={21} />}
         <Text className="label">{label}</Text>
@@ -116,7 +116,7 @@ function FlightCard({
         </View>
       </View>
 
-      <View className="ml-[48px] flex-row flex-wrap gap-md">
+      <View className="ml-12 flex-row flex-wrap gap-md">
         <MetaField
           label="Date"
           value={formatDate(booking.startTime)}
@@ -133,7 +133,7 @@ function FlightCard({
       </View>
 
       {booking.note ? (
-        <View className="card-muted ml-[48px]">
+        <View className="card-muted ml-12">
           <Text className="label">Note</Text>
           <Text className="text-body mt-xs">{booking.note}</Text>
         </View>
@@ -172,7 +172,7 @@ function HotelCard({
         </View>
       </View>
 
-      <View className="ml-[48px] gap-sm">
+      <View className="ml-12 gap-sm">
         <MetaField
           label="Stay"
           value={formatStay(booking.startTime, booking.endTime)}
@@ -183,7 +183,7 @@ function HotelCard({
       </View>
 
       {booking.details.checkInInstructions ? (
-        <View className="card-muted ml-[48px]">
+        <View className="card-muted ml-12">
           <Text className="label">Check-in instructions</Text>
           <Text className="text-body mt-xs">
             {booking.details.checkInInstructions}
@@ -192,7 +192,7 @@ function HotelCard({
       ) : null}
 
       {booking.note ? (
-        <View className="card-muted ml-[48px]">
+        <View className="card-muted ml-12">
           <Text className="label">Note</Text>
           <Text className="text-body mt-xs">{booking.note}</Text>
         </View>
