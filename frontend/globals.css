@@ -705,7 +705,7 @@
   }
 
   .chat-bubble {
-    @apply max-w-[80%] rounded-app-lg px-md py-sm;
+    @apply rounded-app-lg px-md py-sm;
   }
 
   .chat-bubble-me {
