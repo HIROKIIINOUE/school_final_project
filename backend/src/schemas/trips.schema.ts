@@ -44,6 +44,17 @@ export const updateTripBodySchema = z.strictObject({
   endTime: z.iso.datetime().nullable().optional(),
 });
 
+export const joinTripBodySchema = z.object({
+  inviteCode: z
+    .string()
+    .trim()
+    .min(1, "Invite code is required")
+    .transform((code) => code.toUpperCase()),
+});
+
+export type JoinTripBody = z.infer<typeof joinTripBodySchema>;
+
+// ########################## ITINERARY #################################
 export const itineraryItemSchema = z.strictObject({
   title: z
     .string({ error: "Title must be a string." })
@@ -71,6 +82,8 @@ export const itineraryItemParamsSchema = z.strictObject({
 export const itineraryVersionSchema = z.iso.datetime({
   error: "If-Match must contain a valid itinerary version.",
 });
+
+// ######################### CHAT MESSAGE #################################
 
 export const postMessageBodySchema = z.strictObject({
   clientMessageId: z.uuid({ error: "Client message ID must be a valid UUID." }),
@@ -112,15 +125,5 @@ export const messageCursorSchema = z.strictObject({
   createdAt: z.iso.datetime(),
   id: z.uuid(),
 });
-
-export const joinTripBodySchema = z.object({
-  inviteCode: z
-    .string()
-    .trim()
-    .min(1, "Invite code is required")
-    .transform((code) => code.toUpperCase()),
-});
-
-export type JoinTripBody = z.infer<typeof joinTripBodySchema>;
 
 export type MessageCursor = z.infer<typeof messageCursorSchema>;

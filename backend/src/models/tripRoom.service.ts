@@ -87,7 +87,7 @@ async function updateMyTrips(data: {
 
   const membership = await prisma.tripMember.findFirst({
     where: { tripId: id, userId },
-    select: { id: true },
+    select: { id: true, trip: { select: { startDate: true, endDate: true } } },
   });
 
   if (!membership) {
@@ -96,6 +96,37 @@ async function updateMyTrips(data: {
       "TRIP_ACCESS_DENIED",
       "You do not have access to this trip.",
     );
+  }
+
+  const nextStartDate =
+    startTime === undefined
+      ? membership.trip.startDate
+      : startTime === null
+        ? null
+        : new Date(startTime);
+
+  const nextEndDate =
+    endTime === undefined
+      ? membership.trip.endDate
+      : endTime === null
+        ? null
+        : new Date(endTime);
+
+  // validate end and start time if both are not null
+  if (nextStartDate !== null && nextEndDate !== null) {
+    const comparableStartDate = new Date(nextStartDate);
+    const comparableEndDate = new Date(nextEndDate);
+
+    comparableStartDate.setUTCHours(0, 0, 0, 0);
+    comparableEndDate.setUTCHours(0, 0, 0, 0);
+
+    if (comparableStartDate > comparableEndDate) {
+      throw new AppError(
+        400,
+        "INVALID_TRIP_DATE_RANGE",
+        "End date cannot be before start date.",
+      );
+    }
   }
 
   const result = await prisma.trip.update({
