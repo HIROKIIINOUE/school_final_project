@@ -3,9 +3,11 @@ import { prisma } from "../lib/prisma";
 import {
   ItineraryType,
   OverviewDataType,
+  OverviewMemberType,
   TripDetailsType,
 } from "../types/overview.types";
 import { AppError } from "../lib/appError";
+import { assertTripAccess } from "../lib/assertTripAccess";
 
 // TODO: Add more informatin later on such as expenses, chats etc
 
@@ -80,6 +82,38 @@ async function getItineraries({
   return itineraries;
 }
 
+async function getMembers({
+  tripId,
+  userId,
+}: {
+  tripId: string;
+  userId: string;
+}): Promise<OverviewMemberType[]> {
+  await assertTripAccess({ userId, tripId });
+
+  const members = await prisma.tripMember.findMany({
+    where: { tripId },
+    select: { id: true, userId: true, role: true, joinedAt: true },
+    orderBy: [{ joinedAt: "asc" }, { id: "asc" }],
+  });
+  const memberIds = members.map((mem) => mem.userId); // member ids who belong in this trip
+  const profiles = await prisma.profile.findMany({
+    where: { userId: { in: memberIds } },
+    select: { id: true, userId: true, displayName: true, image: true },
+  }); // get profiles of memebers who belong in this trip
+
+  const userPropfileMapping = new Map(
+    profiles.map((profile) => [profile.userId, profile]),
+  );
+
+  const memberData = members.map((mem) => ({
+    ...mem,
+    profile: userPropfileMapping.get(mem.userId) ?? null,
+  }));
+
+  return memberData;
+}
+
 export async function getOverviewData(input: {
   userId: string;
   tripId: string;
@@ -88,5 +122,10 @@ export async function getOverviewData(input: {
 
   const itineraries = await getItineraries({ tripId: input.tripId });
 
-  return { tripDetails, itineraries };
+  const members = await getMembers({
+    tripId: input.tripId,
+    userId: input.userId,
+  });
+
+  return { tripDetails, itineraries, members };
 }
