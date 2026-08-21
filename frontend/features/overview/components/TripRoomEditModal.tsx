@@ -61,17 +61,31 @@ export default function TripRoomEditModal({
     const title = tripInputs.title.trim();
 
     if (!title) {
-      Toast.show({ type: "error", text1: "Activity title is required" });
+      Toast.show({ type: "error", text1: "Trip title is required" });
+      return;
+    }
+
+    const startDate = new Date(tripInputs.startDate);
+    startDate.setHours(0, 0, 0, 0);
+
+    const endDate = new Date(tripInputs.endDate);
+    endDate.setHours(0, 0, 0, 0);
+
+    if (startDate > endDate) {
+      Toast.show({
+        type: "error",
+        text1: "End date cannot be before start date",
+      });
       return;
     }
 
     const sendingData = {
       title,
       tripId: trip.id,
-      description: tripInputs.description ?? null,
-      destination: tripInputs.destination ?? null,
-      startTime: tripInputs.startDate ?? null,
-      endTime: tripInputs.endDate ?? null,
+      description: tripInputs.description.trim() || null,
+      destination: tripInputs.destination.trim() || null,
+      startTime: startDate,
+      endTime: endDate,
     };
 
     setIsSubmitting(true);
@@ -84,9 +98,7 @@ export default function TripRoomEditModal({
       Toast.show({
         type: "error",
         text1:
-          error instanceof Error
-            ? error.message
-            : "Unable to save this activity",
+          error instanceof Error ? error.message : "Unable to save this trip",
       });
     } finally {
       setIsSubmitting(false);
@@ -277,6 +289,7 @@ export default function TripRoomEditModal({
                         }
 
                         if (selectedDate) {
+                          // this is a js Date type
                           settripInputs((prev) => ({
                             ...prev,
                             startDate: selectedDate,
