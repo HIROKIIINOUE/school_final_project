@@ -169,8 +169,8 @@ function TypeOption({
       accessibilityRole="button"
       className={
         active
-          ? "min-h-[44px] flex-row items-center justify-center gap-xs rounded-app-full border border-primary-container bg-primary-container px-md py-sm"
-          : "min-h-[44px] flex-row items-center justify-center gap-xs rounded-app-full border border-outline-variant bg-card px-md py-sm active:bg-surface-container-high"
+          ? "min-h-11 flex-row items-center justify-center gap-xs rounded-app-full border border-primary-container bg-primary-container px-md py-sm"
+          : "min-h-11 flex-row items-center justify-center gap-xs rounded-app-full border border-outline-variant bg-card px-md py-sm active:bg-surface-container-high"
       }
       onPress={onPress}
     >
