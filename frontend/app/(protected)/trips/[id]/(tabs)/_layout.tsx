@@ -1,6 +1,7 @@
 import TripHeader from "@/features/trips/components/TripHeader";
 import { Tabs } from "expo-router";
 import {
+  BookOpen,
   CalendarDays,
   CircleDollarSign,
   House,
@@ -51,6 +52,16 @@ export default function TripTabsLayout() {
         }}
       />
       <Tabs.Screen name="expense/summary/index" options={{ href: null }} />
+
+      <Tabs.Screen
+        name="booking/index"
+        options={{
+          title: "Booking",
+          tabBarIcon: ({ color, size }) => (
+            <BookOpen color={color} size={size} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

@@ -1,9 +1,10 @@
-import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { useCallback, useMemo, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import { Plus } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
+import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import Spinner from "@/components/Spinner";
 import { getDateKey } from "@/lib/formatDate";
 import {
@@ -35,6 +36,9 @@ const ItineraryClient = ({ tripId }: Props) => {
     null,
   );
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<SavedItineraryItem | null>(
+    null,
+  );
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
 
   const loadItineraries = useCallback(async () => {
@@ -100,6 +104,15 @@ const ItineraryClient = ({ tripId }: Props) => {
     setEditingItem(null);
   };
 
+  const closeDeleteModal = () => {
+    if (deletingItemId) return;
+    setItemToDelete(null);
+  };
+
+  const openDeleteModal = (item: SavedItineraryItem) => {
+    setItemToDelete(item);
+  };
+
   const handleSave = async (input: SaveItineraryItemInput) => {
     if (!editingItem) {
       const createdItem = await createItineraryItem({ tripId, input });
@@ -143,40 +156,32 @@ const ItineraryClient = ({ tripId }: Props) => {
     }
   };
 
-  const confirmDelete = (item: SavedItineraryItem) => {
-    Alert.alert(
-      "Delete activity?",
-      `“${item.title}” will be removed from the shared itinerary.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            void handleDelete(item);
-          },
-        },
-      ],
-    );
-  };
+  const handleDelete = async () => {
+    if (deletingItemId || !itemToDelete) return;
 
-  const handleDelete = async (item: SavedItineraryItem) => {
-    if (deletingItemId) return;
-
+    const item = itemToDelete;
     setDeletingItemId(item.id);
+
     try {
       await deleteItineraryItem({ tripId, item });
       setItineraryItems((currentItems) =>
         currentItems.filter((currentItem) => currentItem.id !== item.id),
       );
+      setItemToDelete(null);
       Toast.show({ type: "success", text1: "Activity deleted" });
     } catch (error) {
       if (
         error instanceof ItineraryApiError &&
         error.code === "ITINERARY_CONFLICT"
       ) {
-        await loadItineraries();
+        const refreshedItems = await loadItineraries();
+        const refreshedItem = refreshedItems.find(
+          (currentItem) => currentItem.id === item.id,
+        );
+
+        setItemToDelete(refreshedItem ?? null);
       }
+
       Toast.show({
         type: "error",
         text1:
@@ -229,7 +234,7 @@ const ItineraryClient = ({ tripId }: Props) => {
               key={getDateKey(new Date(items[0].startTime))}
               deletingItemId={deletingItemId}
               itineraries={items}
-              onDelete={confirmDelete}
+              onDelete={openDeleteModal}
               onEdit={openEditEditor}
             />
           ))}
@@ -241,6 +246,16 @@ const ItineraryClient = ({ tripId }: Props) => {
           closeModal={closeEditor}
           item={editingItem}
           onSubmit={handleSave}
+        />
+      ) : null}
+
+      {itemToDelete ? (
+        <DeleteConfirmationModal
+          handleClose={closeDeleteModal}
+          isSending={deletingItemId !== null}
+          label={itemToDelete.title}
+          onPress={handleDelete}
+          title="activity"
         />
       ) : null}
     </SafeAreaView>
