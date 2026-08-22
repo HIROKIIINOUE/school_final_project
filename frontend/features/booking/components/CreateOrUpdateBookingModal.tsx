@@ -37,6 +37,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { bookingQueryKeys } from "../lib/bookingQueryKey";
 import Toast from "react-native-toast-message";
 import MiniSpinner from "@/components/MiniSpinner";
+import { toastConfig } from "@/config/toastConfig";
 
 const StyledSafeAreaView = styled(SafeAreaView);
 
@@ -953,6 +954,7 @@ export default function CreateOrUpdateBookingModal({
           </View>
         </StyledSafeAreaView>
       </KeyboardAvoidingView>
+      <Toast config={toastConfig} />
     </Modal>
   );
 }

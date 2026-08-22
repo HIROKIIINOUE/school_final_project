@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from "react-native";
-import React, { useRef, useState } from "react";
-import { useRouter } from "expo-router";
+import React, { useCallback, useRef, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
 import { CalendarDays, SquarePen, Trash2, Users } from "lucide-react-native";
 import CreateTripModal from "./CreateTripModal";
 import { MyRoomType } from "../types/types";
@@ -19,6 +19,12 @@ const TripRoomCard = ({ room }: Props) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
 
   const swipeableRef = useRef<SwipeableMethods | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      return swipeableRef.current?.close();
+    }, []),
+  );
 
   function handleOnpress() {
     router.push(`/(protected)/trips/${room.id}/(tabs)`);
