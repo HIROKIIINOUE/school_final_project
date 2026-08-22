@@ -1,13 +1,13 @@
 import { Image, Text, View } from "react-native";
 
-import React from 'react'
+import React from "react";
 type Props = {
-  members: { id: number; displayName: string; image: string | null }[];
-  maxDisplay: number
-}
+  members: { id: string; displayName: string; image: string | null }[];
+  maxDisplay: number;
+};
 
 const MemberAvatars = (props: Props) => {
-  const { members, maxDisplay } = props
+  const { members, maxDisplay } = props;
   return (
     <View className="flex-row items-center">
       {members.map((member, index) => {
@@ -16,17 +16,20 @@ const MemberAvatars = (props: Props) => {
             return (
               <View
                 key={member.id}
-                className={`h-4 w-4 items-center justify-center rounded-full border border-white ${index > 0 ? "-ml-1" : ""
-                  } ${index === 0 ? "bg-[#d9b59f]" : index % 2 === 0 ? "bg-[#7896aa]" : "bg-[#c6a579]"}`}
+                className={`h-7 w-7 items-center justify-center rounded-full border border-white ${
+                  index > 0 ? "-ml-1" : ""
+                } ${index === 0 ? "bg-[#d9b59f]" : index % 2 === 0 ? "bg-[#7896aa]" : "bg-[#c6a579]"}`}
               >
-                <Text className="text-[8px] font-bold text-white">{member.displayName[0]}</Text>
+                <Text className="text-[8px] font-bold text-white">
+                  {member.displayName[0]}
+                </Text>
               </View>
-            )
+            );
           } else {
             return (
               <View
                 key={member.id}
-                className={`h-4 w-4 overflow-hidden rounded-full border border-white ${index > 0 ? "-ml-1" : ""}`}
+                className={`h-7 w-7 overflow-hidden rounded-full border border-white ${index > 0 ? "-ml-1" : ""}`}
               >
                 <Image
                   accessibilityLabel={`${member.displayName}'s avatar`}
@@ -40,7 +43,7 @@ const MemberAvatars = (props: Props) => {
         }
       })}
       {members.length - maxDisplay > 0 ? (
-        <View className="-ml-1 h-4 w-4 items-center justify-center rounded-full border border-white bg-[#dce2ea]">
+        <View className="-ml-1 h-7 w-7 items-center justify-center rounded-full border border-white bg-[#dce2ea]">
           <Text className="text-[9px] font-bold text-[#738093]">
             +{members.length - maxDisplay}
           </Text>
@@ -48,6 +51,6 @@ const MemberAvatars = (props: Props) => {
       ) : null}
     </View>
   );
-}
+};
 
-export default MemberAvatars
+export default MemberAvatars;

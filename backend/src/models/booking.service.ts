@@ -83,6 +83,24 @@ async function createBooking({ userId, tripId, body }: CreateBookingParams) {
   // check membership => a logged in user has to belong in the trip.
   await assertTripAccess({ tripId, userId });
 
+  if (
+    body.startTime !== undefined &&
+    body.startTime !== null &&
+    body.endTime !== undefined &&
+    body.endTime !== null
+  ) {
+    const startTime = new Date(body.startTime);
+    const endTime = new Date(body.endTime);
+
+    if (startTime > endTime) {
+      throw new AppError(
+        400,
+        "INVALID_BOOKING_DATE_RANGE",
+        "End time cannot be before start time.",
+      );
+    }
+  }
+
   // owner and member can both create booking => because not only the owner make reservation.
   const createData = { ...body, tripId, createdById: userId };
   const createdBooking = await prisma.booking.create({ data: createData });
@@ -179,6 +197,27 @@ async function updateBooking({
   }
   if (body.details !== undefined) {
     updateData.details = validationResult.data.details;
+  }
+
+  const startTime =
+    body.startTime === undefined
+      ? existingBooking.startTime
+      : body.startTime === null
+        ? null
+        : new Date(body.startTime);
+  const endTime =
+    body.endTime === undefined
+      ? existingBooking.endTime
+      : body.endTime === null
+        ? null
+        : new Date(body.endTime);
+
+  if (startTime !== null && endTime !== null && startTime > endTime) {
+    throw new AppError(
+      400,
+      "INVALID_BOOKING_DATE_RANGE",
+      "End time cannot be before start time.",
+    );
   }
 
   const updatedBooking = await prisma.booking.update({

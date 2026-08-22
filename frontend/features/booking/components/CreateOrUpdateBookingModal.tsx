@@ -63,8 +63,8 @@ type BaseBookingInfo = {
   title: string;
   provider?: string | null;
   confirmationCode?: string | null;
-  startTime?: Date | null;
-  endTime?: Date | null;
+  startTime: Date | null;
+  endTime: Date | null;
   note?: string | null;
 };
 
@@ -94,20 +94,24 @@ function InputField({
 // date time field
 function DateTimeField({
   label,
-  formattedDate,
+  formattedValue,
   placeholder,
   visible,
   value,
+  mode,
   setShowDatePicker,
   setInput,
+  disabled,
 }: {
   label: string;
-  formattedDate: string;
+  formattedValue: string;
   placeholder: string;
   visible: boolean;
   value: Date;
   setShowDatePicker: (value: boolean) => void;
   setInput: (input: Date) => void;
+  mode: "date" | "time";
+  disabled?: boolean;
 }) {
   return (
     <View className="gap-xs">
@@ -121,9 +125,9 @@ function DateTimeField({
         </Text>
       </View>
 
-      <Pressable onPress={() => setShowDatePicker(true)}>
+      <Pressable onPress={() => setShowDatePicker(true)} disabled={disabled}>
         <TextInput
-          value={formattedDate}
+          value={formattedValue}
           editable={false}
           pointerEvents="none"
           placeholder={placeholder}
@@ -133,7 +137,7 @@ function DateTimeField({
       {visible && (
         <DateTimePicker
           value={value}
-          mode="date"
+          mode={mode}
           onChange={(_, selectedDate) => {
             if (Platform.OS === "android") {
               setShowDatePicker(false);
@@ -165,8 +169,8 @@ function TypeOption({
       accessibilityRole="button"
       className={
         active
-          ? "min-h-[44px] flex-row items-center justify-center gap-xs rounded-app-full border border-primary-container bg-primary-container px-md py-sm"
-          : "min-h-[44px] flex-row items-center justify-center gap-xs rounded-app-full border border-outline-variant bg-card px-md py-sm active:bg-surface-container-high"
+          ? "min-h-11 flex-row items-center justify-center gap-xs rounded-app-full border border-primary-container bg-primary-container px-md py-sm"
+          : "min-h-11 flex-row items-center justify-center gap-xs rounded-app-full border border-outline-variant bg-card px-md py-sm active:bg-surface-container-high"
       }
       onPress={onPress}
     >
@@ -228,6 +232,9 @@ export default function CreateOrUpdateBookingModal({
 
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+
   const formattedStartDate = baseBookingInfo.startTime
     ? new Intl.DateTimeFormat("en-CA", {
         year: "numeric",
@@ -235,7 +242,6 @@ export default function CreateOrUpdateBookingModal({
         day: "2-digit",
       }).format(baseBookingInfo.startTime)
     : "";
-
   const formattedEndDate = baseBookingInfo.endTime
     ? new Intl.DateTimeFormat("en-CA", {
         year: "numeric",
@@ -244,10 +250,34 @@ export default function CreateOrUpdateBookingModal({
       }).format(baseBookingInfo.endTime)
     : "";
 
+  const formattedStartTime = baseBookingInfo.startTime
+    ? new Intl.DateTimeFormat("en-CA", {
+        hour: "numeric",
+        minute: "2-digit",
+      }).format(baseBookingInfo.startTime)
+    : "";
+  const formattedEndTime = baseBookingInfo.endTime
+    ? new Intl.DateTimeFormat("en-CA", {
+        hour: "numeric",
+        minute: "2-digit",
+      }).format(baseBookingInfo.endTime)
+    : "";
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   // handling submit
   async function handleSubmit() {
     if (isSubmitting) return;
+    if (
+      baseBookingInfo.startTime !== null &&
+      baseBookingInfo.endTime !== null &&
+      baseBookingInfo.startTime > baseBookingInfo.endTime
+    ) {
+      Toast.show({
+        type: "error",
+        text1: "Start time must be earlier than End time",
+      });
+      return;
+    }
     if (booking) {
       const originalTitle = booking.title;
       const currentTitle = baseBookingInfo.title.trim();
@@ -380,7 +410,8 @@ export default function CreateOrUpdateBookingModal({
         const activityDetailsChanged =
           originalActivityDetails.activityType !==
             currentActivityDetails.activityType ||
-          originalActivityDetails.location !== currentActivityDetails.location ||
+          originalActivityDetails.location !==
+            currentActivityDetails.location ||
           originalActivityDetails.meetingPoint !==
             currentActivityDetails.meetingPoint;
 
@@ -645,25 +676,109 @@ export default function CreateOrUpdateBookingModal({
             />
             <View className="flex-row gap-md">
               <DateTimeField
-                label="Start Time"
-                formattedDate={formattedStartDate}
-                placeholder="start time..."
+                label="Start Date"
+                formattedValue={formattedStartDate}
+                mode="date"
+                placeholder="start date..."
                 visible={showStartDatePicker}
                 value={baseBookingInfo.startTime ?? new Date()}
                 setShowDatePicker={setShowStartDatePicker}
-                setInput={(value) =>
-                  setBaseBookingInfo((prev) => ({ ...prev, startTime: value }))
-                }
+                setInput={(value) => {
+                  setBaseBookingInfo((prev) => {
+                    if (prev.startTime === null) {
+                      const nextStartTime = new Date(value);
+
+                      nextStartTime.setHours(0, 0, 0, 0);
+
+                      return { ...prev, startTime: nextStartTime };
+                    }
+
+                    const nextStartTime = new Date(prev.startTime);
+
+                    nextStartTime.setFullYear(
+                      value.getFullYear(),
+                      value.getMonth(),
+                      value.getDate(),
+                    );
+
+                    return { ...prev, startTime: nextStartTime };
+                  });
+                }}
               />
               <DateTimeField
-                label="End Time"
-                formattedDate={formattedEndDate}
-                placeholder="end time..."
+                label="End Date"
+                formattedValue={formattedEndDate}
+                mode="date"
+                placeholder="end date..."
                 visible={showEndDatePicker}
                 value={baseBookingInfo.endTime ?? new Date()}
                 setShowDatePicker={setShowEndDatePicker}
+                setInput={(value) => {
+                  setBaseBookingInfo((prev) => {
+                    if (prev.endTime === null) {
+                      const nextEndTime = new Date(value);
+
+                      nextEndTime.setHours(0, 0, 0, 0);
+
+                      return { ...prev, endTime: nextEndTime };
+                    }
+
+                    const nextEndTime = new Date(prev.endTime);
+
+                    nextEndTime.setFullYear(
+                      value.getFullYear(),
+                      value.getMonth(),
+                      value.getDate(),
+                    );
+
+                    return { ...prev, endTime: nextEndTime };
+                  });
+                }}
+              />
+            </View>
+            <View className="flex-row gap-md">
+              <DateTimeField
+                disabled={baseBookingInfo.startTime === null}
+                label="Start Time"
+                formattedValue={formattedStartTime}
+                mode="time"
+                placeholder="start time..."
+                visible={showStartTimePicker}
+                value={baseBookingInfo.startTime ?? new Date()}
+                setShowDatePicker={setShowStartTimePicker}
                 setInput={(value) =>
-                  setBaseBookingInfo((prev) => ({ ...prev, endTime: value }))
+                  setBaseBookingInfo((prev) => {
+                    const nextStartTime = new Date(prev.startTime ?? value);
+                    nextStartTime.setHours(
+                      value.getHours(),
+                      value.getMinutes(),
+                      0,
+                      0,
+                    );
+                    return { ...prev, startTime: nextStartTime };
+                  })
+                }
+              />
+              <DateTimeField
+                disabled={baseBookingInfo.endTime === null}
+                label="End Time"
+                formattedValue={formattedEndTime}
+                mode="time"
+                placeholder="end time..."
+                visible={showEndTimePicker}
+                value={baseBookingInfo.endTime ?? new Date()}
+                setShowDatePicker={setShowEndTimePicker}
+                setInput={(value) =>
+                  setBaseBookingInfo((prev) => {
+                    const nextEndTime = new Date(prev.endTime ?? value);
+                    nextEndTime.setHours(
+                      value.getHours(),
+                      value.getMinutes(),
+                      0,
+                      0,
+                    );
+                    return { ...prev, endTime: nextEndTime };
+                  })
                 }
               />
             </View>
@@ -788,10 +903,7 @@ export default function CreateOrUpdateBookingModal({
                   placeholder="Shinjuku"
                   value={activityInfo.location ?? ""}
                   onTextChange={(value) =>
-                    setActivityInfo((prev) => ({
-                      ...prev,
-                      location: value,
-                    }))
+                    setActivityInfo((prev) => ({ ...prev, location: value }))
                   }
                 />
                 <InputField

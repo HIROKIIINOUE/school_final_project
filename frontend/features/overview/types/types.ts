@@ -28,9 +28,24 @@ export type ItineraryType = {
   startTime: Date;
 };
 
+export type OverviewMemberType = {
+  id: string;
+  userId: string;
+  role: "OWNER" | "MEMBER";
+  joinedAt: Date;
+
+  profile: {
+    id: number;
+    userId: string;
+    displayName: string;
+    image: string | null;
+  } | null;
+};
+
 export type OverviewDataType = {
   tripDetails: TripDetailsType;
   itineraries: ItineraryType[];
+  members: OverviewMemberType[];
 };
 
 export type TripRoomFormType = {

@@ -1,13 +1,18 @@
 import { View, Text, Pressable } from "react-native";
 import React, { useState } from "react";
-import { TripDetailsType } from "../types/types";
+import { OverviewMemberType, TripDetailsType } from "../types/types";
 import { CalendarDays, MapPin, SquarePen } from "lucide-react-native";
 import { calculateDuration, calculatePeriod } from "@/lib/calculatePeriod";
 import TripRoomEditModal from "./TripRoomEditModal";
+import MemberAvatars from "@/components/MemberAvatars";
 
-type Props = { tripDetails: TripDetailsType; onTripUpdate: () => void };
+type Props = {
+  tripDetails: TripDetailsType;
+  onTripUpdate: () => void;
+  members: OverviewMemberType[];
+};
 
-const TripDetail = ({ tripDetails, onTripUpdate }: Props) => {
+const TripDetail = ({ tripDetails, onTripUpdate, members }: Props) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
 
   const status =
@@ -77,6 +82,17 @@ const TripDetail = ({ tripDetails, onTripUpdate }: Props) => {
               : "Unprovided"}
           </Text>
         </View>
+        <View className="flex flex-row gap-md items-center">
+          <MemberAvatars
+            members={members.map((mem) => ({
+              id: mem.userId,
+              displayName: mem.profile?.displayName ?? "",
+              image: mem.profile?.image ?? null,
+            }))}
+            maxDisplay={5}
+          />
+        </View>
+        <Text className="text-muted">{members.length} members</Text>
       </View>
       {true && (
         <View className="mt-sm p-sm bg-surface-container rounded-lg border border-primary/20">

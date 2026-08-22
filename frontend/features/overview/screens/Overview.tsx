@@ -84,6 +84,7 @@ const OverView = ({ id }: Props) => {
         <TripDetail
           tripDetails={overviewData?.tripDetails}
           onTripUpdate={fetchOverview}
+          members={overviewData.members}
         />
         <ItineraryCard itineraries={overviewData.itineraries} tripId={id} />
       </ScrollView>
