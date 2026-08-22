@@ -74,7 +74,6 @@ export const useInitializeAuth = () => {
       }
 
       if (!session) {
-        console.log("[AuthInitializer] no initial session; clearing auth");
         clearAuth();
         return;
       }

@@ -41,7 +41,6 @@ const CreateTripModal = ({ visible, onClose, tripData }: Props) => {
     const normalizedTitle = title.trim();
     if (!normalizedTitle) {
       // toast error
-      console.log("Title is required");
       Toast.show({ type: "error", text1: "Title is required" });
       return;
     }

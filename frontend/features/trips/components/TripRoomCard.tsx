@@ -28,8 +28,6 @@ const TripRoomCard = ({ room }: Props) => {
     setIsModalOpen(true);
   }
 
-  console.log("start time for trip room: ", room.startAt);
-
   function renderRightAction() {
     return (
       <View className="w-40 flex-row overflow-hidden rounded-r-lg">

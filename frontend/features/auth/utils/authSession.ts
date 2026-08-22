@@ -44,15 +44,6 @@ export const createSessionFromOAuthCallbackUrl = async (
   const oauthError = params.get("error");
   const oauthErrorCode = params.get("error_code");
 
-  console.log("[OAuth Session] callback parameters parsed", {
-    hasAccessToken: Boolean(accessToken),
-    hasRefreshToken: Boolean(refreshToken),
-    hasCode: Boolean(code),
-    hasOAuthError: Boolean(oauthError || oauthErrorCode),
-    oauthError: oauthError ?? null,
-    oauthErrorCode: oauthErrorCode ?? null,
-  });
-
   if (accessToken && refreshToken) {
     // save session data both in supabase and in AsyncStorage
     const { data, error } = await supabase.auth.setSession({

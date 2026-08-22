@@ -33,8 +33,7 @@ const DeleteTripModal = ({ closeModal, trip }: Props) => {
     deleteLockRef.current = true;
     setIsSending(true);
     try {
-      const result = await deleteTrip({ tripId: trip.id });
-      console.log(result);
+      await deleteTrip({ tripId: trip.id });
       Toast.show({ type: "success", text1: "Successfully deleted the trip" });
       queryClient.invalidateQueries({ queryKey: tripQueryKey.all });
       closeModal();

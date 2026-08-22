@@ -15,8 +15,6 @@ if (!backendUrl) {
 type ApiResponse<T> = { data: T };
 
 export async function fetchMyRooms(): Promise<MyRoomType[]> {
-  console.log("[Trips API] reading Supabase session");
-
   const accessToken = await grabAccessToken();
 
   const res = await fetch(`${backendUrl}/api/trips/my-trips`, {

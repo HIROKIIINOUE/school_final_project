@@ -12,7 +12,6 @@ export const useAuth = () => {
 
   const handleOAuthContinue = async (provider: OAuthProviderId) => {
     if (isSubmitting) {
-      console.log("[OAuth] ignored duplicate submission", { provider });
       return;
     }
 

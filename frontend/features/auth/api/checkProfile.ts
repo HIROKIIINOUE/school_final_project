@@ -16,10 +16,6 @@ const checkProfile = async (
     throw new Error("EXPO_PUBLIC_BACKEND_URL is not configured");
   }
 
-  console.log("[Profile API] checking profile", {
-    hasAccessToken: Boolean(accessToken),
-  });
-
   const res = await fetch(`${backendUrl}/api/user/profile`, {
     method: "GET",
     headers: { Authorization: `Bearer ${accessToken}` },

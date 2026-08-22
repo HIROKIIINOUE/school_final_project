@@ -7,12 +7,10 @@ const ChatRoute = () => {
   const { id } = useGlobalSearchParams();
 
   const tripId = Array.isArray(id) ? id[0] : id;
-  console.log(tripId);
   if (!tripId) {
     return <Text>Invalid trip route.</Text>;
   }
 
-  console.log(tripId);
   return <ChatPageClient tripId={tripId} />;
 };
 

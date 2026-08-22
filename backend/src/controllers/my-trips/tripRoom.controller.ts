@@ -77,8 +77,6 @@ async function createMyTripsController(
     description: description ?? null,
   });
 
-  console.log("successfully created", createdTrip.id);
-
   return res.status(201).json({ data: { createdTrip } });
 }
 

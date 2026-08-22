@@ -30,8 +30,6 @@ const TripDetail = ({ tripDetails, onTripUpdate, members }: Props) => {
     ? calculateDuration(tripDetails.startDate, tripDetails.endDate)
     : "-";
 
-  console.log("Days until start: ", tripDetails.planningStatus.daysUntilStart);
-
   return (
     <View className="relative card mx-sm">
       {editModalOpen && (
