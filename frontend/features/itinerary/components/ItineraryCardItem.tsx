@@ -18,6 +18,14 @@ const ItineraryCardItem = ({
   onEdit,
 }: Props) => {
   const time = formatTime(new Date(itineraryItem.startTime));
+  const itineraryDate = new Date(itineraryItem.startTime);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  itineraryDate.setHours(0, 0, 0, 0);
+
+  const isPast = itineraryDate < today;
+
   return (
     <View className="relative mb-md flex flex-row">
       <View className="absolute -left-7.75 top-sm h-3 w-3 rounded-app-full bg-primary"></View>
@@ -27,6 +35,13 @@ const ItineraryCardItem = ({
             <View className="badge-secondary self-start">
               <Text className="badge-secondary-text">{time}</Text>
             </View>
+            {isPast && (
+              <View className="badge-neutral">
+                <View>
+                  <Text className="badge-neutral-text">Past</Text>
+                </View>
+              </View>
+            )}
             <View className="flex-row items-center gap-xs">
               <Pressable
                 accessibilityLabel={`Edit ${itineraryItem.title}`}

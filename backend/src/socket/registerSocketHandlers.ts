@@ -16,10 +16,6 @@ export function registerSocketHandlers(io: ChatSocketServer) {
     //     userId: "user-123", }, };
 
     // when new client connects
-    console.log(
-      `Socket connected: ${socket.id}, UserId: ${socket.data.userId}`,
-    );
-
     // joining the user to the trip specific room so that socket can manage chat by room
     socket.on("trip:join", async (payload, acknowledge) => {
       const validationResult = joinTripPayloadSchema.safeParse(payload);

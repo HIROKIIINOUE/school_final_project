@@ -171,7 +171,10 @@ async function deleteRoom({
   }
 
   try {
-    await prisma.trip.delete({ where: { id: tripId } });
+    await prisma.$transaction(async (tx) => {
+      await tx.expense.deleteMany({ where: { tripId } });
+      await tx.trip.delete({ where: { id: tripId } });
+    });
   } catch (e) {
     if (!isRecordNotFoundError(e)) {
       throw e;

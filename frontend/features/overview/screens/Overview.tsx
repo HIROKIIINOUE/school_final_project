@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, Pressable } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { getOverviewData } from "../api/overview.api";
 import { OverviewDataType } from "../types/types";
 import Spinner from "@/components/Spinner";
@@ -9,6 +9,7 @@ import OverviewThumbnail from "../components/OverviewThumbnail";
 import ItineraryCard from "../components/ItineraryCard";
 import { Share2 } from "lucide-react-native";
 import InviteCodeModal from "../components/InviteCodeModal";
+import { useFocusEffect } from "expo-router";
 
 type Props = { id: string };
 type OverviewStatus = "loading" | "success" | "error";
@@ -19,7 +20,7 @@ const OverView = ({ id }: Props) => {
 
   const [inviteModalOpen, setInviteModalOpen] = useState<boolean>(false);
 
-  async function fetchOverview() {
+  const fetchOverview = useCallback(async () => {
     try {
       setStatus("loading");
       const overview = await getOverviewData({ id });
@@ -28,10 +29,13 @@ const OverView = ({ id }: Props) => {
     } catch (e) {
       setStatus("error");
     }
-  }
-  useEffect(() => {
-    fetchOverview();
   }, [id]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchOverview();
+    }, [fetchOverview]),
+  );
 
   if (status === "loading") {
     return (

@@ -13,11 +13,6 @@ export const handleSignInWithOAuth = async (
   redirectTo: string,
 ): Promise<OAuthContinueResult> => {
   try {
-    console.log("[OAuth API] requesting authorization URL", {
-      provider,
-      redirectTo,
-    });
-
     // data stores url which is needed to open Google/Apple browser
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,

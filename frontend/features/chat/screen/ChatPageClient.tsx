@@ -86,7 +86,6 @@ const ChatPageClient = ({ tripId }: Props) => {
           console.error("Failed to join trip chat:", result.error);
           return;
         }
-        console.log("Joined trip chat:", result.tripId);
 
         // if reconnecting connection again, it has to trigger re-fetch messages from backend
         if (needRepair) {

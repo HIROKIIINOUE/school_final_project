@@ -19,8 +19,6 @@ function RootNavigator() {
   const authStatus = useAuthStore((state) => state.authStatus);
   const profileStatus = useAuthStore((state) => state.profileStatus);
 
-  console.log("[Auth state]", { authStatus, profileStatus });
-
   useEffect(() => {
     // If user is not logged in anymore, that's when disconnect socket connection
     if (authStatus !== "authenticated") {
