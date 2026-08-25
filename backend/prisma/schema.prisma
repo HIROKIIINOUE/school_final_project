@@ -14,7 +14,7 @@ datasource db {
 
 model Profile {
   id          Int      @id @default(autoincrement())
-  userId      String   @unique @db.Uuid @map("user_id")
+  userId      String   @unique @map("user_id") @db.Uuid
   displayName String   @map("display_name")
   image       String?
   createdAt   DateTime @default(now()) @map("created_at")
@@ -26,7 +26,7 @@ model Trip {
   id          String    @id @default(uuid()) @db.Uuid
   ownerId     String    @db.Uuid // supabase user id
   title       String
-  description String? 
+  description String?
   destination String?
   startDate   DateTime?
   endDate     DateTime?
@@ -38,7 +38,7 @@ model Trip {
   itineraryItems ItineraryItem[]
   messages       Message[]
   expenses       Expense[]
-  bookings Booking[]
+  bookings       Booking[]
 
   @@index([ownerId])
 }
@@ -71,28 +71,30 @@ enum ExpenseSplitType {
 }
 
 model ItineraryItem {
-  id          String   @id @default(uuid()) @db.Uuid
-  tripId      String   @db.Uuid
-  createdById String   @db.Uuid
-  title       String
-  detail      String?
-  location    String?
-  startTime   DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(uuid()) @db.Uuid
+  tripId          String   @db.Uuid
+  createdById     String   @db.Uuid
+  title           String
+  detail          String?
+  location        String?
+  startTime       DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  sourceBookingId String?  @unique @db.Uuid
 
-  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  trip          Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  sourceBooking Booking? @relation(fields: [sourceBookingId], references: [id], onDelete: SetNull)
 
   @@index([tripId, startTime])
   @@index([createdById])
 }
 
 model Message {
-  id String @id @default(uuid()) @db.Uuid
-  userId String @db.Uuid
-  tripId String @db.Uuid
-  content String
-  clientMessageId String @db.Uuid 
+  id              String @id @default(uuid()) @db.Uuid
+  userId          String @db.Uuid
+  tripId          String @db.Uuid
+  content         String
+  clientMessageId String @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -100,8 +102,8 @@ model Message {
   // tripId is related to Trip's id feild
   trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
 
-  @@index([tripId, createdAt])
   @@unique([userId, clientMessageId])
+  @@index([tripId, createdAt])
   @@index([userId])
 }
 
@@ -151,23 +153,24 @@ enum BookingType {
 }
 
 model Booking {
-  id String @id @default(uuid()) @db.Uuid
-  tripId String @db.Uuid @map("trip_id")
+  id          String @id @default(uuid()) @db.Uuid
+  tripId      String @map("trip_id") @db.Uuid
   createdById String @map("created_by_id") @db.Uuid
 
-  type BookingType
-  title String 
-  provider String? 
-  confirmationCode String? @map("confirmation_code")
-  startTime DateTime? @map("start_time")
-  endTime DateTime? @map("end_time")
-  note String? 
-  details Json
+  type             BookingType
+  title            String
+  provider         String?
+  confirmationCode String?     @map("confirmation_code")
+  startTime        DateTime?   @map("start_time")
+  endTime          DateTime?   @map("end_time")
+  note             String?
+  details          Json
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  trip               Trip           @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  generatedItinerary ItineraryItem?
 
   @@index([tripId, startTime])
   @@index([createdById])

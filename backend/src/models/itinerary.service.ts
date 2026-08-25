@@ -1,9 +1,9 @@
+import { Prisma } from "../generated/prisma/client";
 import { AppError } from "../lib/appError";
 import { assertTripAccess } from "../lib/assertTripAccess";
 import { prisma } from "../lib/prisma";
+import { bookingSubtypeSchema } from "../schemas/bookings.schema";
 import { ItineraryItemInput } from "../schemas/trips.schema";
-
-type Booking = {};
 
 const itineraryItemSelect = {
   id: true,
@@ -195,46 +195,95 @@ async function createItineraryBasedOnBooking({
   await assertTripAccess({ tripId, userId });
 
   // get booking info first
-  const existingBokings = await prisma.booking.findMany({
+  const existingBookings = await prisma.booking.findMany({
     where: { tripId },
     select: {
       id: true,
-      createdById: true,
       type: true,
       title: true,
-      provider: true,
-      confirmationCode: true,
       startTime: true,
-      endTime: true,
-      note: true,
       details: true,
     },
   });
 
-  if (existingBokings.length === 0) {
+  if (existingBookings.length === 0) {
     // front needs to know there was no booking info to genereate itineraries
-    return { message: "There is no booking info to get started with" };
+    return [];
   }
 
   // create an array of itinerary data
-  // title       String
-  // detail      String?
-  // location    String?
-  // startTime   DateTime
-  existingBokings.map((booking) => {
-    let extractedDetail;
-    switch (booking.type) {
-      case "FLIGHT":
-        extractedDetail = `Flight ${booking.details}`;
-      case "HOTEL":
-        "";
-      case "ACTIVITY":
-        "";
-      case "TRANSPORT":
-        "";
-    }
-    const shapedData = { title: booking.title, detail: "" };
+  const shapedItineraries = existingBookings.map(
+    (booking): Prisma.ItineraryItemCreateManyInput | null => {
+      // if start time is null, won't add that booking to itinerary, so skip
+      if (!booking.startTime) return null;
+      // if the booking is other, won't add that too, so skip it
+      if (booking.type === "OTHER") return null;
+
+      const validatedBooking = bookingSubtypeSchema.parse({
+        type: booking.type,
+        details: booking.details,
+      });
+
+      switch (validatedBooking.type) {
+        case "FLIGHT":
+          return {
+            tripId,
+            createdById: userId,
+            title: booking.title,
+            detail: `Flight ${validatedBooking.details.flightNumber} : ${validatedBooking.details.departureAirport} to ${validatedBooking.details.arrivalAirport}`,
+            location: validatedBooking.details.departureAirport,
+            startTime: booking.startTime,
+            sourceBookingId: booking.id,
+          };
+        case "HOTEL":
+          return {
+            tripId,
+            createdById: userId,
+            title: booking.title,
+            detail: `Stay at ${validatedBooking.details.address ?? " - "}`,
+            location: validatedBooking.details.address ?? null,
+            startTime: booking.startTime,
+            sourceBookingId: booking.id,
+          };
+        case "ACTIVITY":
+          return {
+            tripId,
+            createdById: userId,
+            title: booking.title,
+            detail: `${validatedBooking.details.activityType ?? ""} Meet up: ${validatedBooking.details.meetingPoint ?? " - "}`,
+            location:
+              validatedBooking.details.meetingPoint ??
+              validatedBooking.details.location ??
+              null,
+            startTime: booking.startTime,
+            sourceBookingId: booking.id,
+          };
+        case "TRANSPORT":
+          return {
+            tripId,
+            createdById: userId,
+            title: booking.title,
+            detail: `Transport Type: ${validatedBooking.details.transportType ?? " - "}. Departure: ${validatedBooking.details.departureLocation ?? " - "} to ${validatedBooking.details.arrivalLocation ?? " - "}`,
+            location: validatedBooking.details.departureLocation || null,
+            startTime: booking.startTime,
+            sourceBookingId: booking.id,
+          };
+      }
+    },
+  );
+
+  const addItineraryData = shapedItineraries.filter(
+    (itinerary): itinerary is Prisma.ItineraryItemCreateManyInput =>
+      itinerary !== null,
+  );
+
+  const createdItineraries = await prisma.itineraryItem.createManyAndReturn({
+    data: addItineraryData,
+    skipDuplicates: true,
+    select: itineraryItemSelect,
   });
+
+  return createdItineraries.map((item) => serializeItineraryItem(item, userId));
 }
 
 export {
@@ -242,4 +291,5 @@ export {
   deleteItineraryItem,
   getItinerary,
   updateItineraryItem,
+  createItineraryBasedOnBooking,
 };
