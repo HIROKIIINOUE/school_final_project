@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../../lib/appError";
 import {
+  createItineraryBasedOnBooking,
   createItineraryItem,
   deleteItineraryItem,
   getItinerary,
@@ -209,9 +210,38 @@ async function deleteItineraryItemController(
   return res.status(204).send();
 }
 
+async function generateItinerariesBasedOnBookingController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = getRequiredUserId(req, next);
+  if (!userId) return;
+
+  const paramsResult = tripIdParamsSchema.safeParse(req.params);
+  if (!paramsResult.success) {
+    return next(
+      new AppError(
+        400,
+        "VALIDATION_ERROR",
+        "Invalid trip ID.",
+        validationDetails(paramsResult.error.issues),
+      ),
+    );
+  }
+
+  const itineraries = await createItineraryBasedOnBooking({
+    userId,
+    tripId: paramsResult.data.tripId,
+  });
+
+  return res.status(200).json({ data: itineraries });
+}
+
 export {
   createItineraryItemController,
   deleteItineraryItemController,
   getItinerariesController,
   updateItineraryItemController,
+  generateItinerariesBasedOnBookingController,
 };

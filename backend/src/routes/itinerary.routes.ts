@@ -3,6 +3,7 @@ import { authCheck } from "../middleware/auth.middleware";
 import {
   createItineraryItemController,
   deleteItineraryItemController,
+  generateItinerariesBasedOnBookingController,
   getItinerariesController,
   updateItineraryItemController,
 } from "../controllers/my-trips/itinerary.controller";
@@ -10,6 +11,11 @@ import {
 const itineraryrouter = Router();
 
 itineraryrouter.get("/:tripId/itinerary", authCheck, getItinerariesController);
+itineraryrouter.post(
+  "/:tripId/itinerary/generate-from-bookings",
+  authCheck,
+  generateItinerariesBasedOnBookingController,
+);
 itineraryrouter.post(
   "/:tripId/itinerary",
   authCheck,
