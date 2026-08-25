@@ -17,6 +17,8 @@ import {
 import CreateOrEditItineraryModal from "../components/CreateOrEditItineraryModal";
 import IndivisualItinerary from "../components/IndivisualItinerary";
 import { SavedItineraryItem, SaveItineraryItemInput } from "../types/types";
+import GenerateItinerariesFromBookingsBtn from "../components/GenerateItinerariesFromBookingsBtn";
+import GeneratingSpinner from "../components/GeneratingSpinner";
 
 type Props = { tripId: string };
 
@@ -32,6 +34,8 @@ export const ItineraryClient = ({ tripId }: Props) => {
     [],
   );
   const [isLoading, setIsLoading] = useState(true);
+  const [isGenerating, setIsGenerating] = useState(false);
+
   const [editingItem, setEditingItem] = useState<SavedItineraryItem | null>(
     null,
   );
@@ -196,6 +200,10 @@ export const ItineraryClient = ({ tripId }: Props) => {
     }
   };
 
+  async function handleGenerationFromBookings() {
+    await loadItineraries();
+  }
+
   if (isLoading) {
     return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -206,16 +214,20 @@ export const ItineraryClient = ({ tripId }: Props) => {
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={["left", "right"]}>
+      {isGenerating && <GeneratingSpinner />}
       <View className="flex-row items-center justify-between bg-surface px-md py-sm">
         <Text className="text-title text-primary">Itinerary Page</Text>
-        <Pressable
-          accessibilityLabel="Add itinerary activity"
-          accessibilityRole="button"
-          className="h-11 w-11 items-center justify-center rounded-full bg-primary-container"
-          onPress={openCreateEditor}
-        >
-          <Plus size={20} />
-        </Pressable>
+        <View className="flex flex-row items-center gap-sm">
+          <Pressable
+            accessibilityLabel="Add itinerary activity"
+            accessibilityRole="button"
+            className="h-11 w-11 items-center justify-center rounded-full bg-primary-container"
+            onPress={openCreateEditor}
+            disabled={isGenerating}
+          >
+            <Plus size={20} />
+          </Pressable>
+        </View>
       </View>
 
       {itineraryItems.length === 0 ? (
@@ -228,9 +240,21 @@ export const ItineraryClient = ({ tripId }: Props) => {
           >
             <Text className="btn-primary-text">Add an activity</Text>
           </Pressable>
+          <GenerateItinerariesFromBookingsBtn
+            tripId={tripId}
+            isGenerating={isGenerating}
+            setIsGenerating={(signal) => setIsGenerating(signal)}
+            setItineraries={handleGenerationFromBookings}
+          />
         </View>
       ) : (
         <ScrollView className="screen" showsVerticalScrollIndicator={false}>
+          <GenerateItinerariesFromBookingsBtn
+            tripId={tripId}
+            isGenerating={isGenerating}
+            setIsGenerating={(signal) => setIsGenerating(signal)}
+            setItineraries={handleGenerationFromBookings}
+          />
           {itineraryGroups.map((items) => (
             <IndivisualItinerary
               key={getDateKey(new Date(items[0].startTime))}

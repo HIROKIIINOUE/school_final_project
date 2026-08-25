@@ -77,10 +77,7 @@ export async function createItineraryItem({
   const authorization = await authorizationHeaders();
   const response = await fetch(itineraryUrl(tripId), {
     method: "POST",
-    headers: {
-      ...authorization,
-      "Content-Type": "application/json",
-    },
+    headers: { ...authorization, "Content-Type": "application/json" },
     body: JSON.stringify(input),
   });
 
@@ -120,13 +117,37 @@ export async function deleteItineraryItem({
   const authorization = await authorizationHeaders();
   const response = await fetch(itineraryUrl(tripId, item.id), {
     method: "DELETE",
-    headers: {
-      ...authorization,
-      "If-Match": `"${item.updatedAt}"`,
-    },
+    headers: { ...authorization, "If-Match": `"${item.updatedAt}"` },
   });
 
   if (!response.ok) {
     await parseResponse<never>(response);
   }
+}
+
+export async function generateItinerariesFromBookings({
+  tripId,
+}: {
+  tripId: string;
+}): Promise<SavedItineraryItem[]> {
+  const authorization = await authorizationHeaders();
+  const res = await fetch(`${itineraryUrl(tripId)}/generate-from-bookings`, {
+    method: "POST",
+    headers: { ...authorization },
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new ItineraryApiError({
+      status: res.status,
+      code: data.error?.code,
+      message:
+        data?.error?.message ??
+        data?.message ??
+        `Itinerary request failed with status ${res.status}`,
+    });
+  }
+
+  return data.data;
 }
