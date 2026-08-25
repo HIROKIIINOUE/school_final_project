@@ -2,7 +2,7 @@ import { Image, Text, View } from "react-native";
 
 import React from "react";
 type Props = {
-  members: { id: string; displayName: string; image: string | null }[];
+  members: { id: string | number; displayName: string; image: string | null }[];
   maxDisplay: number;
 };
 

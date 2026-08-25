@@ -279,7 +279,14 @@ const ExpenseScreen = ({ tripId }: Props) => {
                   <Text className="font-bold text-[#278184]">{paidBy}</Text>
                 </Text>
                 <View className="mt-[4px]">
-                  <MemberAvatars members={splitProfiles} maxDisplay={5} />
+                  <MemberAvatars
+                    members={splitProfiles.map((profile) => ({
+                      id: profile.id,
+                      displayName: profile.displayName,
+                      image: profile.image,
+                    }))}
+                    maxDisplay={5}
+                  />
                 </View>
               </View>
             </Pressable>
