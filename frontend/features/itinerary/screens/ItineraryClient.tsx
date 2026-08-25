@@ -27,7 +27,7 @@ const sortChronologically = (items: SavedItineraryItem[]) =>
       new Date(second.startTime).getTime(),
   );
 
-const ItineraryClient = ({ tripId }: Props) => {
+export const ItineraryClient = ({ tripId }: Props) => {
   const [itineraryItems, setItineraryItems] = useState<SavedItineraryItem[]>(
     [],
   );
@@ -43,11 +43,13 @@ const ItineraryClient = ({ tripId }: Props) => {
 
   const loadItineraries = useCallback(async () => {
     const items = await fetchItineraries(tripId);
+    // array of itineraries
     const sortedItems = sortChronologically(items);
     setItineraryItems(sortedItems);
     return sortedItems;
   }, [tripId]);
 
+  // whenever the page becomes active, fetch itineraries and set it
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
@@ -82,8 +84,8 @@ const ItineraryClient = ({ tripId }: Props) => {
     const groups = new Map<string, SavedItineraryItem[]>();
 
     for (const item of itineraryItems) {
-      const dateKey = getDateKey(new Date(item.startTime));
-      groups.set(dateKey, [...(groups.get(dateKey) ?? []), item]);
+      const dateKey = getDateKey(new Date(item.startTime)); // Aug, 24 2026
+      groups.set(dateKey, [...(groups.get(dateKey) ?? []), item]); // {"Aug, 24 2026" : [{} ... {}]}
     }
 
     return [...groups.values()];
@@ -261,5 +263,3 @@ const ItineraryClient = ({ tripId }: Props) => {
     </SafeAreaView>
   );
 };
-
-export default ItineraryClient;

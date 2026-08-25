@@ -3,6 +3,8 @@ import { assertTripAccess } from "../lib/assertTripAccess";
 import { prisma } from "../lib/prisma";
 import { ItineraryItemInput } from "../schemas/trips.schema";
 
+type Booking = {};
+
 const itineraryItemSelect = {
   id: true,
   createdById: true,
@@ -179,6 +181,59 @@ async function deleteItineraryItem({
       "ITINERARY_CONFLICT",
       "This itinerary item was changed by another member. Refresh and try again.",
     );
+  });
+}
+
+async function createItineraryBasedOnBooking({
+  userId,
+  tripId,
+}: {
+  userId: string;
+  tripId: string;
+}) {
+  // validates user and tripId
+  await assertTripAccess({ tripId, userId });
+
+  // get booking info first
+  const existingBokings = await prisma.booking.findMany({
+    where: { tripId },
+    select: {
+      id: true,
+      createdById: true,
+      type: true,
+      title: true,
+      provider: true,
+      confirmationCode: true,
+      startTime: true,
+      endTime: true,
+      note: true,
+      details: true,
+    },
+  });
+
+  if (existingBokings.length === 0) {
+    // front needs to know there was no booking info to genereate itineraries
+    return { message: "There is no booking info to get started with" };
+  }
+
+  // create an array of itinerary data
+  // title       String
+  // detail      String?
+  // location    String?
+  // startTime   DateTime
+  existingBokings.map((booking) => {
+    let extractedDetail;
+    switch (booking.type) {
+      case "FLIGHT":
+        extractedDetail = `Flight ${booking.details}`;
+      case "HOTEL":
+        "";
+      case "ACTIVITY":
+        "";
+      case "TRANSPORT":
+        "";
+    }
+    const shapedData = { title: booking.title, detail: "" };
   });
 }
 

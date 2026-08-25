@@ -1,6 +1,6 @@
 import React from "react";
 import { useGlobalSearchParams } from "expo-router";
-import ItineraryClient from "@/features/itinerary/screens/ItineraryClient";
+import { ItineraryClient } from "@/features/itinerary/screens/ItineraryClient";
 import { Text } from "react-native";
 
 const ItineraryRoute = () => {
