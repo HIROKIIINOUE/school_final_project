@@ -29,6 +29,8 @@ import {
   ExpenseTripData,
 } from "../types/expense.type";
 import Spinner from "@/components/Spinner";
+import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
+import Toast from "react-native-toast-message";
 
 type Props = { tripId: string };
 
@@ -57,6 +59,9 @@ const ExpenseScreen = ({ tripId }: Props) => {
     useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const loadExpenseData = useCallback(async () => {
     if (!tripId) return;
@@ -98,6 +103,23 @@ const ExpenseScreen = ({ tripId }: Props) => {
     await loadExpenseData();
   };
 
+  const handleConfirmDelete = async () => {
+    if (!selectedExpense || isDeleting) return;
+
+    setIsDeleting(true);
+
+    try {
+      await handleDeleteExpense(selectedExpense.id);
+
+      setDeleteModalOpen(false);
+      setSelectedExpense(null);
+    } catch (error) {
+      Toast.show({ type: "error", text1: "Failed to delete the expense" });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleUpdateExpense = async (
     expenseId: string,
     input: CreateExpenseInput,
@@ -136,6 +158,19 @@ const ExpenseScreen = ({ tripId }: Props) => {
       className="flex-1 bg-[#f7f8ff]"
       edges={["left", "right", "bottom"]}
     >
+      {deleteModalOpen && (
+        <DeleteConfirmationModal
+          handleClose={() => {
+            if (!isDeleting) {
+              setDeleteModalOpen(false);
+            }
+          }}
+          label="Expense"
+          title={selectedExpense?.title ?? "Expense"}
+          onPress={handleConfirmDelete}
+          isSending={isDeleting}
+        />
+      )}
       <Stack.Screen options={{ title: "Expense Calculate" }} />
       <FlatList
         className="flex-1 px-3.5 pb-6"
@@ -301,9 +336,13 @@ const ExpenseScreen = ({ tripId }: Props) => {
       />
       <DetailExpenseModal
         expense={selectedExpense}
-        visible={selectedExpense !== null && editingExpense === null}
+        visible={
+          selectedExpense !== null &&
+          editingExpense === null &&
+          !deleteModalOpen
+        }
         onClose={() => setSelectedExpense(null)}
-        onDelete={() => handleDeleteExpense(selectedExpense!.id)}
+        onDelete={() => setDeleteModalOpen(true)}
         onEdit={() => {
           setEditingExpense(selectedExpense);
           setSelectedExpense(null);
