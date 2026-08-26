@@ -21,6 +21,9 @@ const createSettlementsForGroup = (balances: MemberBalance[]): Settlement[] => {
   let debtorIndex = 0;
   let creditorIndex = 0;
 
+  // iterate until both conditions below are fulfilled
+  // 1) when owed money of the creditor become 0, the iteration of the next creditor starts. Then when all creditor become 0, it's fulfilled
+  // 2) when owe money of the debtor become 0, the iteration of the next debtor starts. Then when all debtor become 0, it's fulfilled.
   while (debtorIndex < debtors.length && creditorIndex < creditors.length) {
     const debtor = debtors[debtorIndex];
     const creditor = creditors[creditorIndex];

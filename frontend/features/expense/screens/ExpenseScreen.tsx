@@ -49,7 +49,9 @@ const formatDateRange = (startDate: string | null, endDate: string | null) => {
 const ExpenseScreen = ({ tripId }: Props) => {
   // const { id } = useLocalSearchParams<{ id: string }>();
   const currentUserId = useAuthStore((state) => state.user?.id);
+  // the trip data in which expense data display
   const [expenseData, setExpenseData] = useState<ExpenseTripData | null>(null);
+  // the expense data
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -168,23 +170,35 @@ const ExpenseScreen = ({ tripId }: Props) => {
         }
         ListHeaderComponent={
           <>
-            <View className="mt-1 px-3.5 pt-4">
-              <Text className="text-[20px] font-bold tracking-[-0.3px] text-[#278184]">
-                {expenseData.trip.title}
-              </Text>
-              <View className="mt-1 flex-row items-center gap-1">
-                <MaterialCommunityIcons
-                  name="calendar-blank-outline"
-                  size={16}
-                  color="#596574"
-                />
-                <Text className="text-[16px] font-medium text-[#596574]">
-                  {formatDateRange(
-                    expenseData.trip.startDate,
-                    expenseData.trip.endDate,
-                  )}
+            <View className="mt-1 flex-row items-center justify-between px-3.5 pt-4">
+              <View className="mr-3 flex-1">
+                <Text className="text-[20px] font-bold tracking-[-0.3px] text-[#278184]">
+                  {expenseData.trip.title}
                 </Text>
+                <View className="mt-1 flex-row items-center gap-1">
+                  <MaterialCommunityIcons
+                    name="calendar-blank-outline"
+                    size={16}
+                    color="#596574"
+                  />
+                  <Text className="text-[16px] font-medium text-[#596574]">
+                    {formatDateRange(
+                      expenseData.trip.startDate,
+                      expenseData.trip.endDate,
+                    )}
+                  </Text>
+                </View>
               </View>
+              <Pressable
+                accessibilityRole="button"
+                className="shrink-0 flex-row items-center gap-1 rounded bg-[#238688] px-3 py-2 active:opacity-60"
+                onPress={() => setIsAddExpenseModalVisible(true)}
+              >
+                <AntDesign name="plus" size={16} color="white" />
+                <Text className="text-[16px] font-bold text-white">
+                  Add expense
+                </Text>
+              </Pressable>
             </View>
 
             <View className="mt-3 h-px bg-[#dfe3eb]" />
@@ -198,7 +212,7 @@ const ExpenseScreen = ({ tripId }: Props) => {
               </Text>
             </View>
 
-            <View className="mt-2.5 flex-row gap-2.5">
+            <View className="mt-2.5 mb-6 flex-row gap-2.5">
               <View className="flex-1 rounded-[8px] border border-[#f1cad0] bg-[#fff1f2] px-2.5 py-2.5">
                 <View className="flex-row items-center justify-between">
                   <Text className="text-[9px] font-bold tracking-[0.8px] text-[#7c6a70]">
@@ -210,7 +224,7 @@ const ExpenseScreen = ({ tripId }: Props) => {
                   {formatCurrency(summary.youOwe)}
                 </Text>
               </View>
-              <View className="flex-1 rounded-[8px] border border-[#b9d7db] bg-[#dff2f3] px2.5 py-2.5">
+              <View className="flex-1 rounded-[8px] border border-[#b9d7db] bg-[#dff2f3] px-2.5 py-2.5">
                 <View className="flex-row items-center justify-between">
                   <Text className="text-[9px] font-bold tracking-[0.8px] text-[#587175]">
                     ARE OWED
@@ -221,22 +235,6 @@ const ExpenseScreen = ({ tripId }: Props) => {
                   {formatCurrency(summary.areOwed)}
                 </Text>
               </View>
-            </View>
-
-            <View className="mt-[32px] flex-col items-center">
-              <Text className="text-[20px] font-extrabold text-[#2e3a48]">
-                Recent Expenses
-              </Text>
-              <Pressable
-                accessibilityRole="button"
-                className="my-4 flex-row items-center gap-1 rounded bg-[#238688] p-2 active:opacity-60"
-                onPress={() => setIsAddExpenseModalVisible(true)}
-              >
-                <AntDesign name="plus" size={16} color="white" />
-                <Text className="text-[16px] font-bold text-white">
-                  Add expense
-                </Text>
-              </Pressable>
             </View>
           </>
         }
