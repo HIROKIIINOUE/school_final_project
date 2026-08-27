@@ -100,10 +100,10 @@ const DetailExpenseModal = ({
                 </Text>
               </Pressable>
               <Pressable
-                className={`h-12 flex-1 items-center justify-center rounded-xl bg-[#e44257]`}
+                className="h-12 flex-1 items-center justify-center rounded-xl bg-[#e44257]"
                 onPress={onDelete}
               >
-                <Text className="text-base font-bold text-white">"Delete"</Text>
+                <Text className="text-base font-bold text-white">Delete</Text>
               </Pressable>
             </View>
 
