@@ -36,6 +36,7 @@ const GenerateItinerariesFromBookingsBtn = ({
       await setItineraries();
       Toast.show({ type: "success", text1: "Generated Successfully" });
     } catch (e) {
+      console.error("Failed to generate itineraries:", e);
       Toast.show({ type: "error", text1: "Failed to generate itineraries" });
     } finally {
       setIsGenerating(false);
